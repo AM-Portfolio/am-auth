@@ -1,0 +1,51 @@
+services:
+  # Real User Management Service
+  am-user-management:
+    build:
+      context: /Users/munishm/Documents/AM-Repos/am-user-management
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    env_file:
+      - /Users/munishm/Documents/AM-Repos/am-user-management/.env.docker
+    volumes:
+      - /Users/munishm/Documents/AM-Repos/am-user-management:/app
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    networks:
+      - am-network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Auth Tokens Service
+  auth-tokens:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - USER_SERVICE_URL=http://am-user-management:8000
+      - JWT_SECRET=your-secret-key-here-change-in-production
+      - JWT_ALGORITHM=HS256
+      - JWT_EXPIRATION_MINUTES=1440
+      - ENVIRONMENT=docker
+      - DEBUG=false
+    networks:
+      - am-network
+    depends_on:
+      am-user-management:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+networks:
+  am-network:
+    driver: bridge
