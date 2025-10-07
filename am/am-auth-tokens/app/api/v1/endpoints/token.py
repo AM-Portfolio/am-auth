@@ -2,6 +2,8 @@ from datetime import timedelta
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel
+import httpx
+import os
 from app.core.security import create_access_token, Token
 from app.services.user_validation import (
     UserValidationService, 
@@ -31,6 +33,20 @@ class TokenResponse(BaseModel):
     user_id: str
     username: str
     email: str
+
+
+class ServiceTokenRequest(BaseModel):
+    service_id: str
+    consumer_key: str
+    consumer_secret: str
+
+
+class ServiceTokenResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    expires_in: int
+    service_id: str
+    scopes: list
 
 
 @router.post("/tokens", response_model=TokenResponse)
@@ -225,3 +241,85 @@ async def create_token_oauth(
         username=validation_result.username,
         email=validation_result.email
     )
+
+@router.post("/tokens/service", response_model=ServiceTokenResponse)
+async def create_service_token(
+    token_request: ServiceTokenRequest
+):
+    """
+    Create a new access token for registered service/application.
+    
+    Args:
+        token_request: Service credentials (service_id, consumer_key, consumer_secret)
+    
+    Returns:
+        ServiceTokenResponse with access token and service information
+    
+    Raises:
+        HTTPException: If service credentials are invalid
+    """
+    # Call User Management service to validate service credentials
+    user_service_url = os.getenv("USER_SERVICE_URL", "http://localhost:8000")
+    
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                f"{user_service_url}/api/v1/service/validate-credentials",
+                json={
+                    "consumer_key": token_request.consumer_key,
+                    "consumer_secret": token_request.consumer_secret
+                },
+                timeout=10.0
+            )
+            
+            if response.status_code != 200:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Invalid service credentials",
+                    headers={"WWW-Authenticate": "Bearer"},
+                )
+            
+            validation_data = response.json()
+            
+            if not validation_data.get("valid"):
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail=validation_data.get("message", "Invalid service credentials"),
+                    headers={"WWW-Authenticate": "Bearer"},
+                )
+            
+            # Verify service_id matches
+            if validation_data.get("service_id") != token_request.service_id:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Service ID mismatch",
+                    headers={"WWW-Authenticate": "Bearer"},
+                )
+            
+            # Create token with service data
+            service_data = {
+                "service_id": validation_data.get("service_id"),
+                "scopes": validation_data.get("scopes", []),
+                "type": "service"
+            }
+            
+            access_token_expires = timedelta(minutes=settings.JWT_EXPIRE_MINUTES)
+            access_token = create_access_token(
+                subject=validation_data.get("service_id"),
+                user_data=service_data,
+                expires_delta=access_token_expires
+            )
+            
+            return ServiceTokenResponse(
+                access_token=access_token,
+                token_type="bearer",
+                expires_in=settings.JWT_EXPIRE_MINUTES * 60,  # Convert to seconds
+                service_id=validation_data.get("service_id"),
+                scopes=validation_data.get("scopes", [])
+            )
+            
+    except httpx.RequestError as e:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=f"User Management service unavailable: {str(e)}"
+        )
