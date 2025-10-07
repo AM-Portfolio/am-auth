@@ -2,7 +2,7 @@
         "info": {
                 "_postman_id": "auth-tokens-api",
                 "name": "Auth Tokens API - JWT Authentication",
-                "description": "Complete API collection for Auth Tokens Service with JWT token creation and validation",
+                "description": "Complete API collection for Auth Tokens Service with JWT token creation, validation, and service-to-service authentication",
                 "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
         },
         "item": [
