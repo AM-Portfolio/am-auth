@@ -222,15 +222,14 @@ async def login(request: LoginRequestModel,
         # Execute use case (authenticate user)
         auth_response = await login_use_case.execute(use_case_request)
 
-        # Return user data for Auth Tokens service to create JWT
+        # Return user data with access token
         return {
             "user_id": auth_response.user_id,
             "username": auth_response.email,  # Using email as username
             "email": auth_response.email,
-            "status":
-            auth_response.status,  # Include status for Auth Tokens to verify
-            "scopes":
-            ["read", "write"]  # Default scopes, can be extended based on roles
+            "status": auth_response.status,
+            "scopes": auth_response.scopes,
+            "access_token": auth_response.access_token
         }
 
     except ValueError as e:
