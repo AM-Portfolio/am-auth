@@ -59,6 +59,7 @@ async def register_user(
 
 @router.post(
     "/login",
+    response_model=LoginResponse,
     summary="User login",
     description="Authenticate user with email and password"
 )
@@ -66,18 +67,11 @@ async def register_user(
 async def login_user(
     request: LoginRequest,
     login_use_case: Annotated[LoginUseCase, Depends()]
-):
+) -> LoginResponse:
     """Authenticate user login"""
     try:
         result = await login_use_case.execute(request.to_use_case_request())
-        return {
-            "user_id": result.user_id,
-            "username": result.email,
-            "email": result.email,
-            "status": result.status,
-            "scopes": result.scopes,
-            "access_token": result.access_token
-        }
+        return LoginResponse.from_use_case_response(result)
         
     except InvalidCredentialsError as e:
         raise HTTPException(
