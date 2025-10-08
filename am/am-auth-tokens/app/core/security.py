@@ -9,6 +9,8 @@ class TokenData(BaseModel):
     user_id: Optional[str] = None
     username: Optional[str] = None
     email: Optional[str] = None
+    service_id: Optional[str] = None
+    token_type: Optional[str] = None  # "user" or "service"
     scopes: list[str] = []
 
 
@@ -67,7 +69,7 @@ def create_access_token(
 
 def verify_token(token: str) -> TokenData:
     """
-    Verify and decode a JWT token.
+    Verify and decode a JWT token (works for both user and service tokens).
     
     Args:
         token: The JWT token string to verify
@@ -85,16 +87,26 @@ def verify_token(token: str) -> TokenData:
             algorithms=[settings.JWT_ALGORITHM]
         )
         
-        user_id: str = payload.get("sub")
-        if user_id is None:
+        subject: str = payload.get("sub")
+        if subject is None:
             raise JWTError("Token missing subject")
         
-        token_data = TokenData(
-            user_id=user_id,
-            username=payload.get("username"),
-            email=payload.get("email"),
-            scopes=payload.get("scopes", [])
-        )
+        # Check if this is a service token
+        if payload.get("type") == "service":
+            token_data = TokenData(
+                service_id=payload.get("service_id", subject),
+                token_type="service",
+                scopes=payload.get("scopes", [])
+            )
+        else:
+            # User token
+            token_data = TokenData(
+                user_id=subject,
+                username=payload.get("username"),
+                email=payload.get("email"),
+                token_type="user",
+                scopes=payload.get("scopes", [])
+            )
         return token_data
     
     except JWTError as e:
