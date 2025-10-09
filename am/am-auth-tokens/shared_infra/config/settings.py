@@ -35,6 +35,22 @@ class Settings(BaseSettings):
     # CORS Configuration
     ALLOWED_ORIGINS: str = os.getenv("ALLOWED_ORIGINS", "*")
     
+    # Google OAuth Configuration
+    GOOGLE_CLIENT_ID: str = os.getenv("GOOGLE_CLIENT_ID", "")
+    GOOGLE_CLIENT_SECRET: str = os.getenv("GOOGLE_CLIENT_SECRET", "")
+    GOOGLE_JWKS_URL: str = os.getenv("GOOGLE_JWKS_URL", "https://www.googleapis.com/oauth2/v3/certs")
+    GOOGLE_ISSUER: str = os.getenv("GOOGLE_ISSUER", "https://accounts.google.com")
+    GOOGLE_AUTH_ENABLED: bool = os.getenv("GOOGLE_AUTH_ENABLED", "true").lower() == "true"
+    GOOGLE_TOKEN_CACHE_TTL: int = int(os.getenv("GOOGLE_TOKEN_CACHE_TTL", "3600"))
+    GOOGLE_EMAIL_DOMAINS_ALLOWED: str = os.getenv("GOOGLE_EMAIL_DOMAINS_ALLOWED", "")
+    
+    @property
+    def google_allowed_domains_list(self) -> list:
+        """Convert GOOGLE_EMAIL_DOMAINS_ALLOWED string to list."""
+        if not self.GOOGLE_EMAIL_DOMAINS_ALLOWED:
+            return []
+        return [domain.strip() for domain in self.GOOGLE_EMAIL_DOMAINS_ALLOWED.split(",")]
+    
     @property
     def allowed_origins_list(self) -> list:
         """Convert ALLOWED_ORIGINS string to list."""
