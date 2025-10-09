@@ -2,7 +2,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from app.api.v1.api import api_router
+from app.api.v1.api import api_router, test_router
 from shared_infra.config.settings import settings
 from app.database.config import db_config
 
@@ -47,6 +47,7 @@ app.add_middleware(
 
 # Include API routes
 app.include_router(api_router, prefix=settings.API_V1_STR)
+app.include_router(test_router)  # Test routes for Google OAuth testing
 
 
 @app.get("/")
