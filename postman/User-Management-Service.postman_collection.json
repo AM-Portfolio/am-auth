@@ -1,0 +1,231 @@
+{
+	"info": {
+		"name": "User Management Service",
+		"description": "User account management service with Google OAuth support",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "user-management-v1"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Login (Validate Credentials)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"testuser\",\n  \"password\": \"testpass123\"\n}"
+						},
+						"url": {
+							"raw": "{{user_mgmt_base_url}}/api/v1/auth/login",
+							"host": [
+								"{{user_mgmt_base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Validate user credentials and return user data.\n\nThis endpoint is typically called by the Auth Tokens service, not directly by clients.\n\nReturns:\n- user_id\n- username\n- email\n- status\n- scopes"
+					}
+				}
+			]
+		},
+		{
+			"name": "Google OAuth",
+			"item": [
+				{
+					"name": "Create/Link Google User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    pm.environment.set('user_id', response.user_id);",
+									"    console.log('User created/linked:', response.username);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"google_id\": \"105942518853029214189\",\n  \"email\": \"demo.user@gmail.com\",\n  \"name\": \"Demo User\",\n  \"picture\": \"https://lh3.googleusercontent.com/a/demo-user\",\n  \"email_verified\": true\n}"
+						},
+						"url": {
+							"raw": "{{user_mgmt_base_url}}/api/v1/google/auth",
+							"host": [
+								"{{user_mgmt_base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"google",
+								"auth"
+							]
+						},
+						"description": "Create a new user from Google OAuth or link to existing user.\n\nBehavior:\n- If google_id exists: Return existing user\n- If email exists: Link Google to existing account\n- Otherwise: Create new user\n\nThis endpoint is typically called by the Auth Tokens service after validating the Google token.\n\nReturns complete user profile including:\n- user_id, username, email\n- google_id, profile_picture_url\n- email_verified, status\n- last_google_login timestamp"
+					}
+				}
+			]
+		},
+		{
+			"name": "User Profile",
+			"item": [
+				{
+					"name": "Get User by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{user_mgmt_base_url}}/api/v1/users/{{user_id}}",
+							"host": [
+								"{{user_mgmt_base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"{{user_id}}"
+							]
+						},
+						"description": "Get user profile by user ID (if endpoint exists)"
+					}
+				}
+			]
+		},
+		{
+			"name": "Testing Scenarios",
+			"item": [
+				{
+					"name": "Scenario: New Google User",
+					"item": [
+						{
+							"name": "Create New User via Google",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"google_id\": \"{{$randomInt}}\",\n  \"email\": \"new.user.{{$timestamp}}@gmail.com\",\n  \"name\": \"New Test User\",\n  \"picture\": \"https://lh3.googleusercontent.com/new-user\",\n  \"email_verified\": true\n}"
+								},
+								"url": {
+									"raw": "{{user_mgmt_base_url}}/api/v1/google/auth",
+									"host": [
+										"{{user_mgmt_base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"google",
+										"auth"
+									]
+								},
+								"description": "Test creating a brand new user via Google OAuth.\nUses random values to ensure uniqueness."
+							}
+						}
+					]
+				},
+				{
+					"name": "Scenario: Link Google to Existing Account",
+					"item": [
+						{
+							"name": "Step 1: Create Regular User",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"username\": \"existing.user@example.com\",\n  \"password\": \"password123\",\n  \"email\": \"existing.user@example.com\"\n}"
+								},
+								"url": {
+									"raw": "{{user_mgmt_base_url}}/api/v1/users",
+									"host": [
+										"{{user_mgmt_base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"users"
+									]
+								},
+								"description": "Create a regular user account (if user creation endpoint exists)"
+							}
+						},
+						{
+							"name": "Step 2: Link Google Account",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"google_id\": \"999888777666\",\n  \"email\": \"existing.user@example.com\",\n  \"name\": \"Existing User\",\n  \"picture\": \"https://lh3.googleusercontent.com/existing\",\n  \"email_verified\": true\n}"
+								},
+								"url": {
+									"raw": "{{user_mgmt_base_url}}/api/v1/google/auth",
+									"host": [
+										"{{user_mgmt_base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"google",
+										"auth"
+									]
+								},
+								"description": "Link Google OAuth to existing user account by matching email.\nThe user can now log in with either password or Google."
+							}
+						}
+					]
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "user_mgmt_base_url",
+			"value": "http://localhost:8000",
+			"type": "string"
+		},
+		{
+			"key": "user_id",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
