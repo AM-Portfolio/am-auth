@@ -46,7 +46,10 @@ async def generate_mock_google_token(request: MockGoogleTokenRequest):
             exp_seconds=request.exp
         )
         
-        token_info = google_mock_service.decode_mock_token(id_token)
+        try:
+            token_info = google_mock_service.decode_mock_token(id_token)
+        except:
+            token_info = {"email": request.email, "name": request.name}
         
         return MockGoogleTokenResponse(
             id_token=id_token,

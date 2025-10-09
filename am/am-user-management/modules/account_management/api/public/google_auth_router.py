@@ -8,11 +8,17 @@ from sqlalchemy import select, update
 import uuid
 
 from ...infrastructure.models.user_account_orm import UserAccountORM
-from shared_infra.database.session import get_db_session
 from ...domain.enums.user_status import UserStatus
 
 
 router = APIRouter()
+
+
+async def get_db_session():
+    """Temporary DB session function - will be replaced by dependency from main"""
+    from shared_infra.database.config import db_config
+    async for session in db_config.get_session():
+        yield session
 
 
 class GoogleAuthRequest(BaseModel):

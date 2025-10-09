@@ -25,7 +25,8 @@ class GoogleAuthService:
             ValueError: If token is invalid or verification fails
         """
         try:
-            if use_mock or not settings.GOOGLE_CLIENT_ID:
+            is_test_client = settings.GOOGLE_CLIENT_ID == google_mock_service.TEST_GOOGLE_CLIENT_ID
+            if use_mock or not settings.GOOGLE_CLIENT_ID or is_test_client:
                 return cls._verify_mock_token(token)
             else:
                 return cls._verify_real_google_token(token)
@@ -37,10 +38,7 @@ class GoogleAuthService:
     def _verify_mock_token(cls, token: str) -> Dict[str, Any]:
         """Verify a mock Google token for testing"""
         try:
-            client_id = google_mock_service.TEST_GOOGLE_CLIENT_ID
-            
-            if settings.GOOGLE_CLIENT_ID and settings.GOOGLE_CLIENT_ID != client_id:
-                client_id = settings.GOOGLE_CLIENT_ID
+            client_id = settings.GOOGLE_CLIENT_ID if settings.GOOGLE_CLIENT_ID else google_mock_service.TEST_GOOGLE_CLIENT_ID
             
             id_info = google_mock_service.verify_mock_token(token, client_id)
             

@@ -31,7 +31,7 @@ outputType = "console"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd am/am-auth-tokens && python main.py"
+args = "cd am/am-auth-tokens && GOOGLE_CLIENT_ID=\"test-google-client-id.apps.googleusercontent.com\" python main.py"
 waitForPort = 8080
 
 [[workflows.workflow]]
