@@ -14,6 +14,8 @@ services:
       - LOG_CONSOLE=true
       - USER_MGMT_LOG_LEVEL=INFO
       - ENVIRONMENT=docker
+      # Auth service connection
+      - AUTH_SERVICE_URL=http://auth-tokens:8001
     volumes:
       - ./am-user-management:/app
       - ../shared:/app/shared  # Mount shared logging infrastructure
