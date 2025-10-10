@@ -8,8 +8,15 @@ services:
       - "8000:8000"
     env_file:
       - ./.env.docker
+    environment:
+      # Centralized logging configuration
+      - LOG_FORMAT=json
+      - LOG_CONSOLE=true
+      - USER_MGMT_LOG_LEVEL=INFO
+      - ENVIRONMENT=docker
     volumes:
       - ./am-user-management:/app
+      - ../shared:/app/shared  # Mount shared logging infrastructure
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     networks:
       - am-network
@@ -30,7 +37,13 @@ services:
     env_file:
       - ./.env.docker
     environment:
+      # Centralized logging configuration
+      - LOG_FORMAT=json
+      - LOG_CONSOLE=true
+      - AUTH_TOKENS_LOG_LEVEL=INFO
       - ENVIRONMENT=docker
+    volumes:
+      - ../shared:/app/shared  # Mount shared logging infrastructure
     networks:
       - am-network
     depends_on:

@@ -1,27 +1,52 @@
+import sys
+from pathlib import Path
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+
+# Add shared logging to path
+shared_path = Path(__file__).parent.parent.parent / "shared"
+if str(shared_path) not in sys.path:
+    sys.path.insert(0, str(shared_path))
+
 from app.api.v1.api import api_router, test_router
 from shared_infra.config.settings import settings
 from app.database.config import db_config
+
+# Import centralized logging
+from shared.logging import initialize_auth_tokens_logging, get_logger
+
+# Initialize logging at startup
+logger_instance = initialize_auth_tokens_logging()
+logger = get_logger("am-auth-tokens.main")
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Manage application lifecycle"""
-    print("🚀 Starting Auth Tokens API...")
+    logger.info("🚀 Starting Auth Tokens API...", extra={"event": "startup"})
     
     try:
         await db_config.create_tables()
-        print("✅ PostgreSQL database tables created successfully")
+        logger.info("✅ PostgreSQL database tables created successfully", extra={
+            "event": "database_setup", 
+            "status": "success"
+        })
     except Exception as e:
-        print(f"⚠️ Failed to create database tables: {e}")
-        print("💡 Service will continue but OAuth 2.0 features may not work")
+        logger.error(f"⚠️ Failed to create database tables: {e}", extra={
+            "event": "database_setup",
+            "status": "failed",
+            "error": str(e)
+        }, exc_info=True)
+        logger.warning("💡 Service will continue but OAuth 2.0 features may not work", extra={
+            "event": "database_setup",
+            "status": "degraded"
+        })
     
     yield
     
-    print("🛑 Shutting down Auth Tokens API...")
+    logger.info("🛑 Shutting down Auth Tokens API...", extra={"event": "shutdown"})
     await db_config.close()
 
 
@@ -36,6 +61,18 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+# Add logging middleware (before CORS)
+try:
+    from shared.logging.middleware import LoggingMiddleware
+    app.add_middleware(
+        LoggingMiddleware,
+        service_name="am-auth-tokens",
+        exclude_paths=["/health", "/metrics", "/docs", "/openapi.json", "/"]
+    )
+    logger.info("Added logging middleware", extra={"middleware": "logging"})
+except ImportError:
+    logger.warning("FastAPI logging middleware not available", extra={"middleware": "logging"})
+
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
@@ -44,6 +81,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+logger.info("Added CORS middleware", extra={"middleware": "cors"})
 
 # Include API routes
 app.include_router(api_router, prefix=settings.API_V1_STR)
@@ -53,6 +91,7 @@ app.include_router(test_router)  # Test routes for Google OAuth testing
 @app.get("/")
 async def root():
     """Root endpoint providing service information."""
+    logger.debug("Root endpoint accessed", extra={"endpoint": "/"})
     return {
         "service": settings.PROJECT_NAME,
         "version": settings.VERSION,
@@ -64,6 +103,7 @@ async def root():
 @app.get("/health")
 async def health_check():
     """Health check endpoint."""
+    logger.debug("Health check endpoint accessed", extra={"endpoint": "/health"})
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={
@@ -77,6 +117,11 @@ async def health_check():
 @app.get("/info")
 async def service_info():
     """Service information endpoint."""
+    logger.info("Service info endpoint accessed", extra={
+        "endpoint": "/info",
+        "service": settings.PROJECT_NAME,
+        "version": settings.VERSION
+    })
     return {
         "service": settings.PROJECT_NAME,
         "version": settings.VERSION,

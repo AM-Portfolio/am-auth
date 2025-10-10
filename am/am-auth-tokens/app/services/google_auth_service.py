@@ -1,15 +1,25 @@
 """Google OAuth authentication service"""
+import sys
+from pathlib import Path
 from typing import Dict, Any, Optional
 from google.oauth2 import id_token
 from google.auth.transport import requests
+
+# Add shared logging to path
+shared_path = Path(__file__).parent.parent.parent.parent.parent / "shared"
+if str(shared_path) not in sys.path:
+    sys.path.insert(0, str(shared_path))
+
 from shared_infra.config.settings import settings
 from app.services.google_mock_service import google_mock_service
+from shared.logging import get_logger, LoggerMixin, log_execution_time
 
 
-class GoogleAuthService:
+class GoogleAuthService(LoggerMixin):
     """Service for Google OAuth token validation and user management"""
     
     @classmethod
+    @log_execution_time("am-auth-tokens.google_auth")
     async def verify_google_token(cls, token: str, use_mock: bool = False) -> Dict[str, Any]:
         """
         Verify a Google ID token and extract user information
@@ -24,14 +34,38 @@ class GoogleAuthService:
         Raises:
             ValueError: If token is invalid or verification fails
         """
+        logger = get_logger("am-auth-tokens.google_auth")
+        
         try:
             is_test_client = settings.GOOGLE_CLIENT_ID == google_mock_service.TEST_GOOGLE_CLIENT_ID
+            
+            logger.info("Starting Google token verification", extra={
+                "use_mock": use_mock,
+                "is_test_client": is_test_client,
+                "token_length": len(token) if token else 0
+            })
+            
             if use_mock or not settings.GOOGLE_CLIENT_ID or is_test_client:
-                return cls._verify_mock_token(token)
+                result = cls._verify_mock_token(token)
+                logger.info("Mock token verification completed", extra={
+                    "user_email": result.get("email", "unknown"),
+                    "verification_method": "mock"
+                })
             else:
-                return cls._verify_real_google_token(token)
+                result = cls._verify_real_google_token(token)
+                logger.info("Real Google token verification completed", extra={
+                    "user_email": result.get("email", "unknown"),
+                    "verification_method": "google_oauth"
+                })
+            
+            return result
         
         except Exception as e:
+            logger.error(f"Token verification failed: {str(e)}", extra={
+                "use_mock": use_mock,
+                "error": str(e),
+                "error_type": type(e).__name__
+            }, exc_info=True)
             raise ValueError(f"Token verification failed: {str(e)}")
     
     @classmethod

@@ -1,24 +1,39 @@
 """SQLAlchemy implementation of UserRepository"""
+import sys
+from pathlib import Path
 from typing import Optional, List
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
+
+# Add shared logging to path
+shared_path = Path(__file__).parent.parent.parent.parent.parent.parent.parent / "shared"
+if str(shared_path) not in sys.path:
+    sys.path.insert(0, str(shared_path))
 
 from core.interfaces.repository import UserRepository
 from core.value_objects.user_id import UserId
 from ..models.user_account_orm import UserAccountORM
 from ...domain.models.user_account import UserAccount
 from ...domain.exceptions.user_already_exists import EmailAlreadyExistsError, PhoneAlreadyExistsError
+from shared.logging import get_logger, LoggerMixin, log_async_execution_time
 
 
-class SQLAlchemyUserRepository(UserRepository):
+class SQLAlchemyUserRepository(UserRepository, LoggerMixin):
     """SQLAlchemy implementation of user repository"""
     
     def __init__(self, session: AsyncSession):
         self._session = session
     
+    @log_async_execution_time("am-user-management.repository")
     async def save(self, user_account: UserAccount) -> UserAccount:
         """Save user account to database"""
+        self.log_info("Saving user account", extra={
+            "user_id": user_account.id.value,
+            "email": str(user_account.email),
+            "operation": "save"
+        })
+        
         try:
             # Check if this is an update (user already exists)
             existing = await self._session.get(UserAccountORM, user_account.id.value)

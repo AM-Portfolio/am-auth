@@ -1,14 +1,22 @@
 """Integrated FastAPI application using the modular architecture"""
 import os
+import sys
 import asyncio
-import logging
+from pathlib import Path
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator, Optional
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+# Add shared logging to path
+shared_path = Path(__file__).parent.parent.parent / "shared"
+if str(shared_path) not in sys.path:
+    sys.path.insert(0, str(shared_path))
+
+# Initialize centralized logging
+from shared.logging import initialize_user_management_logging, get_logger
+
+# Initialize logging at startup - this replaces the basic logging configuration
+logger_instance = initialize_user_management_logging()
+logger = get_logger("am-user-management.main")
 
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -83,25 +91,41 @@ async def get_login_use_case(
 async def lifespan(app: FastAPI):
     """Manage application lifecycle"""
     # Startup
-    print("🚀 Starting AM User Management API...")
+    logger.info("🚀 Starting AM User Management API...", extra={"event": "startup"})
 
     # Create database tables
     try:
         await db_config.create_tables()
-        print("✅ PostgreSQL database tables created successfully")
-        print(f"📊 Database URL: {db_config.database_url}")
+        logger.info("✅ PostgreSQL database tables created successfully", extra={
+            "event": "database_setup",
+            "status": "success",
+            "database_url": str(db_config.database_url).split("@")[-1]  # Hide credentials
+        })
+        logger.debug(f"📊 Full Database URL pattern: {db_config.database_url[:20]}...", extra={
+            "event": "database_setup",
+            "url_prefix": str(db_config.database_url)[:20]
+        })
     except Exception as e:
-        print(f"❌ Failed to create PostgreSQL database tables: {e}")
-        print(
-            "💡 Make sure PostgreSQL is running: brew services start postgresql@15"
-        )
-        print("� Make sure database exists: createdb am_user_management")
+        logger.error(f"❌ Failed to create PostgreSQL database tables: {e}", extra={
+            "event": "database_setup",
+            "status": "failed",
+            "error": str(e),
+            "error_type": type(e).__name__
+        }, exc_info=True)
+        logger.warning("💡 Make sure PostgreSQL is running: brew services start postgresql@15", extra={
+            "event": "database_setup",
+            "troubleshooting": "postgresql_not_running"
+        })
+        logger.warning("💡 Make sure database exists: createdb am_user_management", extra={
+            "event": "database_setup", 
+            "troubleshooting": "database_not_exists"
+        })
         raise e  # Don't fall back to SQLite, we want PostgreSQL
 
     yield
 
     # Shutdown
-    print("🛑 Shutting down AM User Management API...")
+    logger.info("🛑 Shutting down AM User Management API...", extra={"event": "shutdown"})
     await db_config.close()
 
 
@@ -114,6 +138,18 @@ app = FastAPI(
     debug=True,
     lifespan=lifespan)
 
+# Add logging middleware (before CORS)
+try:
+    from shared.logging.middleware import LoggingMiddleware
+    app.add_middleware(
+        LoggingMiddleware,
+        service_name="am-user-management",
+        exclude_paths=["/health", "/metrics", "/docs", "/openapi.json", "/"]
+    )
+    logger.info("Added logging middleware", extra={"middleware": "logging"})
+except ImportError:
+    logger.warning("FastAPI logging middleware not available", extra={"middleware": "logging"})
+
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
@@ -122,6 +158,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+logger.info("Added CORS middleware", extra={"middleware": "cors"})
 
 # Include routers
 app.include_router(service_router)
@@ -194,6 +231,12 @@ async def register(request: RegisterRequest,
                        get_create_user_use_case)):
     """Register a new user"""
     try:
+        logger.info("User registration attempt", extra={
+            "email": request.email,
+            "has_phone": bool(request.phone_number),
+            "endpoint": "/api/v1/auth/register"
+        })
+        
         # Convert API request to use case request
         use_case_request = CreateUserRequest(email=request.email,
                                              password=request.password,
@@ -201,17 +244,34 @@ async def register(request: RegisterRequest,
 
         # Execute use case
         response = await create_user_use_case.execute(use_case_request)
+        
+        logger.info("User registration successful", extra={
+            "user_id": response.user_id,
+            "email": request.email
+        })
+        
         return response
 
     except ValueError as e:
+        logger.warning("User registration validation error", extra={
+            "email": request.email,
+            "error": str(e),
+            "error_type": "ValueError"
+        })
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail=str(e))
     except Exception as e:
+        logger.error("User registration failed", extra={
+            "email": request.email,
+            "error": str(e),
+            "error_type": type(e).__name__
+        }, exc_info=True)
+        
         if "already exists" in str(e).lower():
             raise HTTPException(status_code=status.HTTP_409_CONFLICT,
                                 detail=str(e))
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                            detail="Internal server error occurred")
+                            detail=f"Internal server error: {str(e)}")
 
 
 @app.post("/api/v1/auth/login")
@@ -291,6 +351,40 @@ async def get_user_internal(
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                             detail="Internal server error occurred")
+
+
+@app.post("/api/v1/admin/reset-database")
+async def reset_database():
+    """Reset database - Drop and recreate all tables (DEV ONLY)"""
+    try:
+        logger.warning("Database reset requested - dropping all tables", extra={
+            "endpoint": "/api/v1/admin/reset-database",
+            "action": "reset_database"
+        })
+        
+        # Drop all tables
+        await db_config.drop_tables()
+        logger.info("All database tables dropped successfully")
+        
+        # Recreate all tables with current schema
+        await db_config.create_tables()
+        logger.info("All database tables recreated successfully")
+        
+        return {
+            "status": "success",
+            "message": "Database reset completed successfully",
+            "action": "tables_dropped_and_recreated"
+        }
+        
+    except Exception as e:
+        logger.error("Database reset failed", extra={
+            "error": str(e),
+            "error_type": type(e).__name__
+        }, exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Database reset failed: {str(e)}"
+        )
 
 
 if __name__ == "__main__":
