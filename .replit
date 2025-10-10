@@ -58,6 +58,10 @@ externalPort = 8000
 localPort = 8080
 externalPort = 8080
 
+[[ports]]
+localPort = 36717
+externalPort = 3000
+
 [deployment]
 deploymentTarget = "autoscale"
 run = ["bash", "-c", "cd am/am-auth-tokens && uvicorn main:app --host 0.0.0.0 --port 5000"]
