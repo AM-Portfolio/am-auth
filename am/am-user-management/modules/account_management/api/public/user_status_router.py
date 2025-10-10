@@ -9,6 +9,7 @@ from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 import uuid
+from datetime import datetime, timezone
 
 from modules.account_management.infrastructure.models.user_account_orm import UserAccountORM
 from modules.account_management.domain.enums.user_status import UserStatus
@@ -29,6 +30,7 @@ class UpdateUserStatusRequest(BaseModel):
     """Request to update user status"""
     status: UserStatus = Field(..., description="New user status")
     reason: Optional[str] = Field(None, description="Reason for status change")
+    verify_email: Optional[bool] = Field(None, description="Set to true to verify email (auto-set when status='active')")
 
 
 class UserStatusResponse(BaseModel):
@@ -184,6 +186,17 @@ async def update_user_status(
     # Update status
     user.status = request.status
     
+    # Auto-verify email when setting status to active (unless explicitly disabled)
+    if request.status == UserStatus.ACTIVE and request.verify_email != False:
+        user.email_verified = True
+        if not user.verified_at:
+            user.verified_at = datetime.now(timezone.utc)
+    elif request.verify_email == True:
+        # Explicit email verification requested
+        user.email_verified = True
+        if not user.verified_at:
+            user.verified_at = datetime.now(timezone.utc)
+    
     # Commit changes
     await db.commit()
     await db.refresh(user)
@@ -230,6 +243,17 @@ async def update_user_status_by_email(
     
     # Update status
     user.status = request.status
+    
+    # Auto-verify email when setting status to active (unless explicitly disabled)
+    if request.status == UserStatus.ACTIVE and request.verify_email != False:
+        user.email_verified = True
+        if not user.verified_at:
+            user.verified_at = datetime.now(timezone.utc)
+    elif request.verify_email == True:
+        # Explicit email verification requested
+        user.email_verified = True
+        if not user.verified_at:
+            user.verified_at = datetime.now(timezone.utc)
     
     # Commit changes
     await db.commit()
