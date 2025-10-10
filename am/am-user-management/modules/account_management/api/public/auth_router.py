@@ -71,8 +71,7 @@ async def login_user(
     """Authenticate user login"""
     try:
         result = await login_use_case.execute(request.to_use_case_request())
-        response = LoginResponse.from_use_case_response(result)
-        return response
+        return LoginResponse.from_use_case_response(result)
         
     except InvalidCredentialsError as e:
         raise HTTPException(

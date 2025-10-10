@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel
+from typing import Optional
 from app.core.security import verify_token, get_token_expiration, TokenValidationResponse
 from jose import JWTError
 
@@ -13,12 +14,14 @@ class ValidateTokenRequest(BaseModel):
 
 class ValidateTokenResponse(BaseModel):
     valid: bool
-    user_id: str = None
-    username: str = None
-    email: str = None
+    user_id: Optional[str] = None
+    username: Optional[str] = None
+    email: Optional[str] = None
+    service_id: Optional[str] = None
+    type: Optional[str] = None  # "user" or "service"
     scopes: list[str] = []
-    expires_at: str = None
-    message: str = None
+    expires_at: Optional[str] = None
+    message: Optional[str] = None
 
 
 @router.post("/validate", response_model=ValidateTokenResponse)
@@ -45,6 +48,8 @@ async def validate_token(request: ValidateTokenRequest):
             user_id=token_data.user_id,
             username=token_data.username,
             email=token_data.email,
+            service_id=token_data.service_id,
+            type=token_data.token_type,
             scopes=token_data.scopes,
             expires_at=expires_at_str,
             message="Token is valid"

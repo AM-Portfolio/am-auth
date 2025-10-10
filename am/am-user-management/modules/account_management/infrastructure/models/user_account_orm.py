@@ -1,9 +1,9 @@
 """SQLAlchemy ORM model for UserAccount"""
 from datetime import datetime, timezone
 from typing import Optional
-from sqlalchemy import Column, String, Integer, DateTime, Boolean, Enum as SQLEnum
+from sqlalchemy import Column, String, Integer, DateTime, Boolean, Enum as SQLEnum, JSON
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.types import TypeDecorator, CHAR
 import uuid
 
@@ -69,6 +69,14 @@ class UserAccountORM(Base):
     # Security fields
     failed_login_attempts = Column(Integer, default=0, nullable=False)
     locked_until = Column(DateTime(timezone=True), nullable=True)
+    
+    # Google OAuth fields
+    google_id = Column(String(255), unique=True, nullable=True, index=True)
+    auth_provider = Column(String(50), default='local', nullable=False)
+    profile_picture_url = Column(String(500), nullable=True)
+    email_verified = Column(Boolean, default=False, nullable=False)
+    provider_data = Column(JSONB, nullable=True)
+    last_google_login = Column(DateTime(timezone=True), nullable=True)
     
     def __repr__(self):
         return f"<UserAccountORM(id={self.id}, email={self.email}, status={self.status})>"
