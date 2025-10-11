@@ -353,6 +353,37 @@ async def get_user_internal(
                             detail="Internal server error occurred")
 
 
+# Internal service-to-service endpoints
+@app.get("/internal/v1/service-info")
+async def get_service_info():
+    """
+    Internal endpoint for service discovery and health checking.
+    Called by other internal services.
+    """
+    return {
+        "service_id": "am-user-management",
+        "service_name": "User Management Service",
+        "version": "1.0.0",
+        "capabilities": [
+            "user_authentication",
+            "user_registration", 
+            "user_management",
+            "jwt_token_validation"
+        ],
+        "endpoints": {
+            "internal": [
+                "/internal/v1/users/{user_id}",
+                "/internal/v1/service-info"
+            ],
+            "public": [
+                "/api/v1/auth/register",
+                "/api/v1/auth/login", 
+                "/api/v1/auth/status"
+            ]
+        }
+    }
+
+
 @app.post("/api/v1/admin/reset-database")
 async def reset_database():
     """Reset database - Drop and recreate all tables (DEV ONLY)"""

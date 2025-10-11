@@ -59,6 +59,66 @@ services:
       retries: 3
       start_period: 10s
 
+  # Python Internal Service (Document Processing)
+  am-python-internal-service:
+    build:
+      context: ./am-python-internal-service
+      dockerfile: Dockerfile
+    # No external ports exposed - internal network only
+    env_file:
+      - ./.env.docker
+    environment:
+      # Centralized logging configuration
+      - LOG_FORMAT=json
+      - LOG_CONSOLE=true
+      - INTERNAL_SERVICE_LOG_LEVEL=INFO
+      - ENVIRONMENT=docker
+      # JWT Configuration
+      - JWT_SECRET=jwt-super-secret-signing-key-change-in-production-must-be-32chars-minimum-xyz
+      - INTERNAL_JWT_SECRET=internal-service-super-secret-key-32chars-minimum-change-in-prod
+    volumes:
+      - ../shared:/app/shared  # Mount shared logging infrastructure
+    networks:
+      - am-network
+    depends_on:
+      am-user-management:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8002/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Java Internal Service (Reporting)
+  am-java-internal-service:
+    build:
+      context: ./am-java-internal-service
+      dockerfile: Dockerfile
+    # No external ports exposed - internal network only
+    env_file:
+      - ./.env.docker
+    environment:
+      # Centralized logging configuration
+      - LOG_FORMAT=json
+      - LOG_CONSOLE=true
+      - INTERNAL_SERVICE_LOG_LEVEL=INFO
+      - ENVIRONMENT=docker
+      # JWT Configuration
+      - JWT_SECRET=jwt-super-secret-signing-key-change-in-production-must-be-32chars-minimum-xyz
+      - INTERNAL_JWT_SECRET=internal-service-super-secret-key-32chars-minimum-change-in-prod
+    networks:
+      - am-network
+    depends_on:
+      am-user-management:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
 networks:
   am-network:
     driver: bridge
