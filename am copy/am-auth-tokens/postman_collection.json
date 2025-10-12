@@ -1,0 +1,225 @@
+{
+        "info": {
+                "_postman_id": "auth-tokens-api",
+                "name": "Auth Tokens API - JWT Authentication",
+                "description": "Complete API collection for Auth Tokens Service with JWT token creation, validation, and service-to-service authentication",
+                "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+        },
+        "item": [
+                {
+                        "name": "Health & Info",
+                        "item": [
+                                {
+                                        "name": "Root - Service Info",
+                                        "request": {
+                                                "method": "GET",
+                                                "header": [],
+                                                "url": {
+                                                        "raw": "{{AUTH_BASE}}/",
+                                                        "host": ["{{AUTH_BASE}}"],
+                                                        "path": [""]
+                                                }
+                                        },
+                                        "response": []
+                                },
+                                {
+                                        "name": "Health Check",
+                                        "request": {
+                                                "method": "GET",
+                                                "header": [],
+                                                "url": {
+                                                        "raw": "{{AUTH_BASE}}/health",
+                                                        "host": ["{{AUTH_BASE}}"],
+                                                        "path": ["health"]
+                                                }
+                                        },
+                                        "response": []
+                                },
+                                {
+                                        "name": "Service Info",
+                                        "request": {
+                                                "method": "GET",
+                                                "header": [],
+                                                "url": {
+                                                        "raw": "{{AUTH_BASE}}/info",
+                                                        "host": ["{{AUTH_BASE}}"],
+                                                        "path": ["info"]
+                                                }
+                                        },
+                                        "response": []
+                                }
+                        ]
+                },
+                {
+                        "name": "JWT Token Operations",
+                        "item": [
+                                {
+                                        "name": "Create Token",
+                                        "event": [
+                                                {
+                                                        "listen": "test",
+                                                        "script": {
+                                                                "exec": [
+                                                                        "if (pm.response.code === 200) {",
+                                                                        "    var jsonData = pm.response.json();",
+                                                                        "    pm.environment.set(\"access_token\", jsonData.access_token);",
+                                                                        "    pm.environment.set(\"user_id\", jsonData.user_id);",
+                                                                        "    console.log(\"Token saved to environment\");",
+                                                                        "}"
+                                                                ],
+                                                                "type": "text/javascript"
+                                                        }
+                                                }
+                                        ],
+                                        "request": {
+                                                "method": "POST",
+                                                "header": [
+                                                        {
+                                                                "key": "Content-Type",
+                                                                "value": "application/json"
+                                                        }
+                                                ],
+                                                "body": {
+                                                        "mode": "raw",
+                                                        "raw": "{\n  \"username\": \"test@example.com\",\n  \"password\": \"securePassword123\"\n}"
+                                                },
+                                                "url": {
+                                                        "raw": "{{AUTH_BASE}}/api/v1/tokens",
+                                                        "host": ["{{AUTH_BASE}}"],
+                                                        "path": ["api", "v1", "tokens"]
+                                                },
+                                                "description": "Create JWT token using username and password"
+                                        },
+                                        "response": []
+                                },
+                                {
+                                        "name": "OAuth2 Token Endpoint",
+                                        "request": {
+                                                "method": "POST",
+                                                "header": [
+                                                        {
+                                                                "key": "Content-Type",
+                                                                "value": "application/x-www-form-urlencoded"
+                                                        }
+                                                ],
+                                                "body": {
+                                                        "mode": "urlencoded",
+                                                        "urlencoded": [
+                                                                {
+                                                                        "key": "grant_type",
+                                                                        "value": "password",
+                                                                        "type": "text"
+                                                                },
+                                                                {
+                                                                        "key": "username",
+                                                                        "value": "test@example.com",
+                                                                        "type": "text"
+                                                                },
+                                                                {
+                                                                        "key": "password",
+                                                                        "value": "securePassword123",
+                                                                        "type": "text"
+                                                                }
+                                                        ]
+                                                },
+                                                "url": {
+                                                        "raw": "{{AUTH_BASE}}/api/v1/tokens/oauth",
+                                                        "host": ["{{AUTH_BASE}}"],
+                                                        "path": ["api", "v1", "tokens", "oauth"]
+                                                },
+                                                "description": "OAuth2-compatible token endpoint using form data"
+                                        },
+                                        "response": []
+                                },
+                                {
+                                        "name": "Service Login",
+                                        "event": [
+                                                {
+                                                        "listen": "test",
+                                                        "script": {
+                                                                "exec": [
+                                                                        "if (pm.response.code === 200) {",
+                                                                        "    var jsonData = pm.response.json();",
+                                                                        "    pm.environment.set(\"service_token\", jsonData.access_token);",
+                                                                        "    pm.environment.set(\"service_id\", jsonData.service_id);",
+                                                                        "    console.log(\"Service token saved to environment\");",
+                                                                        "}"
+                                                                ],
+                                                                "type": "text/javascript"
+                                                        }
+                                                }
+                                        ],
+                                        "request": {
+                                                "method": "POST",
+                                                "header": [
+                                                        {
+                                                                "key": "Content-Type",
+                                                                "value": "application/json"
+                                                        }
+                                                ],
+                                                "body": {
+                                                        "mode": "raw",
+                                                        "raw": "{\n  \"service_id\": \"test_service_login\",\n  \"consumer_key\": \"ck_ExxFYWJ_NLP-9NjwBraghYypxwJZZhfKV19i9v95yDg\",\n  \"consumer_secret\": \"cs_5bVnvKZ2PesB35heqIemCp6_F-P95du7gvD_0BmTElSAWjOs7XX1p-kz-qJJ-DU-\"\n}"
+                                                },
+                                                "url": {
+                                                        "raw": "{{AUTH_BASE}}/api/v1/tokens/service",
+                                                        "host": ["{{AUTH_BASE}}"],
+                                                        "path": ["api", "v1", "tokens", "service"]
+                                                },
+                                                "description": "Service-to-service authentication using service_id, consumer_key, and consumer_secret"
+                                        },
+                                        "response": []
+                                },
+                                {
+                                        "name": "Validate Token",
+                                        "request": {
+                                                "method": "POST",
+                                                "header": [
+                                                        {
+                                                                "key": "Content-Type",
+                                                                "value": "application/json"
+                                                        }
+                                                ],
+                                                "body": {
+                                                        "mode": "raw",
+                                                        "raw": "{\n  \"token\": \"{{access_token}}\"\n}"
+                                                },
+                                                "url": {
+                                                        "raw": "{{AUTH_BASE}}/api/v1/validate",
+                                                        "host": ["{{AUTH_BASE}}"],
+                                                        "path": ["api", "v1", "validate"]
+                                                },
+                                                "description": "Validate JWT token and get user info"
+                                        },
+                                        "response": []
+                                }
+                        ]
+                },
+                {
+                        "name": "API Documentation",
+                        "item": [
+                                {
+                                        "name": "OpenAPI Docs",
+                                        "request": {
+                                                "method": "GET",
+                                                "header": [],
+                                                "url": {
+                                                        "raw": "{{AUTH_BASE}}/api/v1/docs",
+                                                        "host": ["{{AUTH_BASE}}"],
+                                                        "path": ["api", "v1", "docs"]
+                                                },
+                                                "description": "Interactive API documentation (Swagger UI)"
+                                        },
+                                        "response": []
+                                }
+                        ]
+                }
+        ],
+        "variable": [
+                {
+                        "key": "AUTH_BASE",
+                        "value": "https://2f4d5a4b-f2a1-430a-a68b-3f4203f0e4df-00-3vzvsij2w2yta.pike.replit.dev:8080",
+                        "type": "string"
+                }
+        ]
+}
