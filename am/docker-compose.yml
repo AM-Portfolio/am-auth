@@ -30,8 +30,6 @@ services:
         condition: service_healthy
       am-python-internal-service:
         condition: service_healthy
-      am-java-internal-service:
-        condition: service_healthy
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
       interval: 30s
@@ -84,6 +82,11 @@ services:
       - LOG_CONSOLE=true
       - AUTH_TOKENS_LOG_LEVEL=INFO
       - ENVIRONMENT=docker
+      # User service connection
+      - USER_SERVICE_URL=http://am-user-management:8000
+      # JWT Configuration
+      - JWT_SECRET=jwt-super-secret-signing-key-change-in-production-must-be-32chars-minimum-xyz
+      - JWT_ALGORITHM=HS256
     volumes:
       - ../shared:/app/shared  # Mount shared logging infrastructure
     networks:
@@ -115,6 +118,7 @@ services:
       - ENVIRONMENT=docker
       # JWT Configuration
       - JWT_SECRET=jwt-super-secret-signing-key-change-in-production-must-be-32chars-minimum-xyz
+      - JWT_ALGORITHM=HS256
       - INTERNAL_JWT_SECRET=internal-service-super-secret-key-32chars-minimum-change-in-prod
     volumes:
       - ../shared:/app/shared  # Mount shared logging infrastructure
@@ -152,12 +156,6 @@ services:
     depends_on:
       am-user-management:
         condition: service_healthy
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8003/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 15s
 
 networks:
   am-network:

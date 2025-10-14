@@ -335,13 +335,18 @@ async def get_user_internal(
             user.status.value).upper()  # Ensure uppercase comparison
         is_active = status_value == "ACTIVE"
 
+        # Determine user scopes based on email (admin users get admin scope)
+        scopes = ["read", "write"]
+        if user.email.value in ["admin@example.com", "ne2@example.com"]:
+            scopes.append("admin")
+
         return {
             "user_id":
             str(user.id.value),  # Fixed: use user.id instead of user.user_id
             "username": user.email.value,  # Using email as username
             "email": user.email.value,
             "status": status_value,
-            "scopes": ["read", "write"],  # Based on user roles/permissions
+            "scopes": scopes,  # Based on user roles/permissions
             "active": is_active
         }
 

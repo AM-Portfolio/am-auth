@@ -67,7 +67,31 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 
                 List<SimpleGrantedAuthority> authorities = new ArrayList<>();
                 
-                if ("user_token".equals(tokenType)) {
+                // Check for user token by 'sub' and 'email' fields (modern format)
+                String sub = decodedJWT.getClaim("sub").asString();
+                String email = decodedJWT.getClaim("email").asString();
+                
+                if (sub != null && email != null) {
+                    // Modern user token format from User Management service
+                    String username = decodedJWT.getClaim("username").asString();
+                    if (username == null) username = email;
+                    
+                    authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+                    
+                    // Store user info in security context
+                    UsernamePasswordAuthenticationToken authentication = 
+                        new UsernamePasswordAuthenticationToken(username, null, authorities);
+                    authentication.setDetails(Map.of(
+                        "user_id", sub, // Use 'sub' as user_id
+                        "username", username,
+                        "token_type", "user"
+                    ));
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                    
+                    logger.info("User token validated for user: {}", username);
+                    
+                } else if ("user_token".equals(tokenType)) {
+                    // Legacy user token format
                     String userId = decodedJWT.getClaim("user_id").asString();
                     String username = decodedJWT.getClaim("username").asString();
                     authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
@@ -119,6 +143,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             JWTVerifier userVerifier = JWT.require(userAlgorithm).build();
             DecodedJWT decodedJWT = userVerifier.verify(token);
             
+            // User tokens from User Management have 'sub' (user_id) and 'email' fields
+            // They don't have 'type' field, so we check for these identifying fields
+            String sub = decodedJWT.getClaim("sub").asString();
+            String email = decodedJWT.getClaim("email").asString();
+            
+            if (sub != null && email != null) {
+                return decodedJWT; // Valid user token
+            }
+            
+            // Legacy format with explicit type field
             if ("user_token".equals(decodedJWT.getClaim("type").asString())) {
                 return decodedJWT;
             }

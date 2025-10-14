@@ -68,6 +68,13 @@ class JWTValidator:
         try:
             # Try user token first
             payload = jwt.decode(token, self.user_jwt_secret, algorithms=[self.algorithm])
+            # User tokens from User Management have 'sub' (user_id) and 'email' fields
+            # They don't have 'type' field, so we check for these identifying fields
+            if payload.get("sub") and payload.get("email"):
+                # Add user_id field for backward compatibility
+                payload["user_id"] = payload.get("sub")
+                return "user", payload
+            # Legacy format with explicit type field
             if payload.get("type") == "user_token":
                 return "user", payload
         except InvalidTokenError:

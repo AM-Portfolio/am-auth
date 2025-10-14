@@ -26,23 +26,17 @@ async def get_user_reports(
     
     Flow:
     1. Validates user token
-    2. Generates service token
-    3. Calls internal Java service
-    4. Returns reports to client
+    2. Passes user token to Java service (service filters by user_id)
+    3. Returns reports to client
     """
     try:
         logger.info(f"User {current_user.user_id} requesting reports")
         
-        service_token = await generate_service_token(
-            user_token=current_user.token,
-            service_id="api-gateway",
-            permissions=["read:reports"]
-        )
-        
+        # Pass user token directly - Java service needs user context to filter reports
         async with httpx.AsyncClient() as client:
             response = await client.get(
                 f"{settings.JAVA_SERVICE_URL}/internal/reports",
-                headers={"Authorization": f"Bearer {service_token}"},
+                headers={"Authorization": f"Bearer {current_user.token}"},
                 timeout=settings.DEFAULT_TIMEOUT
             )
             
@@ -125,16 +119,11 @@ async def generate_report(
     try:
         logger.info(f"User {current_user.user_id} generating report")
         
-        service_token = await generate_service_token(
-            user_token=current_user.token,
-            service_id="api-gateway",
-            permissions=["write:reports"]
-        )
-        
+        # Pass user token directly - Java service needs user context for report generation
         async with httpx.AsyncClient() as client:
             response = await client.post(
                 f"{settings.JAVA_SERVICE_URL}/internal/reports/generate",
-                headers={"Authorization": f"Bearer {service_token}"},
+                headers={"Authorization": f"Bearer {current_user.token}"},
                 json=report_data,
                 timeout=settings.LONG_TIMEOUT  # Reports might take longer
             )

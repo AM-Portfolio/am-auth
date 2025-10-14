@@ -32,19 +32,12 @@ async def get_user_documents(
     try:
         logger.info(f"User {current_user.user_id} requesting documents")
         
-        # Generate service token for internal communication
-        service_token = await generate_service_token(
-            user_token=current_user.token,
-            service_id="api-gateway",
-            permissions=["read:documents"]
-        )
-        
-        # Call internal Python service
+        # Call internal Python service with user token
+        # Note: /internal/documents requires user token, not service token
         async with httpx.AsyncClient() as client:
             response = await client.get(
                 f"{settings.PYTHON_SERVICE_URL}/internal/documents",
-                headers={"Authorization": f"Bearer {service_token}"},
-                params={"user_id": current_user.user_id},
+                headers={"Authorization": f"Bearer {current_user.token}"},
                 timeout=settings.DEFAULT_TIMEOUT
             )
             

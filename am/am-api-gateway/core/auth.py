@@ -46,10 +46,14 @@ async def get_current_user(
             data = response.json()
             logger.info(f"User authenticated: {data.get('user_id')}")
             
+            # Map scopes to roles (validation endpoint returns 'scopes', not 'roles')
+            roles = data.get("roles", data.get("scopes", []))
+            logger.info(f"User roles/scopes: {roles}")
+            
             return CurrentUser(
                 user_id=data.get("user_id"),
                 email=data.get("email"),
-                roles=data.get("roles", []),
+                roles=roles,
                 token=token
             )
             
@@ -81,6 +85,7 @@ async def generate_service_token(
                 headers={"Authorization": f"Bearer {user_token}"},
                 json={
                     "service_id": service_id,
+                    "service_name": "API Gateway",
                     "permissions": permissions
                 },
                 timeout=10.0

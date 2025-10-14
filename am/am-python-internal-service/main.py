@@ -104,19 +104,27 @@ except NameError:
         try:
             token = credentials.credentials
             
-            # Try user token first
+            # Try user token first (from user management service)
             try:
                 payload = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
-                if payload.get("type") == "user_token":
-                    logger.info(f"User token validated for user: {payload.get('username')}")
+                logger.info(f"Decoded user token payload: {payload}")
+                # User tokens have 'sub' (user_id) and 'email' fields but no 'type' field
+                if payload.get("sub") and payload.get("email"):
+                    logger.info(f"✅ User token validated for user: {payload.get('username', payload.get('email'))}")
+                    # Add user_id to payload for convenience
+                    payload["user_id"] = payload.get("sub")
                     return {"type": "user", "payload": payload}
-            except jwt.JWTError:
+                else:
+                    logger.warning(f"User token missing required fields. sub={payload.get('sub')}, email={payload.get('email')}")
+            except jwt.JWTError as e:
+                logger.error(f"JWT decode error for user token: {str(e)}")
                 pass
             
-            # Try service token
+            # Try service token (from auth-tokens service)
             try:
                 payload = jwt.decode(token, INTERNAL_JWT_SECRET, algorithms=["HS256"])
-                if payload.get("type") == "service_token":
+                # Service tokens have 'service_id' field
+                if payload.get("service_id"):
                     logger.info(f"Service token validated for service: {payload.get('service_id')}")
                     return {"type": "service", "payload": payload}
             except jwt.JWTError:
