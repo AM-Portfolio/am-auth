@@ -24,8 +24,10 @@ from modules.account_management.infrastructure.services.mock_email_service impor
 from modules.account_management.application.use_cases.create_user import CreateUserUseCase, CreateUserRequest, CreateUserResponse
 from modules.account_management.application.use_cases.login import LoginUseCase, LoginRequest, LoginResponse
 
-# Import service registration router
+# Import routers
 from modules.account_management.api.service_registration import router as service_router
+from modules.account_management.api.internal.user_internal_api import router as internal_router
+from modules.account_management.api.public.password_reset_router import router as password_reset_router
 
 
 # Dependency injection setup
@@ -123,6 +125,8 @@ app.add_middleware(
 
 # Include routers
 app.include_router(service_router)
+app.include_router(internal_router)
+app.include_router(password_reset_router)
 
 
 # Pydantic models for API requests/responses

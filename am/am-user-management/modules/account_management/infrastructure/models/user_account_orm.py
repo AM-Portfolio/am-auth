@@ -70,6 +70,10 @@ class UserAccountORM(Base):
     failed_login_attempts = Column(Integer, default=0, nullable=False)
     locked_until = Column(DateTime(timezone=True), nullable=True)
     
+    # Password reset fields
+    password_reset_token = Column(String(255), nullable=True)
+    password_reset_token_expires = Column(DateTime(timezone=True), nullable=True)
+    
     def __repr__(self):
         return f"<UserAccountORM(id={self.id}, email={self.email}, status={self.status})>"
     

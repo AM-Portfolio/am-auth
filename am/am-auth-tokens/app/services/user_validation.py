@@ -30,6 +30,7 @@ class UserValidationService:
     ) -> UserValidationResponse:
         """
         Validate user credentials against the user management service.
+        Uses the internal validation endpoint to avoid circular dependency.
         
         Args:
             credentials: User credentials to validate
@@ -40,7 +41,7 @@ class UserValidationService:
         try:
             async with httpx.AsyncClient(timeout=self.timeout) as client:
                 response = await client.post(
-                    f"{self.base_url}/api/v1/auth/login",
+                    f"{self.base_url}/internal/validate-credentials",
                     json={
                         "email": credentials.username,  # Assuming username is email
                         "password": credentials.password
@@ -52,25 +53,22 @@ class UserValidationService:
                 
                 if response.status_code == 200:
                     data = response.json()
-                    return UserValidationResponse(
-                        valid=True,
-                        user_id=data.get("user_id"),
-                        username=data.get("username"),
-                        email=data.get("email"),
-                        status=data.get("status"),
-                        scopes=data.get("scopes", []),
-                        message="User validated successfully"
-                    )
-                elif response.status_code == 401:
-                    return UserValidationResponse(
-                        valid=False,
-                        message="Invalid credentials"
-                    )
-                elif response.status_code == 404:
-                    return UserValidationResponse(
-                        valid=False,
-                        message="User not found"
-                    )
+                    # Check if validation was successful
+                    if data.get("valid"):
+                        return UserValidationResponse(
+                            valid=True,
+                            user_id=data.get("user_id"),
+                            username=data.get("username"),
+                            email=data.get("email"),
+                            status=data.get("status"),
+                            scopes=data.get("scopes", []),
+                            message=data.get("message", "User validated successfully")
+                        )
+                    else:
+                        return UserValidationResponse(
+                            valid=False,
+                            message=data.get("message", "Invalid credentials")
+                        )
                 else:
                     return UserValidationResponse(
                         valid=False,
