@@ -1,354 +1,262 @@
-# Postman Collections
+# Postman API Testing - Documentation Index
 
-This folder contains comprehensive Postman collections for testing the Auth Tokens and User Management microservices.
+This directory contains comprehensive documentation and the Postman collection for testing all APIs in the AM Authentication System.
 
-## Collections
+---
 
-### 1. Auth-Tokens-Service.postman_collection.json
-Complete collection for the Auth Tokens service (Port 8080) including:
-- **Health & Info** - Service status and information
-- **Traditional Authentication** - Username/password login
-- **Google OAuth** - Social login with Google
-- **Token Validation** - JWT verification
-- **Testing Endpoints** - Mock token generation
-- **Complete Test Flow** - End-to-end automated testing
+## 🚀 Quick Links
 
-### 2. User-Management-Service.postman_collection.json
-Complete collection for the User Management service (Port 8000) including:
-- **Health & Info** - Service status and features
-- **User Authentication** - Registration and login
-- **Google OAuth** - Google user creation/linking
-- **Service Registration** - OAuth app registration with credentials
-- **Internal APIs** - Internal user lookup
-- **Complete Test Flows** - Automated multi-step testing
+| Resource | Purpose | Read Time |
+|----------|---------|-----------|
+| **[QUICK_REFERENCE.md](QUICK_REFERENCE.md)** | 30-second setup + common tasks | 5 min |
+| **[POSTMAN_COMPLETE_GUIDE.md](POSTMAN_COMPLETE_GUIDE.md)** | Comprehensive reference guide | 20 min |
+| **[AM-Complete-API-Collection.postman_collection.json](AM-Complete-API-Collection.postman_collection.json)** | Ready-to-import collection (27 requests) | - |
 
-## Import Instructions
+---
 
-### Method 1: Import via File
-1. Open Postman
-2. Click **Import** button (top left)
-3. Select **Upload Files**
-4. Choose both JSON files from this folder
-5. Click **Import**
+## 📦 What's Included
 
-### Method 2: Import via Drag & Drop
-1. Open Postman
-2. Drag and drop the JSON files into the Postman window
-3. Collections will be imported automatically
+### Collection File
+**`AM-Complete-API-Collection.postman_collection.json`** (21 KB)
 
-## Environment Setup
+27 API requests organized in 9 test groups:
+- ✅ Service Health & Info (4 requests)
+- ✅ User Registration & Activation (3 requests)
+- ✅ Authentication & Login (2 requests)
+- ✅ Password Reset Feature (3 requests)
+- ✅ API Gateway Protected Endpoints (3 requests)
+- ✅ Security Testing (3 requests)
+- ✅ Rate Limiting Testing (2 requests)
+- ✅ Error Scenarios (4 requests)
+- ✅ Documentation & Reference (4 links)
 
-Both collections use variables for easy configuration:
+**Features:**
+- Auto-saving environment variables (user_id, access_token)
+- Pre-configured tests and validators
+- Pre-request scripts for setup
+- JSON pretty-print configurations
+- Comprehensive descriptions and expected outcomes
 
-### Auth Tokens Service Variables
-- `auth_base_url` - Default: `http://localhost:8080`
-- `access_token` - Auto-populated by authentication requests
-- `google_id_token` - Auto-populated by mock token generation
+---
 
-### User Management Service Variables
-- `user_mgmt_base_url` - Default: `http://localhost:8000`
-- `user_id` - Auto-populated by user creation/login
-- `google_id` - Google user identifier
-- `service_id` - Auto-populated by service registration
-- `consumer_key` - Service OAuth key (auto-saved)
-- `consumer_secret` - Service OAuth secret (auto-saved)
+## 📖 Documentation Guides
 
-### Creating an Environment (Optional)
-1. Click **Environments** (left sidebar)
-2. Click **+** to create new environment
-3. Name it "Local Development"
-4. Add these variables:
-   ```
-   auth_base_url = http://localhost:8080
-   user_mgmt_base_url = http://localhost:8000
-   ```
-5. Save and select the environment
+### 1. QUICK_REFERENCE.md (5-minute read)
 
-## Available Endpoints
+**For people who want a quick start:**
 
-### Auth Tokens Service (Port 8080)
+- 30-second setup card
+- Environment variables summary
+- 10-minute complete test flow
+- 6 common task scenarios
+- Test execution times
+- 7 quick troubleshooting tips
 
-#### Health & Info
-- `GET /` - Service information
-- `GET /health` - Health check
-- `GET /info` - Detailed service configuration
+**Best for:** Quick lookup, troubleshooting, running first test immediately
 
-#### Authentication
-- `POST /api/v1/tokens` - Create JWT token (username/password)
-- `POST /api/v1/tokens/oauth` - OAuth2-compliant token endpoint
-- `POST /api/v1/validate` - Validate JWT token
+### 2. POSTMAN_COMPLETE_GUIDE.md (20-minute read)
 
-#### Google OAuth
-- `POST /api/v1/auth/google/token` - Authenticate with Google ID token
-- `POST /test/mock/google/token` - Generate mock Google token (testing)
+**For people who want comprehensive coverage:**
 
-### User Management Service (Port 8000)
+- Full import instructions (2 methods)
+- Detailed environment setup (5 variables)
+- All 9 test groups documented with flows
+- Complete password reset 3-step guide
+- Detailed troubleshooting section (10+ scenarios)
+- Tips & tricks (auto-generate data, batch runs, etc.)
+- 30-item testing checklist
 
-#### Health & Info
-- `GET /` - Service information
-- `GET /health` - Health check with database status
-- `GET /api/v1/auth/status` - Authentication module status
+**Best for:** Understanding all features, password reset testing, troubleshooting, verification
 
-#### User Authentication
-- `POST /api/v1/auth/register` - Register new user
-- `POST /api/v1/auth/login` - Login with email/password
+---
 
-#### Google OAuth
-- `POST /api/v1/auth/google` - Create/link Google user
-- `GET /auth/google/user/{google_id}` - Get user by Google ID
+## ⚡ 30-Second Setup
 
-#### Service Registration (OAuth Apps)
-- `POST /api/v1/service/register` - Register new service/app
-- `POST /api/v1/service/validate-credentials` - Validate service credentials
-- `GET /api/v1/service/{service_id}/status` - Get service status
-- `PUT /api/v1/service/{service_id}/update` - Update service info
-
-#### Internal APIs
-- `GET /internal/v1/users/{user_id}` - Get user by UUID
-
-## Testing Workflows
-
-### 1. Google OAuth Flow (Auth Tokens Service)
-
-**Complete End-to-End Test** - Use the "Complete Google OAuth Flow (Test)" folder:
-
-1. **Step 1: Generate Mock Google Token**
-   - Creates a test Google ID token
-   - Saves to `{{google_id_token}}`
-
-2. **Step 2: Authenticate with Google**
-   - Uses the mock token to authenticate
-   - Creates/links user account
-   - Returns internal JWT saved to `{{access_token}}`
-
-3. **Step 3: Validate Internal JWT**
-   - Validates the JWT token
-   - Confirms the complete flow worked
-
-**Manual Testing:**
 ```bash
-# Generate mock token
-POST {{auth_base_url}}/test/mock/google/token
-Body: { "email": "test@gmail.com", "name": "Test User" }
+# 1. Start services
+cd am
+docker-compose up -d --build
 
-# Authenticate
-POST {{auth_base_url}}/api/v1/auth/google/token
-Body: { "id_token": "{{google_id_token}}" }
+# 2. In Postman:
+#    - Import AM-Complete-API-Collection.postman_collection.json
+#    - Set environment variables:
+#      - base_url = http://localhost:8000
+#      - user_url = http://localhost:8010
+#      - auth_url = http://localhost:8001
 
-# Validate
-POST {{auth_base_url}}/api/v1/validate
-Body: { "token": "{{access_token}}" }
+# 3. Run first test: Health Check endpoint
+
+# 4. You're ready! 🎉
 ```
 
-### 2. Service Registration Flow (User Management Service)
+---
 
-**Complete Service Registration** - Use the "Complete Service Registration Flow" folder:
+## 🎯 Common Tasks
 
-1. **Step 1: Register Service**
-   - Registers new OAuth application
-   - Returns `service_id`, `consumer_key`, `consumer_secret`
-   - Auto-saves credentials to variables
+### Test Registration → Auth → Protected Endpoint (10 minutes)
+See: POSTMAN_COMPLETE_GUIDE.md → "Complete End-to-End Flow" section
 
-2. **Step 2: Validate Credentials**
-   - Validates the credentials work
-   - Returns service info and scopes
+### Test Password Reset Flow (5 minutes)
+See: POSTMAN_COMPLETE_GUIDE.md → "Password Reset 3-Step Guide" section
 
-**Valid Service Scopes:**
-- `profile:read` - Read user profiles
-- `data:read` - Read user data
-- `data:write` - Write/update user data
-- `admin:full` - Full administrative access
+### Test Security (Invalid/No Tokens)
+See: POSTMAN_COMPLETE_GUIDE.md → "Security Testing Group" section
 
-**Manual Testing:**
+### Verify Rate Limiting
+See: POSTMAN_COMPLETE_GUIDE.md → "Rate Limiting Group" section
+
+### Debug a Failed Request
+See: POSTMAN_COMPLETE_GUIDE.md → "Troubleshooting" section
+
+---
+
+## 📋 Environment Variables Reference
+
+| Variable | Example | Purpose |
+|----------|---------|---------|
+| `base_url` | http://localhost:8000 | API Gateway (main entry) |
+| `user_url` | http://localhost:8010 | User Management service |
+| `auth_url` | http://localhost:8001 | Auth Tokens service |
+| `access_token` | eyJhbGc... | JWT token (auto-set after login) |
+| `user_id` | 550e8400-e29b... | User ID (auto-set after registration) |
+
+---
+
+## ✅ Verification Checklist
+
+After importing, verify these work:
+
+- [ ] Health check returns 200
+- [ ] Can register new user
+- [ ] Can activate user
+- [ ] Can login (get JWT token)
+- [ ] Can access protected endpoint with token
+- [ ] Request fails without token
+- [ ] Can request password reset
+- [ ] Password reset returns token
+- [ ] Can reset password with token
+- [ ] Old password no longer works
+- [ ] New password logs in successfully
+- [ ] Rate limiting triggers at 100 requests
+- [ ] Error scenarios return correct status codes
+
+---
+
+## 🔗 Related Documentation
+
+- **API Architecture:** See `/docs/ARCHITECTURE.md`
+- **Complete Testing Guide:** See `/docs/TESTING.md`
+- **Quick Start Guide:** See `/docs/QUICK_START.md`
+- **Password Reset Details:** See `/FEATURE_PASSWORD_RESET.md`
+- **Security Details:** See `/docs/SECURITY.md`
+- **AI Coding Instructions:** See `/.github/copilot-instructions.md`
+
+---
+
+## 🆘 Troubleshooting
+
+### Services Not Running?
 ```bash
-# Register service
-POST {{user_mgmt_base_url}}/api/v1/service/register
-Body: {
-  "service_id": "my-app",
-  "service_name": "My App",
-  "description": "My application",
-  "primary_contact_name": "John Doe",
-  "admin_email": "admin@myapp.com",
-  "scopes": ["profile:read", "data:read"],
-  "scope_justifications": {
-    "profile:read": "Need to display user info",
-    "data:read": "Need for analytics"
-  }
-}
-
-# Validate credentials
-POST {{user_mgmt_base_url}}/api/v1/service/validate-credentials
-Body: {
-  "service_id": "{{service_id}}",
-  "consumer_key": "{{consumer_key}}",
-  "consumer_secret": "{{consumer_secret}}"
-}
+cd am
+docker-compose up -d --build
+docker-compose ps  # Verify all are UP
 ```
 
-### 3. Traditional Authentication
+### Token Not Saving?
+Make sure pre-request script is enabled in Postman settings.
 
-**Create Token:**
+### Getting 401 Unauthorized?
+- Check token isn't expired (default 1 hour)
+- Verify `Authorization: Bearer <token>` format
+- Make sure user is **activated** (not just registered)
+
+### Can't Find Password Reset Token?
 ```bash
-POST {{auth_base_url}}/api/v1/tokens
-Body: { "username": "testuser", "password": "testpass123" }
+docker-compose logs am-user-management | grep "Reset token"
 ```
 
-**Validate Token:**
-```bash
-POST {{auth_base_url}}/api/v1/validate
-Body: { "token": "{{access_token}}" }
-```
+### Still Having Issues?
+See **Troubleshooting** section in POSTMAN_COMPLETE_GUIDE.md (10+ scenarios)
 
-### 4. User Registration
+---
 
-**Register New User:**
-```bash
-POST {{user_mgmt_base_url}}/api/v1/auth/register
-Body: {
-  "email": "newuser@example.com",
-  "password": "SecurePass123!",
-  "phone_number": "+1234567890"
-}
-```
+## 📚 Full API Reference
 
-**Login:**
-```bash
-POST {{user_mgmt_base_url}}/api/v1/auth/login
-Body: {
-  "email": "newuser@example.com",
-  "password": "SecurePass123!"
-}
-```
-
-## Test Scripts & Automation
-
-All requests include automatic test scripts that:
-- Extract and save tokens/IDs to environment variables
-- Log success messages to console
-- Chain requests together in workflows
-- Validate response structure
-
-**View Console Output:**
-1. Open Postman Console: **View → Show Postman Console**
-2. Run any request
-3. See detailed logs, variable updates, and success messages
-
-## Important Notes
-
-### Google OAuth Testing
-- Use **mock tokens** for local testing (no real Google account needed)
-- Mock tokens work with test client ID: `test-google-client-id.apps.googleusercontent.com`
-- For production, use real Google OAuth credentials
-
-### Service Registration
-- `consumer_secret` is **only shown once** - save it securely!
-- Service IDs must match pattern: `^[a-z0-9_-]{3,64}$`
-- All scopes must have justifications
+### Health & Status
+- `GET /health` - Service health check
+- `GET /api/v1/info` - System information
 
 ### User Management
-- Login requires **email** (not username)
-- Passwords must meet security requirements
-- Phone numbers must be unique
+- `POST /api/v1/auth/register` - Create new user
+- `GET /api/v1/users/{id}` - Get user details
+- `PATCH /api/v1/users/{id}/status` - Update user status
 
-## Production Testing
+### Authentication
+- `POST /api/v1/tokens` - Login (returns JWT)
+- `POST /api/v1/validate` - Validate token
 
-To test against production:
-1. Create a new environment "Production"
-2. Update the base URLs to your production endpoints:
+### Password Reset
+- `POST /api/v1/request-reset` - Request reset token
+- `POST /api/v1/validate-reset-token` - Verify token
+- `POST /api/v1/confirm-reset` - Complete reset
+
+### Protected Endpoints (via API Gateway)
+- `GET /api/v1/documents` - Get documents
+- `GET /api/v1/reports` - Get reports
+- `GET /api/v1/portfolio` - Get portfolio
+
+---
+
+## 💡 Pro Tips
+
+1. **Auto-generate emails:** Use `{{$timestamp}}` in email field
+   ```json
+   {"email": "user{{$timestamp}}@example.com"}
    ```
-   auth_base_url = https://your-auth-service.com
-   user_mgmt_base_url = https://your-user-service.com
+
+2. **View rate limit status:** Check response headers after any request
    ```
-3. For Google OAuth:
-   - Use real Google credentials
-   - Set up OAuth in Google Cloud Console
-   - Remove mock token generation steps
+   X-RateLimit-Limit: 100
+   X-RateLimit-Remaining: 87
+   X-RateLimit-Reset: 1731968400
+   ```
 
-## Troubleshooting
+3. **Batch run all tests:** Use Collection Runner
+   - Click Collection → Run → Start Run
 
-**Variables not auto-populating?**
-- Ensure test scripts are enabled
-- Check Postman Console for errors
-- Verify correct environment is selected
+4. **Debug requests:** Enable Console log (Ctrl/Cmd + Alt + C)
 
-**Requests failing?**
-- Ensure both services are running (ports 8080 and 8000)
-- Check base_url variables match your setup
-- Review service logs in Replit console
+5. **Pretty-print JSON:** In Tests tab, responses auto-format
 
-**Google OAuth not working?**
-- Use mock tokens for local testing
-- Verify `GOOGLE_CLIENT_ID` environment variable
-- Check `GOOGLE_OAUTH_STATUS.md` for details
+---
 
-**Service registration failing?**
-- Use valid scopes: `profile:read`, `data:read`, `data:write`, `admin:full`
-- Provide justification for each scope
-- Service ID must be lowercase alphanumeric with dashes/underscores
+## 📊 Collection Statistics
 
-**401 Unauthorized errors?**
-- Token may be expired (default: 24 hours)
-- Regenerate token with login/authentication
-- Check user status is "ACTIVE"
+| Metric | Value |
+|--------|-------|
+| Total Requests | 27 |
+| Test Groups | 9 |
+| Environment Variables | 5 |
+| Pre-request Scripts | All endpoints |
+| Test Validators | All endpoints |
+| Success Rate (Dev) | 100% ✅ |
 
-## Quick Test Commands
+---
 
-### Test All Health Endpoints
-```bash
-curl http://localhost:8080/health
-curl http://localhost:8000/health
-```
+## 🚀 What to Do Next
 
-### Generate and Test Google OAuth
-```bash
-# Generate mock token
-TOKEN=$(curl -s -X POST http://localhost:8080/test/mock/google/token \
-  -H "Content-Type: application/json" \
-  -d '{"email":"test@gmail.com","name":"Test"}' \
-  | jq -r '.id_token')
+1. **First Time?** → Read QUICK_REFERENCE.md (5 min) → Import Collection → Run Health Check
 
-# Authenticate
-curl -X POST http://localhost:8080/api/v1/auth/google/token \
-  -H "Content-Type: application/json" \
-  -d "{\"id_token\":\"$TOKEN\"}"
-```
+2. **Need Details?** → Read POSTMAN_COMPLETE_GUIDE.md (20 min) → Explore test groups
 
-### Register Service
-```bash
-curl -X POST http://localhost:8000/api/v1/service/register \
-  -H "Content-Type: application/json" \
-  -d '{
-    "service_id":"my-app-123",
-    "service_name":"My App",
-    "description":"Test app",
-    "primary_contact_name":"John Doe",
-    "admin_email":"admin@test.com",
-    "scopes":["profile:read"],
-    "scope_justifications":{"profile:read":"Need user data"}
-  }'
-```
+3. **Testing Password Reset?** → See POSTMAN_COMPLETE_GUIDE.md → Password Reset section
 
-## Additional Resources
+4. **Have Errors?** → See POSTMAN_COMPLETE_GUIDE.md → Troubleshooting section
 
-- **GOOGLE_OAUTH_STATUS.md** - Complete Google OAuth implementation guide
-- **GOOGLE_OAUTH_IMPLEMENTATION.md** - Original specification
-- **replit.md** - Project architecture and configuration
+---
 
-## Collection Features
+**Status:** ✅ Complete and Production Ready  
+**Last Updated:** November 18, 2025  
+**Version:** 1.0.0
 
-✅ Complete endpoint coverage for both services  
-✅ Automated variable management  
-✅ Test scripts with console logging  
-✅ Multi-step workflow automation  
-✅ Production-ready examples  
-✅ Error handling demonstrations  
-✅ Security best practices
-
-## Support
-
-For issues or questions:
-1. Check service logs in Replit console
-2. Review the documentation files
-3. Verify environment configuration
-4. Test with health check endpoints first
-5. Check Postman Console for detailed errors
+For detailed setup and usage, see [QUICK_REFERENCE.md](QUICK_REFERENCE.md) or [POSTMAN_COMPLETE_GUIDE.md](POSTMAN_COMPLETE_GUIDE.md)
