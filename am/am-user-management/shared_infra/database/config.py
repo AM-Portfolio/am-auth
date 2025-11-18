@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 
 from modules.account_management.infrastructure.models.user_account_orm import Base
 from modules.account_management.infrastructure.models.registered_service_orm import RegisteredServiceORM
+from modules.account_management.infrastructure.models.password_reset_token_orm import PasswordResetTokenORM
 
 # Load environment variables from .env file
 load_dotenv()

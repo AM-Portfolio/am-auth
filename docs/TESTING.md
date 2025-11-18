@@ -219,6 +219,216 @@ curl --connect-timeout 2 http://localhost:8003/health  # Java service
 
 Expected: Connection refused (this is CORRECT - services are protected)
 
+## Testing Password Reset Feature
+
+### Complete Password Reset Flow
+
+The password reset feature has three endpoints that work together:
+
+1. **Request Reset** - User requests a password reset link
+2. **Validate Token** - Verify the reset token is valid before showing form
+3. **Confirm Reset** - Complete the password reset with new password
+
+#### Step 1: Request Password Reset
+
+```bash
+curl -X POST http://localhost:8010/api/v1/request-reset \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "user@example.com"
+  }'
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "If an account exists with this email, a reset link will be sent",
+  "note": "If an account exists with this email, a password reset link will be sent"
+}
+```
+
+**Note:** For security, the same message is returned whether user exists or not. In development, the reset token is logged to the service logs.
+
+#### Step 2: Get Reset Token from Logs
+
+```bash
+docker-compose logs am-user-management | grep "Reset token for" | tail -1
+```
+
+**Output example:**
+```
+Reset token for user@example.com: zc2XlTHE94FW9JQncusO21phwKJfWTj7JpVEApO2DGI
+```
+
+#### Step 3: Validate the Reset Token
+
+Before allowing password reset, validate the token:
+
+```bash
+curl -X POST http://localhost:8010/api/v1/validate-reset-token \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "user@example.com",
+    "token": "zc2XlTHE94FW9JQncusO21phwKJfWTj7JpVEApO2DGI"
+  }'
+```
+
+**Success Response:**
+```json
+{
+  "valid": true,
+  "message": "Token is valid"
+}
+```
+
+**Failed Response (expired/already used/revoked):**
+```json
+{
+  "valid": false,
+  "message": "Token expired"
+}
+```
+
+#### Step 4: Confirm Password Reset
+
+Once token is validated, user can set a new password:
+
+```bash
+curl -X POST http://localhost:8010/api/v1/confirm-reset \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "user@example.com",
+    "token": "zc2XlTHE94FW9JQncusO21phwKJfWTj7JpVEApO2DGI",
+    "new_password": "NewPassword123!"
+  }'
+```
+
+**Success Response:**
+```json
+{
+  "success": true,
+  "message": "Password reset successfully"
+}
+```
+
+**Failed Response (invalid token/password):**
+```json
+{
+  "success": false,
+  "message": "Invalid reset token"
+}
+```
+
+#### Step 5: Verify Password Changed
+
+Login with the new password to confirm it worked:
+
+```bash
+curl -X POST http://localhost:8001/api/v1/tokens \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "user@example.com",
+    "password": "NewPassword123!"
+  }'
+```
+
+Should return a valid JWT token.
+
+### Password Requirements
+
+The new password must meet these criteria:
+
+- **Minimum 8 characters**
+- **Contains uppercase letter** (A-Z)
+- **Contains lowercase letter** (a-z)
+- **Contains digit** (0-9)
+
+**Examples:**
+- ✅ `ValidPass123` - OK
+- ✅ `MyPassword2024` - OK
+- ❌ `weakpass` - No uppercase, no digit
+- ❌ `NODIGITS` - No lowercase, no digit
+- ❌ `short1A` - Only 7 characters
+
+### Token Expiration
+
+Reset tokens expire after **24 hours**. Expired tokens will return:
+
+```json
+{
+  "valid": false,
+  "message": "Token expired"
+}
+```
+
+### Security Features
+
+1. **One-time use**: Tokens can only be used once. Using a token marks it as used.
+2. **Token revocation**: Requesting another reset revokes all previous unused tokens.
+3. **Email privacy**: Same response whether user exists or not (prevents user enumeration).
+4. **Token hashing**: Tokens are hashed in the database (only hash stored, not original token).
+5. **Secure generation**: Tokens generated using `secrets.token_urlsafe()` with 32 bytes.
+
+### Automated Password Reset Test
+
+Add this to your test script:
+
+```bash
+#!/bin/bash
+
+# Create test user
+USER_ID=$(curl -s -X POST http://localhost:8010/api/v1/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "resettest@example.com",
+    "password": "OldPassword123!",
+    "full_name": "Reset Test"
+  }' | jq -r '.user_id')
+
+# Activate user
+curl -s -X PATCH http://localhost:8010/api/v1/users/$USER_ID/status \
+  -H "Content-Type: application/json" \
+  -d '{"status":"active"}' > /dev/null
+
+# Request reset
+curl -s -X POST http://localhost:8010/api/v1/request-reset \
+  -H "Content-Type: application/json" \
+  -d '{"email": "resettest@example.com"}' > /dev/null
+
+# Extract token from logs (wait a moment for logs)
+sleep 1
+TOKEN=$(docker-compose logs am-user-management | \
+  grep "Reset token for resettest" | \
+  tail -1 | \
+  sed 's/.*: //')
+
+# Validate token
+VALID=$(curl -s -X POST http://localhost:8010/api/v1/validate-reset-token \
+  -H "Content-Type: application/json" \
+  -d "{\"email\":\"resettest@example.com\",\"token\":\"$TOKEN\"}" | jq -r '.valid')
+
+# If valid, confirm reset
+if [ "$VALID" = "true" ]; then
+  curl -s -X POST http://localhost:8010/api/v1/confirm-reset \
+    -H "Content-Type: application/json" \
+    -d "{\"email\":\"resettest@example.com\",\"token\":\"$TOKEN\",\"new_password\":\"NewPassword123!\"}" > /dev/null
+  
+  # Try login with new password
+  LOGIN=$(curl -s -X POST http://localhost:8001/api/v1/tokens \
+    -H "Content-Type: application/json" \
+    -d '{"username":"resettest@example.com","password":"NewPassword123!"}')
+  
+  if echo "$LOGIN" | jq -e '.access_token' > /dev/null 2>&1; then
+    echo "✅ Password reset test PASSED"
+  else
+    echo "❌ Password reset test FAILED - Could not login with new password"
+  fi
+else
+  echo "❌ Password reset test FAILED - Token validation failed"
+fi
+```
+
 ## Testing API Documentation
 
 ### Swagger UI

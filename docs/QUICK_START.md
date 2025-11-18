@@ -136,7 +136,52 @@ curl http://localhost:8000/api/v1/portfolio \
 
 Expected responses show data from internal services!
 
-### Step 8: Test Rate Limiting (Optional)
+### Step 8: Reset Password (Optional)
+
+Forgot your password? Use the password reset feature:
+
+```bash
+# Step 1: Request reset
+curl -X POST http://localhost:8010/api/v1/request-reset \
+  -H "Content-Type: application/json" \
+  -d '{"email": "testuser@example.com"}'
+
+# Step 2: Get token from logs
+docker-compose logs am-user-management | grep "Reset token for" | tail -1
+
+# Step 3: Validate token (copy token from logs)
+curl -X POST http://localhost:8010/api/v1/validate-reset-token \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "testuser@example.com",
+    "token": "PASTE_TOKEN_HERE"
+  }'
+
+# Step 4: Reset password
+curl -X POST http://localhost:8010/api/v1/confirm-reset \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "testuser@example.com",
+    "token": "PASTE_TOKEN_HERE",
+    "new_password": "NewPassword123!"
+  }'
+
+# Step 5: Login with new password
+curl -X POST http://localhost:8001/api/v1/tokens \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "testuser@example.com",
+    "password": "NewPassword123!"
+  }'
+```
+
+**Password Requirements:**
+- Minimum 8 characters
+- Contains uppercase (A-Z)
+- Contains lowercase (a-z)
+- Contains digit (0-9)
+
+### Step 9: Test Rate Limiting (Optional)
 
 ```bash
 # Make 101 requests to trigger rate limit
@@ -151,7 +196,7 @@ done
 
 After 100 requests, you should see **429 Too Many Requests**.
 
-### Step 9: Verify Security (Optional)
+### Step 10: Verify Security (Optional)
 
 Try to access internal services directly (this should FAIL):
 
