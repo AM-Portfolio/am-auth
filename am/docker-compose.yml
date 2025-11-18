@@ -87,6 +87,8 @@ services:
       # JWT Configuration
       - JWT_SECRET=jwt-super-secret-signing-key-change-in-production-must-be-32chars-minimum-xyz
       - JWT_ALGORITHM=HS256
+      # Database connection (uses host machine's PostgreSQL)
+      - DATABASE_URL=postgresql://postgres:password@host.docker.internal:5432/postgres
     volumes:
       - ../shared:/app/shared  # Mount shared logging infrastructure
     networks:

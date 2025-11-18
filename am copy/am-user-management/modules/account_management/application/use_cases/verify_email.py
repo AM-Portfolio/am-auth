@@ -1,1 +1,0 @@
-# Marks user as verified
