@@ -193,7 +193,9 @@ See **Troubleshooting** section in POSTMAN_COMPLETE_GUIDE.md (10+ scenarios)
 
 ### Authentication
 - `POST /api/v1/tokens` - Login (returns JWT)
-- `POST /api/v1/validate` - Validate token
+- `POST /api/v1/validate` - Validate token (body: {"token": "..."})
+- `POST /api/v1/validate/bearer` - Validate token (bearer format)
+- `GET /api/v1/validate/me?token=...` - Validate token (query param)
 
 ### Password Reset
 - `POST /api/v1/request-reset` - Request reset token

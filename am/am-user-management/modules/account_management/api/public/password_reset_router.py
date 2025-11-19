@@ -4,6 +4,7 @@ from pydantic import BaseModel, EmailStr, Field
 from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 import logging
+import os
 
 from shared_infra.database.config import db_config
 from modules.account_management.infrastructure.services.bcrypt_password_hasher import BcryptPasswordHasher
@@ -36,6 +37,7 @@ class PasswordResetRequestResponse(BaseModel):
     success: bool
     message: str
     note: str = "If an account exists with this email, a password reset link will be sent"
+    reset_token: Optional[str] = None  # Only in development mode
 
 
 class PasswordResetConfirmRequest(BaseModel):
@@ -76,19 +78,33 @@ async def request_password_reset(
     For security reasons, it always returns a success message
     regardless of whether the user exists.
     
+    **Development Mode:**
+    Returns the reset token in the response for testing purposes.
+    
+    **Production Mode:**
+    Token is only sent via email (returned token will be null).
+    
     **Returns:**
-    - Reset token (only sent to email in real implementation)
+    - Reset token (development only, null in production)
     """
     service = PasswordResetService(db, password_hasher)
     success, message, reset_token = await service.request_reset(request.email)
     
-    # In development, log the token; in production, send via email
+    # In development/docker, log the token and return it; in production, only send via email
+    # Check if we're in development or docker mode (production would disable token return)
+    environment = os.getenv("ENVIRONMENT", "development").lower()
+    is_development = environment in ("development", "docker")
+    token_to_return = None
+    
     if reset_token:
         logger.info(f"Reset token for {request.email}: {reset_token}")
+        if is_development:
+            token_to_return = reset_token
     
     return PasswordResetRequestResponse(
         success=success,
-        message=message
+        message=message,
+        reset_token=token_to_return
     )
 
 

@@ -127,16 +127,18 @@ GET  /api/v1/info              → System information
 
 ### User Management API (Port 8010)
 ```
-POST   /api/v1/users/register           → Create new user account
-GET    /api/v1/users/{id}               → Get user details
+POST   /api/v1/auth/register            → Create new user account
+GET    /api/v1/users/{id}/status        → Get user status & details
 PATCH  /api/v1/users/{id}/status        → Update user status (activate/deactivate)
 ```
 
 ### Authentication API (Port 8001)
 ```
 POST   /api/v1/auth/login                → Login with email/password → Returns JWT token
-POST   /api/v1/tokens                    → Create JWT token
-POST   /api/v1/validate                  → Validate JWT token
+POST   /api/v1/tokens                    → Create JWT token (username/password)
+POST   /api/v1/validate                  → Validate token (send token in body)
+POST   /api/v1/validate/bearer           → Validate token (bearer format alternative)
+GET    /api/v1/validate/me?token=...     → Validate token (query parameter)
 ```
 
 ### Password Reset API (Port 8010)
@@ -233,21 +235,55 @@ curl -X GET http://localhost:8000/api/v1/documents \
 }
 ```
 
+### Example 4b: Validate JWT Token
+```bash
+# Method 1: POST with token in body (recommended)
+curl -X POST http://localhost:8001/api/v1/validate \
+  -H "Content-Type: application/json" \
+  -d '{"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."}'
+
+# Method 2: GET with token as query parameter
+curl -X GET "http://localhost:8001/api/v1/validate/me?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+
+# Method 3: POST with bearer format
+curl -X POST http://localhost:8001/api/v1/validate/bearer \
+  -H "Content-Type: application/json" \
+  -d '{"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."}'
+
+# Response (200 OK) for all methods:
+{
+  "valid": true,
+  "user_id": "550e8400-e29b-41d4-a716-446655440000",
+  "username": "user@example.com",
+  "email": "user@example.com",
+  "type": "user",
+  "scopes": ["read", "write"],
+  "expires_at": "2025-11-18T11:30:00Z",
+  "message": "Token is valid"
+}
+```
+
 ### Example 5: Password Reset Flow
 ```bash
-# Step 1: Request reset token
+# Step 1: Request reset token - TOKEN RETURNED IN RESPONSE (development mode)
 curl -X POST http://localhost:8010/api/v1/request-reset \
   -H "Content-Type: application/json" \
   -d '{"email": "user@example.com"}'
 
-# Response: Token generated and logged (development)
+# Response (200 OK) - Token included in development/docker mode:
+{
+  "success": true,
+  "message": "If an account exists with this email, a password reset link will be sent",
+  "note": "If an account exists with this email, a password reset link will be sent",
+  "reset_token": "34ELseSP1lZOZf3W9KfgJe6J4WBVwbONXeP04nQKQqc"
+}
 
-# Step 2: Validate reset token (get token from logs)
+# Step 2: Validate reset token
 curl -X POST http://localhost:8010/api/v1/validate-reset-token \
   -H "Content-Type: application/json" \
   -d '{
     "email": "user@example.com",
-    "token": "zc2XlTHE94FW9JQncusO21phwKJfWTj7JpVEApO2DGI"
+    "token": "34ELseSP1lZOZf3W9KfgJe6J4WBVwbONXeP04nQKQqc"
   }'
 
 # Response (200 OK):
@@ -258,9 +294,13 @@ curl -X POST http://localhost:8010/api/v1/confirm-reset \
   -H "Content-Type: application/json" \
   -d '{
     "email": "user@example.com",
-    "token": "zc2XlTHE94FW9JQncusO21phwKJfWTj7JpVEApO2DGI",
+    "token": "34ELseSP1lZOZf3W9KfgJe6J4WBVwbONXeP04nQKQqc",
     "new_password": "NewPassword123!"
   }'
+
+# Response (200 OK):
+{"success": true, "message": "Password reset successfully"}
+```
 
 # Response (200 OK):
 {"success": true, "message": "Password reset successfully"}

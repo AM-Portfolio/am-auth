@@ -133,16 +133,16 @@
           "response": []
         },
         {
-          "name": "Get User by ID",
+          "name": "Get User Status by ID",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{user_url}}/api/v1/users/{{user_id}}",
+              "raw": "{{user_url}}/api/v1/users/{{user_id}}/status",
               "host": ["{{user_url}}"],
-              "path": ["api", "v1", "users", "{{user_id}}"]
+              "path": ["api", "v1", "users", "{{user_id}}", "status"]
             },
-            "description": "Retrieve user information by ID"
+            "description": "Retrieve user information and status by ID"
           },
           "response": []
         }
@@ -194,19 +194,23 @@
         {
           "name": "Validate Token",
           "request": {
-            "method": "GET",
+            "method": "POST",
             "header": [
               {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
+                "key": "Content-Type",
+                "value": "application/json"
               }
             ],
-            "url": {
-              "raw": "{{auth_url}}/api/v1/tokens/validate",
-              "host": ["{{auth_url}}"],
-              "path": ["api", "v1", "tokens", "validate"]
+            "body": {
+              "mode": "raw",
+              "raw": "{\"token\": \"{{access_token}}\"}"
             },
-            "description": "Validate the current JWT token"
+            "url": {
+              "raw": "{{auth_url}}/api/v1/validate",
+              "host": ["{{auth_url}}"],
+              "path": ["api", "v1", "validate"]
+            },
+            "description": "Validate a JWT token. Pass the token in the request body.\n\n**Response:**\n```json\n{\n  \"valid\": true,\n  \"user_id\": \"...\",\n  \"username\": \"...\",\n  \"email\": \"...\",\n  \"type\": \"user\",\n  \"scopes\": [\"read\", \"write\"],\n  \"expires_at\": \"...\",\n  \"message\": \"Token is valid\"\n}\n```"
           },
           "response": []
         }
