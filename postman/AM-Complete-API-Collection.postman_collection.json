@@ -252,7 +252,7 @@
               "host": ["{{user_url}}"],
               "path": ["api", "v1", "request-reset"]
             },
-            "description": "Request a password reset for a user. Returns success message regardless of whether email exists (security feature).\n\n⚠️ NOTE: Token will be logged to service console in development mode."
+            "description": "Request a password reset for a user. Returns success message regardless of whether email exists (security feature).\n\n✅ Development Mode: Token is returned in `reset_token` field - copy and use it directly!\n❌ Production Mode: Token is only sent via email, `reset_token` will be null.\n\n**Response includes:**\n- success: true/false\n- message: Status message\n- reset_token: The token to use (development only, null in production)"
           },
           "response": []
         },
@@ -275,7 +275,7 @@
               "host": ["{{user_url}}"],
               "path": ["api", "v1", "validate-reset-token"]
             },
-            "description": "Validate a password reset token before allowing password change.\n\n⚠️ Steps:\n1. Run \"Step 1 - Request Password Reset\"\n2. Check service logs: `docker-compose logs am-user-management | grep 'Reset token for'`\n3. Copy the token and paste it in the request body\n4. Send this request to validate the token"
+            "description": "Validate a password reset token before allowing password change.\n\n**Simple Steps:**\n1. Run \"Step 1 - Request Password Reset\"\n2. Copy the `reset_token` from the response\n3. Paste it in the `token` field below\n4. Send this request\n\n**Response:**\n- valid: true/false\n- message: Details about token validity"
           },
           "response": []
         },
