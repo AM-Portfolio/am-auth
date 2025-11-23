@@ -1,9 +1,17 @@
 """
 Document Processor Service Proxy
-Routes requests to Java document processor service
+Generic proxy pattern: 1 function handles ALL endpoints to Document Processor service
+
+Architecture:
+- API Gateway validates user JWT (get_current_user)
+- Generates service JWT for internal service communication
+- Forwards request to Document Processor with service JWT + X-User-ID header
+- Returns response to client
+
+This pattern is scalable: 1 function per service, not 1 per endpoint
 """
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 import httpx
 import logging
 from core.auth import get_current_user, generate_service_token, CurrentUser
@@ -14,16 +22,28 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-@router.get("/documents/types")
-async def get_document_types(current_user = Depends(get_current_user)):
+@router.api_route("/documents/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
+async def proxy_document_processor(
+    path: str,
+    request: Request,
+    current_user: CurrentUser = Depends(get_current_user)
+):
     """
-    Get available document types from Document Processor service
+    Generic proxy for ALL Document Processor endpoints
+    
+    This single function handles:
+    - GET /documents/types
+    - POST /documents/process
+    - GET /documents/{doc_id}
+    - PUT /documents/{doc_id}
+    - DELETE /documents/{doc_id}
+    - ... and any future endpoints added to Document Processor
     
     Flow:
-    1. User JWT validated by get_current_user ✅
-    2. Generate service JWT for document processor
-    3. Call Java service with service token
-    4. Return document types to client
+    1. get_current_user validates user JWT ✅
+    2. Generate service JWT for inter-service communication
+    3. Forward request with service JWT + X-User-ID header
+    4. Return response to client
     """
     
     try:
@@ -31,100 +51,50 @@ async def get_document_types(current_user = Depends(get_current_user)):
         service_token = await generate_service_token(
             user_token=current_user.token,
             service_id=settings.DOCUMENT_PROCESSOR_SERVICE_ID,
-            permissions=["read:document-types"]
+            permissions=["document-processor:all"]
         )
         
-        # Call Java document processor service
-        async with httpx.AsyncClient(timeout=10.0) as client:
-            response = await client.get(
-                f"{settings.DOCUMENT_PROCESSOR_URL}/api/v1/documents/types",
+        # Read request body for POST/PUT requests
+        body = b""
+        if request.method in ["POST", "PUT", "PATCH"]:
+            body = await request.body()
+        
+        # Forward request to Document Processor
+        async with httpx.AsyncClient(timeout=settings.LONG_TIMEOUT) as client:
+            response = await client.request(
+                method=request.method,
+                url=f"{settings.DOCUMENT_PROCESSOR_URL}/api/v1/documents/{path}",
                 headers={
                     "Authorization": f"Bearer {service_token}",
-                    "X-User-ID": str(current_user.user_id)
-                }
+                    "X-User-ID": str(current_user.user_id),
+                    "Content-Type": request.headers.get("content-type", "application/json")
+                },
+                content=body,
+                params=request.query_params
             )
         
-        if response.status_code != 200:
-            raise HTTPException(
-                status_code=response.status_code,
-                detail=f"Document Processor error: {response.text}"
+        # Return response from Document Processor
+        if response.status_code >= 400:
+            logger.warning(
+                f"Document Processor error: {response.status_code} for path: {path}",
+                extra={"user_id": current_user.user_id}
             )
         
-        return response.json()
+        return response.json() if response.headers.get("content-type") == "application/json" else response.text
         
     except httpx.ConnectError:
+        logger.error(
+            f"Cannot connect to Document Processor at {settings.DOCUMENT_PROCESSOR_URL}",
+            extra={"user_id": current_user.user_id}
+        )
         raise HTTPException(
             status_code=503,
             detail="Document Processor service unavailable"
         )
     except Exception as e:
-        logger.error(f"Error calling document processor: {e}", exc_info=True)
+        logger.error(
+            f"Error proxying to document processor: {e}",
+            extra={"user_id": current_user.user_id},
+            exc_info=True
+        )
         raise HTTPException(status_code=500, detail="Internal server error")
-
-
-@router.post("/documents/process")
-async def process_document(
-    current_user = Depends(get_current_user),
-    file_data: dict = None
-):
-    """
-    Process document using Document Processor service
-    
-    Only authenticated users can process documents
-    """
-    
-    try:
-        service_token = await generate_service_token(
-            user_token=current_user.token,
-            service_id=settings.DOCUMENT_PROCESSOR_SERVICE_ID,
-            permissions=["write:documents"]
-        )
-        
-        async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.post(
-                f"{settings.DOCUMENT_PROCESSOR_URL}/api/v1/documents/process",
-                json=file_data,
-                headers={
-                    "Authorization": f"Bearer {service_token}",
-                    "X-User-ID": str(current_user.user_id)
-                }
-            )
-        
-        if response.status_code not in [200, 201]:
-            raise HTTPException(
-                status_code=response.status_code,
-                detail=f"Failed to process document"
-            )
-        
-        return response.json()
-        
-    except Exception as e:
-        logger.error(f"Document processing error: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail="Processing failed")
-
-
-@router.get("/documents/{doc_id}")
-async def get_document(
-    doc_id: str,
-    current_user = Depends(get_current_user)
-):
-    """Get specific document"""
-    
-    service_token = await generate_service_token(
-        user_token=current_user.token,
-        service_id=settings.DOCUMENT_PROCESSOR_SERVICE_ID,
-        permissions=["read:documents"]
-    )
-    
-    async with httpx.AsyncClient() as client:
-        response = await client.get(
-            f"{settings.DOCUMENT_PROCESSOR_URL}/api/v1/documents/{doc_id}",
-            headers={"Authorization": f"Bearer {service_token}"}
-        )
-    
-    if response.status_code == 404:
-        raise HTTPException(status_code=404, detail="Document not found")
-    elif response.status_code != 200:
-        raise HTTPException(status_code=response.status_code)
-    
-    return response.json()

@@ -54,6 +54,8 @@ services:
       - ENVIRONMENT=docker
       # Auth service connection
       - AUTH_SERVICE_URL=http://auth-tokens:8001
+      # Email verification - disabled for testing
+      - ENABLE_EMAIL_VERIFICATION=false
     volumes:
       - ./am-user-management:/app
       - ../shared:/app/shared  # Mount shared logging infrastructure
@@ -172,6 +174,7 @@ services:
       - SERVER_PORT=8070
       - INTERNAL_JWT_SECRET=${INTERNAL_JWT_SECRET}
       - JWT_SECRET=${JWT_SECRET}
+    # NO ports exposed - internal network only (security: network isolation)
     networks:
       - am-network
     depends_on:
