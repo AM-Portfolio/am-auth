@@ -34,6 +34,7 @@ from modules.account_management.application.use_cases.login import LoginUseCase,
 
 # Import service registration router
 from modules.account_management.api.service_registration import router as service_router
+from modules.account_management.api.public.auth_router import router as auth_router
 from modules.account_management.api.public.google_auth_router import router as google_auth_router
 from modules.account_management.api.public.user_status_router import router as user_status_router
 from modules.account_management.api.public.password_reset_router import router as password_reset_router
@@ -163,6 +164,7 @@ logger.info("Added CORS middleware", extra={"middleware": "cors"})
 
 # Include routers
 app.include_router(service_router)
+app.include_router(auth_router, prefix="/api/v1")
 app.include_router(google_auth_router, prefix="/api/v1")
 app.include_router(user_status_router, prefix="/api/v1")
 app.include_router(password_reset_router, prefix="/api/v1")

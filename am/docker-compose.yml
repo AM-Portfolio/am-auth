@@ -43,7 +43,7 @@ services:
       context: ./am-user-management
       dockerfile: Dockerfile
     ports:
-      - "8010:8000"  # Changed external port to 8010 to avoid conflict with API Gateway
+      - "8010:8000"  # Map external port 8010 to internal port 8000
     env_file:
       - ./.env.docker
     environment:
@@ -158,6 +158,31 @@ services:
     depends_on:
       am-user-management:
         condition: service_healthy
+
+
+  am-document-processor:
+    build:
+      context: /Users/munishm/Documents/AM-Repos/am-document-processor
+      dockerfile: Dockerfile
+    container_name: am-document-processor
+    environment:
+      - MONGODB_URL=${MONGODB_URL}
+      - KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BOOTSTRAP_SERVERS}
+      - SPRING_APPLICATION_NAME=am-document-processor
+      - SERVER_PORT=8070
+      - INTERNAL_JWT_SECRET=${INTERNAL_JWT_SECRET}
+      - JWT_SECRET=${JWT_SECRET}
+    networks:
+      - am-network
+    depends_on:
+      am-api-gateway:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8070/actuator/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
 
 networks:
   am-network:

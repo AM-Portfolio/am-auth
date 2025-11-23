@@ -10,7 +10,7 @@ from fastapi.responses import JSONResponse
 import logging
 import time
 
-from api.v1.endpoints import documents, reports, portfolio, trades, market_data
+from api.v1.endpoints import documents, reports, portfolio, trades, market_data ,document_processor
 from middleware.rate_limiter import RateLimiterMiddleware
 from middleware.logging_middleware import LoggingMiddleware
 
@@ -71,7 +71,9 @@ async def root():
             "reports": "/api/v1/reports",
             "portfolio": "/api/v1/portfolio",
             "trades": "/api/v1/trades",
-            "market_data": "/api/v1/market-data"
+            "market_data": "/api/v1/market-data",
+            "document_processor": "/api/v1/documents/types",  # ← NEW
+            "document_processing": "/api/v1/documents/process"  # ← NEW
         },
         "note": "All endpoints require authentication via Bearer token"
     }
@@ -82,6 +84,8 @@ app.include_router(reports.router, prefix="/api/v1", tags=["Reports"])
 app.include_router(portfolio.router, prefix="/api/v1", tags=["Portfolio"])
 app.include_router(trades.router, prefix="/api/v1", tags=["Trades"])
 app.include_router(market_data.router, prefix="/api/v1", tags=["Market Data"])
+app.include_router(document_processor.router, prefix="/api/v1", tags=["Document Processor"])
+
 
 # Global exception handler
 @app.exception_handler(Exception)

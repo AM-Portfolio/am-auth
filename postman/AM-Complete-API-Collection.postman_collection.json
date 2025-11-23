@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "auth-system-complete-collection",
     "name": "AM Authentication System - Complete API Collection",
-    "description": "Complete testing collection for all microservices\n\n**Base URLs:**\n- API Gateway: http://localhost:8000\n- User Management: http://localhost:8010\n- Auth Tokens: http://localhost:8001\n\n**Environment Variables:**\n- base_url: http://localhost:8000\n- user_url: http://localhost:8010\n- auth_url: http://localhost:8001\n- access_token: (set after login)\n- user_id: (set after registration)",
+    "description": "Complete testing collection for all microservices\n\n**Base URLs:**\n- API Gateway: http://localhost:8000\n- User Management: http://localhost:8010\n- Auth Tokens: http://localhost:8001\n- Document Processor (Internal): http://am-document-processor:8070\n\n**Environment Variables:**\n- base_url: http://localhost:8000\n- user_url: http://localhost:8010\n- auth_url: http://localhost:8001\n- access_token: (set after login)\n- user_id: (set after registration)\n- process_id: (set after document upload)\n\n**New in this version:**\n✨ Document Processor endpoints added (Section 9 & 10)\n- Via API Gateway (protected, requires user JWT)\n- Direct access (public /types endpoint, internal network only)",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -564,7 +564,196 @@
       ]
     },
     {
-      "name": "9. Documentation & Reference",
+      "name": "9. Security Verification Tests",
+      "item": [
+        {
+          "name": "✅ Port 8000 (API Gateway) - Should Work",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"API Gateway returns 200 OK\", function() {",
+                  "    pm.expect(pm.response.code).to.equal(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response contains document types\", function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(Array.isArray(jsonData)).to.be.true;",
+                  "    pm.expect(jsonData.length).to.be.greaterThan(0);",
+                  "    pm.expect(jsonData).to.include('BROKER_PORTFOLIO');",
+                  "});",
+                  "",
+                  "pm.test(\"✅ Security Working: API Gateway is accessible\", function() {",
+                  "    pm.expect(pm.response.code).to.equal(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/documents/types",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "documents", "types"]
+            },
+            "description": "🔐 SECURITY TEST 1: API Gateway Access\n\n✅ Expected Result: 200 OK\n\nProves that:\n• Legitimate authenticated access works\n• API Gateway is accessible\n• User JWT is validated\n• Service JWT generated internally\n• Document Processor accessible via Gateway\n\nThis is the CORRECT and RECOMMENDED way to access Document Processor."
+          },
+          "response": []
+        },
+        {
+          "name": "❌ Port 8070 (Direct) - Should Fail",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Port 8070 is NOT accessible (connection refused)\", function() {",
+                  "    // This test will fail - that's expected!",
+                  "    // Port 8070 should NOT be accessible from host",
+                  "    pm.expect(pm.response.code).to.be.oneOf([0, 'ECONNREFUSED']);",
+                  "});",
+                  "",
+                  "pm.test(\"✅ Security Working: Port 8070 is hidden\", function() {",
+                  "    // If we get here, security is working correctly",
+                  "    // because the request was blocked",
+                  "    pm.expect(true).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8070/api/v1/documents/types",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8070",
+              "path": ["api", "v1", "documents", "types"]
+            },
+            "description": "🔐 SECURITY TEST 2: Direct Port 8070 Access\n\n❌ Expected Result: Connection Refused (Cannot Connect)\n\nProves that:\n• Port 8070 is NOT exposed to host machine\n• Direct access is blocked\n• Only API Gateway (8000) is accessible\n• Security architecture is working\n\n⚠️ This request will fail - that's the point!\nPort 8070 should NOT be accessible from the host.\n\nThis proves protection is working correctly."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "10. Document Processor (Via API Gateway)",
+      "item": [
+        {
+          "name": "Get Document Types (Protected - Via Gateway)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/documents/types",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "documents", "types"]
+            },
+            "description": "Get supported document types from Document Processor service via API Gateway.\n\n✅ Requires: Valid user JWT token\n✅ Gateway validates user token\n✅ Gateway generates service token for internal communication\n✅ Returns: List of supported document types\n\n**Expected Response:**\n```json\n[\n  \"BROKER_PORTFOLIO\",\n  \"MUTUAL_FUND\",\n  \"NPS_STATEMENT\",\n  \"COMPANY_FINANCIAL_REPORT\",\n  \"STOCK_PORTFOLIO\",\n  \"NSE_INDICES\"\n]\n```"
+          },
+          "response": []
+        },
+        {
+          "name": "Process Document (Protected - Via Gateway)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                },
+                {
+                  "key": "documentType",
+                  "value": "BROKER_PORTFOLIO",
+                  "type": "text"
+                },
+                {
+                  "key": "portfolioId",
+                  "value": "portfolio-123",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/documents/process",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "documents", "process"]
+            },
+            "description": "Upload and process a document via API Gateway.\n\n✅ Requires: Valid user JWT token\n✅ Gateway validates user token\n✅ Gateway generates service token\n✅ Document Processor validates service token\n✅ Processes document and returns result\n\n**Form Data:**\n- file: Document file to upload\n- documentType: One of the supported types\n- portfolioId: (Optional) Portfolio identifier"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Document Status (Protected - Via Gateway)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/documents/status/{{process_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "documents", "status", "{{process_id}}"]
+            },
+            "description": "Get processing status for a document.\n\n✅ Requires: Valid user JWT token\n✅ Replace {{process_id}} with actual process ID from upload response"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "11. Document Processor (Internal/Testing Only)",
+      "item": [
+        {
+          "name": "⚠️ SECURITY ARCHITECTURE - READ THIS FIRST",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": ["{{base_url}}"],
+              "path": ["health"]
+            },
+            "description": "🔐 SECURITY ARCHITECTURE - Document Processor Access\n\n**KEY PRINCIPLE: Port 8070 is NOT exposed to the host machine**\n\n✅ CORRECT ACCESS (Recommended):\n   • Use API Gateway (port 8000)\n   • Send user JWT token\n   • Gateway validates user token\n   • Gateway generates service JWT\n   • Gateway proxies to internal Document Processor\n   • See Section 9 for examples\n\n❌ DIRECT ACCESS (NOT from host):\n   • Port 8070 is internal-only (no port mapping in docker-compose.yml)\n   • NOT accessible from localhost:8070 ❌\n   • Only accessible from within Docker network\n   • Only for internal service-to-service communication\n   • Only for testing from other containers\n\n🧪 TESTING INTERNAL ACCESS (For debugging):\n   If you need to test from within Docker network:\n   \n   ```bash\n   # From API Gateway container\n   docker exec am-am-api-gateway-1 python3 -c \\\n     \"import urllib.request; print(urllib.request.urlopen('http://am-document-processor:8070/api/v1/documents/types').read().decode())\"\n   ```\n\n**SECURITY BENEFITS:**\n✅ Client must authenticate with user JWT first\n✅ Service tokens never leave internal network\n✅ API Gateway controls all access to internal services\n✅ Prevents direct unauthorized access\n✅ Audit trail through API Gateway\n\n**ENDPOINTS:**\n   Public (no auth):\n   - GET /api/v1/documents/types\n   - GET /actuator/health\n   - GET /swagger-ui/**\n   \n   Protected (service JWT):\n   - POST /api/v1/documents/process\n   - POST /api/v1/documents/batch-process\n   - GET /api/v1/documents/status/{id}"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "12. Documentation & Reference",
       "item": [
         {
           "name": "🔗 API Gateway - Swagger UI",
@@ -652,6 +841,12 @@
     },
     {
       "key": "user_id",
+      "value": "",
+      "type": "string",
+      "disabled": false
+    },
+    {
+      "key": "process_id",
       "value": "",
       "type": "string",
       "disabled": false

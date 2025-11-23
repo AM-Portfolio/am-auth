@@ -10,6 +10,8 @@ class Settings(BaseSettings):
     JAVA_SERVICE_URL: str = "http://am-java-internal-service:8003"
     AUTH_SERVICE_URL: str = "http://auth-tokens:8001"
     USER_MGMT_SERVICE_URL: str = "http://am-user-management:8000"
+    DOCUMENT_PROCESSOR_URL: str = "http://am-document-processor:8070"
+    DOCUMENT_PROCESSOR_SERVICE_ID: str = "document-processor"
     
     # JWT Settings
     JWT_SECRET_KEY: str = "jwt-super-secret-signing-key-change-in-production-must-be-32chars-minimum-xyz"
