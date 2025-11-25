@@ -10,7 +10,7 @@ from fastapi.responses import JSONResponse
 import logging
 import time
 
-from api.v1.endpoints import documents, reports, portfolio, trades, market_data ,document_processor
+from api.v1.endpoints import documents, reports, trades, market_data, document_processor, portfolio_service
 from middleware.rate_limiter import RateLimiterMiddleware
 from middleware.logging_middleware import LoggingMiddleware
 
@@ -72,8 +72,9 @@ async def root():
             "portfolio": "/api/v1/portfolio",
             "trades": "/api/v1/trades",
             "market_data": "/api/v1/market-data",
-            "document_processor": "/api/v1/documents/types",  # ← NEW
-            "document_processing": "/api/v1/documents/process"  # ← NEW
+            "document_processor": "/api/v1/documents/types",
+            "document_processing": "/api/v1/documents/process",
+            "portfolio_service": "/api/v1/portfolio/{path}"
         },
         "note": "All endpoints require authentication via Bearer token"
     }
@@ -81,10 +82,11 @@ async def root():
 # Register routers
 app.include_router(documents.router, prefix="/api/v1", tags=["Documents"])
 app.include_router(reports.router, prefix="/api/v1", tags=["Reports"])
-app.include_router(portfolio.router, prefix="/api/v1", tags=["Portfolio"])
+# Old portfolio router removed - replaced with portfolio_service generic proxy
 app.include_router(trades.router, prefix="/api/v1", tags=["Trades"])
 app.include_router(market_data.router, prefix="/api/v1", tags=["Market Data"])
 app.include_router(document_processor.router, prefix="/api/v1", tags=["Document Processor"])
+app.include_router(portfolio_service.router, prefix="/api/v1", tags=["Portfolio Service"])
 
 
 # Global exception handler

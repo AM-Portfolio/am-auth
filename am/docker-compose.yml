@@ -187,6 +187,31 @@ services:
       retries: 5
       start_period: 60s
 
+  am-portfolio:
+    build:
+      context: /Users/munishm/Documents/AM-Repos/am-portfolio
+      dockerfile: Dockerfile
+    container_name: am-portfolio
+    environment:
+      - MONGODB_URL=${MONGODB_URL}
+      - KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BOOTSTRAP_SERVERS}
+      - SPRING_APPLICATION_NAME=am-portfolio
+      - SERVER_PORT=8080
+      - INTERNAL_JWT_SECRET=${INTERNAL_JWT_SECRET}
+      - JWT_SECRET=${JWT_SECRET}
+    # NO ports exposed - internal network only (security: network isolation)
+    networks:
+      - am-network
+    depends_on:
+      am-api-gateway:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
 networks:
   am-network:
     driver: bridge
