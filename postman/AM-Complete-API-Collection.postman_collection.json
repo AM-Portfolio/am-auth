@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "auth-system-complete-collection",
     "name": "AM Authentication System - Complete API Collection",
-    "description": "Complete testing collection for all microservices\n\n**Base URLs:**\n- API Gateway: http://localhost:8000\n- User Management: http://localhost:8010\n- Auth Tokens: http://localhost:8001\n- Document Processor (Internal): http://am-document-processor:8070\n\n**Environment Variables:**\n- base_url: http://localhost:8000\n- user_url: http://localhost:8010\n- auth_url: http://localhost:8001\n- access_token: (set after login)\n- user_id: (set after registration)\n- process_id: (set after document upload)\n\n**New in this version:**\n✨ Document Processor endpoints added (Section 9 & 10)\n- Via API Gateway (protected, requires user JWT)\n- Direct access (public /types endpoint, internal network only)",
+    "description": "Complete testing collection for all microservices\n\n**Base URLs:**\n- API Gateway: http://localhost:8000\n- User Management: http://localhost:8010\n- Auth Tokens: http://localhost:8001\n- Document Processor (Internal): http://am-document-processor:8070\n- Portfolio Service (Internal): http://am-portfolio:8080\n\n**Environment Variables:**\n- base_url: http://localhost:8000\n- user_url: http://localhost:8010\n- auth_url: http://localhost:8001\n- access_token: (set after login)\n- user_id: (set after registration)\n- process_id: (set after document upload)\n\n**✨ Latest Updates:**\n- Section 11: Portfolio Service endpoints (market indices, portfolios, holdings, analytics)\n- Section 10: Document Processor endpoints\n- All internal services: Network isolated, port not exposed\n- Generic proxy pattern: 1 function per service in API Gateway\n- Two-tier JWT: User JWT + Service JWT for internal communication",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -734,7 +734,7 @@
       ]
     },
     {
-      "name": "11. Document Processor (Internal/Testing Only)",
+      "name": "12. Document Processor (Internal/Testing Only)",
       "item": [
         {
           "name": "⚠️ SECURITY ARCHITECTURE - READ THIS FIRST",
@@ -753,7 +753,194 @@
       ]
     },
     {
-      "name": "12. Documentation & Reference",
+      "name": "11. Portfolio Service (Via API Gateway)",
+      "item": [
+        {
+          "name": "Get All Market Indices",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/portfolio/market-index/all",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "portfolio", "market-index", "all"]
+            },
+            "description": "Get all market indices from Portfolio Service via API Gateway.\n\n✅ Requires: Valid user JWT token\n✅ Gateway validates user token\n✅ Gateway generates service token for internal communication\n✅ Returns: List of market indices\n\n**Architecture:**\n- API Gateway: http://localhost:8000 (exposed)\n- Portfolio Service: http://am-portfolio:8080 (internal only)\n- Port 8080 NOT exposed to host (network isolation)\n\n**Security Flow:**\n1. Client → API Gateway with user JWT\n2. Gateway validates user JWT\n3. Gateway generates service JWT\n4. Gateway → Portfolio Service with service JWT\n5. Portfolio Service validates service JWT\n6. Returns data to client"
+          },
+          "response": []
+        },
+        {
+          "name": "Get User Portfolios",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/portfolio/portfolios?userId={{user_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "portfolio", "portfolios"],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "{{user_id}}"
+                }
+              ]
+            },
+            "description": "Get all portfolios for a specific user.\n\n✅ Requires: Valid user JWT token\n✅ Query parameter: userId (automatically set from environment)\n✅ Returns: List of user's portfolios"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Portfolio by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/portfolio/portfolios/:portfolioId",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "portfolio", "portfolios", ":portfolioId"],
+              "variable": [
+                {
+                  "key": "portfolioId",
+                  "value": "your-portfolio-id-here"
+                }
+              ]
+            },
+            "description": "Get detailed portfolio information by ID.\n\n✅ Requires: Valid user JWT token\n✅ Replace :portfolioId with actual portfolio UUID\n✅ Returns: Complete portfolio details"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Portfolio Summary",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/portfolio/portfolios/summary?userId={{user_id}}&interval=1M",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "portfolio", "portfolios", "summary"],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "{{user_id}}"
+                },
+                {
+                  "key": "interval",
+                  "value": "1M",
+                  "description": "Time interval: 1D, 1W, 1M, 3M, 6M, 1Y"
+                },
+                {
+                  "key": "portfolioId",
+                  "value": "",
+                  "description": "Optional: Filter by specific portfolio",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Get portfolio summary with performance metrics.\n\n✅ Requires: Valid user JWT token\n✅ Query parameters:\n   - userId: User ID\n   - interval: Time period (1D, 1W, 1M, 3M, 6M, 1Y)\n   - portfolioId: (Optional) Specific portfolio ID\n✅ Returns: Portfolio summary with performance data"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Portfolio Holdings",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/portfolio/portfolios/holdings?userId={{user_id}}&interval=1M",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "portfolio", "portfolios", "holdings"],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "{{user_id}}"
+                },
+                {
+                  "key": "interval",
+                  "value": "1M",
+                  "description": "Time interval: 1D, 1W, 1M, 3M, 6M, 1Y"
+                },
+                {
+                  "key": "portfolioId",
+                  "value": "",
+                  "description": "Optional: Filter by specific portfolio",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Get all holdings across portfolios for a user.\n\n✅ Requires: Valid user JWT token\n✅ Query parameters:\n   - userId: User ID\n   - interval: Time period\n   - portfolioId: (Optional) Filter by portfolio\n✅ Returns: Holdings with current values"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Portfolio Basic Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/portfolio/portfolios/list?userId={{user_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "portfolio", "portfolios", "list"],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "{{user_id}}"
+                }
+              ]
+            },
+            "description": "Get lightweight list of portfolio IDs and names.\n\n✅ Requires: Valid user JWT token\n✅ Query parameter: userId\n✅ Returns: Array of {id, name} objects"
+          },
+          "response": []
+        },
+        {
+          "name": "⚠️ Test Direct Access (Should FAIL)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/portfolio/market-index/all",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "portfolio", "market-index", "all"]
+            },
+            "description": "🔐 SECURITY TEST - This should FAIL\n\n**Expected Result:** Connection refused ❌\n\n**Why?**\n- Port 8080 is NOT exposed in docker-compose.yml\n- Portfolio Service is internal-only\n- Network isolation enforced\n- Must go through API Gateway\n\n**Security Benefits:**\n✅ Prevents direct unauthorized access\n✅ Forces authentication through Gateway\n✅ Service tokens never exposed externally\n✅ Audit trail through Gateway\n\n**Correct Access:**\nUse API Gateway endpoints above (Section 11) with Bearer token."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "13. Documentation & Reference",
       "item": [
         {
           "name": "🔗 API Gateway - Swagger UI",
