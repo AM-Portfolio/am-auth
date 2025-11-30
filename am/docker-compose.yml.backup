@@ -21,8 +21,6 @@ services:
       # Timeouts
       - DEFAULT_TIMEOUT=30.0
       - LONG_TIMEOUT=60.0
-    volumes:
-      - ./am-api-gateway:/app
     networks:
       - am-network
     depends_on:
@@ -33,7 +31,7 @@ services:
       am-python-internal-service:
         condition: service_healthy
     healthcheck:
-      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" ]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -45,7 +43,7 @@ services:
       context: ./am-user-management
       dockerfile: Dockerfile
     ports:
-      - "8010:8000" # Map external port 8010 to internal port 8000
+      - "8010:8000"  # Map external port 8010 to internal port 8000
     env_file:
       - ./.env.docker
     environment:
@@ -60,12 +58,12 @@ services:
       - ENABLE_EMAIL_VERIFICATION=false
     volumes:
       - ./am-user-management:/app
-      - ../shared:/app/shared # Mount shared logging infrastructure
+      - ../shared:/app/shared  # Mount shared logging infrastructure
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     networks:
       - am-network
     healthcheck:
-      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" ]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -94,7 +92,7 @@ services:
       # Database connection (uses host machine's PostgreSQL)
       - DATABASE_URL=postgresql://postgres:password@host.docker.internal:5432/postgres
     volumes:
-      - ../shared:/app/shared # Mount shared logging infrastructure
+      - ../shared:/app/shared  # Mount shared logging infrastructure
     networks:
       - am-network
     depends_on:
@@ -102,7 +100,7 @@ services:
         condition: service_healthy
     command: sh -c "pip install pydantic[email] && python -m uvicorn main:app --host 0.0.0.0 --port 8001 --reload"
     healthcheck:
-      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')" ]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -127,14 +125,14 @@ services:
       - JWT_ALGORITHM=HS256
       - INTERNAL_JWT_SECRET=internal-service-super-secret-key-32chars-minimum-change-in-prod
     volumes:
-      - ../shared:/app/shared # Mount shared logging infrastructure
+      - ../shared:/app/shared  # Mount shared logging infrastructure
     networks:
       - am-network
     depends_on:
       am-user-management:
         condition: service_healthy
     healthcheck:
-      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8002/health')" ]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8002/health')"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -163,6 +161,7 @@ services:
       am-user-management:
         condition: service_healthy
 
+
   am-document-processor:
     build:
       context: /Users/munishm/Documents/AM-Repos/am-document-processor
@@ -182,7 +181,7 @@ services:
       am-api-gateway:
         condition: service_healthy
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8070/actuator/health" ]
+      test: ["CMD", "curl", "-f", "http://localhost:8070/actuator/health"]
       interval: 15s
       timeout: 10s
       retries: 5
@@ -207,12 +206,15 @@ services:
       am-api-gateway:
         condition: service_healthy
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
       interval: 15s
       timeout: 10s
       retries: 5
       start_period: 60s
 
+networks:
+  am-network:
+    driver: bridge
   am-trade-api:
     build:
       context: /Users/munishm/Documents/AM-Repos/am-trade-management
@@ -225,13 +227,14 @@ services:
       - SERVER_PORT=8073
       - INTERNAL_JWT_SECRET=${INTERNAL_JWT_SECRET}
       - JWT_SECRET=${JWT_SECRET}
-    restart: always
     networks:
       - am-network
     depends_on:
       am-api-gateway:
         condition: service_healthy
-
-networks:
-  am-network:
-    driver: bridge
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8073/actuator/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 60s

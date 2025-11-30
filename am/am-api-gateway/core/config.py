@@ -14,6 +14,8 @@ class Settings(BaseSettings):
     DOCUMENT_PROCESSOR_SERVICE_ID: str = "document-processor"
     PORTFOLIO_SERVICE_URL: str = "http://am-portfolio:8080"
     PORTFOLIO_SERVICE_ID: str = "portfolio-service"
+    TRADE_SERVICE_URL: str = "http://am-trade-api:8073"
+    TRADE_SERVICE_ID: str = "trade-service"
     
     # JWT Settings
     JWT_SECRET_KEY: str = "jwt-super-secret-signing-key-change-in-production-must-be-32chars-minimum-xyz"

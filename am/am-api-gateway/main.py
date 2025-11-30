@@ -69,12 +69,11 @@ async def root():
         "endpoints": {
             "documents": "/api/v1/documents",
             "reports": "/api/v1/reports",
-            "portfolio": "/api/v1/portfolio",
-            "trades": "/api/v1/trades",
+            "portfolio": "/api/v1/portfolio/{path}",
+            "trades": "/api/v1/trades/{path}",
             "market_data": "/api/v1/market-data",
             "document_processor": "/api/v1/documents/types",
-            "document_processing": "/api/v1/documents/process",
-            "portfolio_service": "/api/v1/portfolio/{path}"
+            "document_processing": "/api/v1/documents/process"
         },
         "note": "All endpoints require authentication via Bearer token"
     }
