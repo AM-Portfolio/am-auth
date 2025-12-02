@@ -16,6 +16,8 @@ class Settings(BaseSettings):
     PORTFOLIO_SERVICE_ID: str = "portfolio-service"
     TRADE_SERVICE_URL: str = "http://am-trade-api:8073"
     TRADE_SERVICE_ID: str = "trade-service"
+    MARKET_DATA_SERVICE_URL: str = "http://am-market-data:8092"
+    MARKET_DATA_SERVICE_ID: str = "market-data-service"
     
     # JWT Settings
     JWT_SECRET_KEY: str = "jwt-super-secret-signing-key-change-in-production-must-be-32chars-minimum-xyz"
