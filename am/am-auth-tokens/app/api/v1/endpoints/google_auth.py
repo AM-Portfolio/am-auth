@@ -58,7 +58,7 @@ async def authenticate_with_google(request: GoogleTokenRequest):
         
         user_data = await create_or_update_google_user(user_profile)
         
-        if user_data.get("status") != "ACTIVE":
+        if user_data.get("status", "").upper() != "ACTIVE":
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail={
@@ -80,7 +80,8 @@ async def authenticate_with_google(request: GoogleTokenRequest):
         }
         
         access_token = create_access_token(
-            data=token_data,
+            subject=token_data["sub"],
+            user_data=token_data,
             expires_delta=timedelta(minutes=settings.JWT_EXPIRE_MINUTES)
         )
         

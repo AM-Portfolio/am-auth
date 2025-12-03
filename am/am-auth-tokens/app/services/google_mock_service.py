@@ -83,7 +83,7 @@ class GoogleMockService:
                 token,
                 cls.TEST_PRIVATE_KEY,
                 algorithms=["HS256"],
-                options={"verify_signature": True}
+                options={"verify_signature": True, "verify_aud": False, "verify_at_hash": False}
             )
             return payload
         except Exception as e:

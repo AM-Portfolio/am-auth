@@ -268,6 +268,105 @@
       ]
     },
     {
+      "name": "Google Authentication",
+      "item": [
+        {
+          "name": "1. Generate Mock Google Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set(\"google_id_token\", jsonData.id_token);",
+                  "    pm.test(\"Mock token generated\", function() {",
+                  "        pm.expect(jsonData).to.have.property('id_token');",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"testuser@example.com\",\n  \"name\": \"Test User\",\n  \"picture\": \"https://example.com/avatar.jpg\"\n}"
+            },
+            "url": {
+              "raw": "{{auth_url}}/test/mock/google/token",
+              "host": [
+                "{{auth_url}}"
+              ],
+              "path": [
+                "test",
+                "mock",
+                "google",
+                "token"
+              ]
+            },
+            "description": "Generate a mock Google ID token for testing without real Google credentials."
+          },
+          "response": []
+        },
+        {
+          "name": "2. Login with Google Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set(\"access_token\", jsonData.access_token);",
+                  "    pm.test(\"Google login successful\", function() {",
+                  "        pm.expect(jsonData).to.have.property('access_token');",
+                  "        pm.expect(jsonData.token_type).to.equal('bearer');",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_token\": \"{{google_id_token}}\"\n}"
+            },
+            "url": {
+              "raw": "{{auth_url}}/api/v1/auth/google/token",
+              "host": [
+                "{{auth_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "google",
+                "token"
+              ]
+            },
+            "description": "Exchange Google ID token for App Access Token (JWT)."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
       "name": "4. Password Reset Feature",
       "item": [
         {
