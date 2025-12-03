@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "auth-system-complete-collection",
     "name": "AM Authentication System - Complete API Collection",
-    "description": "Complete testing collection for all microservices\n\n**Base URLs:**\n- API Gateway: http://localhost:8000\n- User Management: http://localhost:8010\n- Auth Tokens: http://localhost:8001\n- Document Processor (Internal): http://am-document-processor:8070\n- Portfolio Service (Internal): http://am-portfolio:8080\n\n**Environment Variables:**\n- base_url: http://localhost:8000\n- user_url: http://localhost:8010\n- auth_url: http://localhost:8001\n- access_token: (set after login)\n- user_id: (set after registration)\n- process_id: (set after document upload)\n\n**✨ Latest Updates:**\n- Section 11: Portfolio Service endpoints (market indices, portfolios, holdings, analytics)\n- Section 10: Document Processor endpoints\n- All internal services: Network isolated, port not exposed\n- Generic proxy pattern: 1 function per service in API Gateway\n- Two-tier JWT: User JWT + Service JWT for internal communication",
+    "description": "Complete testing collection for all microservices\n\n**Base URLs:**\n- API Gateway: http://localhost:8000\n- User Management: http://localhost:8010\n- Auth Tokens: http://localhost:8001\n- Document Processor (Internal): http://am-document-processor:8070\n- Portfolio Service (Internal): http://am-portfolio:8080\n\n**Environment Variables:**\n- base_url: http://localhost:8000\n- user_url: http://localhost:8010\n- auth_url: http://localhost:8001\n- access_token: (set after login)\n- user_id: (set after registration)\n- process_id: (set after document upload)\n\n**✨ Latest Updates:**\n- Section 15: Trade Service endpoints\n- Section 11: Portfolio Service endpoints (market indices, portfolios, holdings, analytics)\n- Section 10: Document Processor endpoints\n- All internal services: Network isolated, port not exposed\n- Generic proxy pattern: 1 function per service in API Gateway\n- Two-tier JWT: User JWT + Service JWT for internal communication",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -1360,6 +1360,101 @@
               ]
             },
             "description": "Open in browser: http://localhost:8001/docs"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "15. Trade Service (Via API Gateway)",
+      "item": [
+        {
+          "name": "Get All Trades",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/trades",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "trades"
+              ]
+            },
+            "description": "Get all trades for the authenticated user.\n\n✅ Requires: Valid user JWT token\n✅ Gateway proxies to Trade Service"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Trade by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/trades/:tradeId",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "trades",
+                ":tradeId"
+              ],
+              "variable": [
+                {
+                  "key": "tradeId",
+                  "value": "trade-123"
+                }
+              ]
+            },
+            "description": "Get details of a specific trade.\n\n✅ Requires: Valid user JWT token"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Trade",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"symbol\": \"RELIANCE\",\n  \"quantity\": 10,\n  \"price\": 2500.00,\n  \"type\": \"BUY\",\n  \"exchange\": \"NSE\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/trades",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "trades"
+              ]
+            },
+            "description": "Create a new trade.\n\n✅ Requires: Valid user JWT token"
           },
           "response": []
         }
