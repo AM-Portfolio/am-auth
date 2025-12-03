@@ -44,6 +44,13 @@ async def get_current_user(
                 )
             
             data = response.json()
+            
+            if not data.get("valid", True):
+                logger.warning(f"Token validation failed: {data.get('message')}")
+                raise HTTPException(
+                    status_code=401,
+                    detail=data.get("message", "Invalid token")
+                )
             logger.info(f"User authenticated: {data.get('user_id')}")
             
             # Map scopes to roles (validation endpoint returns 'scopes', not 'roles')

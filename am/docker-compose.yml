@@ -174,7 +174,8 @@ services:
       - SPRING_APPLICATION_NAME=am-document-processor
       - SERVER_PORT=8070
       - INTERNAL_JWT_SECRET=${INTERNAL_JWT_SECRET}
-      - JWT_SECRET=${JWT_SECRET}
+      - JWT_SECRET=${INTERNAL_JWT_SECRET}
+      - SPRING_AUTOCONFIGURE_EXCLUDE=org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
     # NO ports exposed - internal network only (security: network isolation)
     networks:
       - am-network
@@ -199,7 +200,7 @@ services:
       - SPRING_APPLICATION_NAME=am-portfolio
       - SERVER_PORT=8080
       - INTERNAL_JWT_SECRET=${INTERNAL_JWT_SECRET}
-      - JWT_SECRET=${JWT_SECRET}
+      - JWT_SECRET=${INTERNAL_JWT_SECRET}
     # NO ports exposed - internal network only (security: network isolation)
     networks:
       - am-network
@@ -224,7 +225,9 @@ services:
       - SPRING_APPLICATION_NAME=am-trade-api
       - SERVER_PORT=8073
       - INTERNAL_JWT_SECRET=${INTERNAL_JWT_SECRET}
-      - JWT_SECRET=${JWT_SECRET}
+      - INTERNAL_JWT_SECRET=${INTERNAL_JWT_SECRET}
+      - JWT_SECRET=${INTERNAL_JWT_SECRET}
+      - LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY=DEBUG
     restart: always
     networks:
       - am-network
@@ -243,13 +246,26 @@ services:
       - SPRING_APPLICATION_NAME=am-market-data
       - SERVER_PORT=8092
       - INTERNAL_JWT_SECRET=${INTERNAL_JWT_SECRET}
-      - JWT_SECRET=${JWT_SECRET}
+      - JWT_SECRET=${INTERNAL_JWT_SECRET}
+      - REDIS_HOSTNAME=redis
     restart: always
     networks:
       - am-network
     depends_on:
       am-api-gateway:
         condition: service_healthy
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - am-network
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 networks:
   am-network:

@@ -16,8 +16,12 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/health",
-              "host": ["{{base_url}}"],
-              "path": ["health"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "health"
+              ]
             },
             "description": "Check API Gateway health status"
           },
@@ -30,8 +34,12 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/",
-              "host": ["{{base_url}}"],
-              "path": [""]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                ""
+              ]
             },
             "description": "Get API Gateway information and available endpoints"
           },
@@ -44,8 +52,12 @@
             "header": [],
             "url": {
               "raw": "{{user_url}}/health",
-              "host": ["{{user_url}}"],
-              "path": ["health"]
+              "host": [
+                "{{user_url}}"
+              ],
+              "path": [
+                "health"
+              ]
             },
             "description": "Check User Management service health"
           },
@@ -58,8 +70,12 @@
             "header": [],
             "url": {
               "raw": "{{auth_url}}/health",
-              "host": ["{{auth_url}}"],
-              "path": ["health"]
+              "host": [
+                "{{auth_url}}"
+              ],
+              "path": [
+                "health"
+              ]
             },
             "description": "Check Auth Tokens service health"
           },
@@ -102,8 +118,15 @@
             },
             "url": {
               "raw": "{{user_url}}/api/v1/auth/register",
-              "host": ["{{user_url}}"],
-              "path": ["api", "v1", "auth", "register"]
+              "host": [
+                "{{user_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "register"
+              ]
             },
             "description": "Register a new user account"
           },
@@ -125,8 +148,16 @@
             },
             "url": {
               "raw": "{{user_url}}/api/v1/users/{{user_id}}/status",
-              "host": ["{{user_url}}"],
-              "path": ["api", "v1", "users", "{{user_id}}", "status"]
+              "host": [
+                "{{user_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "{{user_id}}",
+                "status"
+              ]
             },
             "description": "Activate a registered user (change status from pending_activation to active)"
           },
@@ -139,8 +170,16 @@
             "header": [],
             "url": {
               "raw": "{{user_url}}/api/v1/users/{{user_id}}/status",
-              "host": ["{{user_url}}"],
-              "path": ["api", "v1", "users", "{{user_id}}", "status"]
+              "host": [
+                "{{user_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "{{user_id}}",
+                "status"
+              ]
             },
             "description": "Retrieve user information and status by ID"
           },
@@ -184,8 +223,14 @@
             },
             "url": {
               "raw": "{{auth_url}}/api/v1/tokens",
-              "host": ["{{auth_url}}"],
-              "path": ["api", "v1", "tokens"]
+              "host": [
+                "{{auth_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tokens"
+              ]
             },
             "description": "Login and obtain JWT access token. Token is valid for 30 minutes."
           },
@@ -207,8 +252,14 @@
             },
             "url": {
               "raw": "{{auth_url}}/api/v1/validate",
-              "host": ["{{auth_url}}"],
-              "path": ["api", "v1", "validate"]
+              "host": [
+                "{{auth_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "validate"
+              ]
             },
             "description": "Validate a JWT token. Pass the token in the request body.\n\n**Response:**\n```json\n{\n  \"valid\": true,\n  \"user_id\": \"...\",\n  \"username\": \"...\",\n  \"email\": \"...\",\n  \"type\": \"user\",\n  \"scopes\": [\"read\", \"write\"],\n  \"expires_at\": \"...\",\n  \"message\": \"Token is valid\"\n}\n```"
           },
@@ -249,8 +300,14 @@
             },
             "url": {
               "raw": "{{user_url}}/api/v1/request-reset",
-              "host": ["{{user_url}}"],
-              "path": ["api", "v1", "request-reset"]
+              "host": [
+                "{{user_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "request-reset"
+              ]
             },
             "description": "Request a password reset for a user. Returns success message regardless of whether email exists (security feature).\n\n✅ Development Mode: Token is returned in `reset_token` field - copy and use it directly!\n❌ Production Mode: Token is only sent via email, `reset_token` will be null.\n\n**Response includes:**\n- success: true/false\n- message: Status message\n- reset_token: The token to use (development only, null in production)"
           },
@@ -272,8 +329,14 @@
             },
             "url": {
               "raw": "{{user_url}}/api/v1/validate-reset-token",
-              "host": ["{{user_url}}"],
-              "path": ["api", "v1", "validate-reset-token"]
+              "host": [
+                "{{user_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "validate-reset-token"
+              ]
             },
             "description": "Validate a password reset token before allowing password change.\n\n**Simple Steps:**\n1. Run \"Step 1 - Request Password Reset\"\n2. Copy the `reset_token` from the response\n3. Paste it in the `token` field below\n4. Send this request\n\n**Response:**\n- valid: true/false\n- message: Details about token validity"
           },
@@ -295,8 +358,14 @@
             },
             "url": {
               "raw": "{{user_url}}/api/v1/confirm-reset",
-              "host": ["{{user_url}}"],
-              "path": ["api", "v1", "confirm-reset"]
+              "host": [
+                "{{user_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "confirm-reset"
+              ]
             },
             "description": "Complete the password reset with the new password.\n\nPassword requirements:\n- Minimum 8 characters\n- Contains uppercase letter (A-Z)\n- Contains lowercase letter (a-z)\n- Contains digit (0-9)\n\n⚠️ After successful reset:\n- Old password will no longer work\n- New password can be used to login\n- Token will be marked as used (cannot be reused)"
           },
@@ -319,8 +388,14 @@
             ],
             "url": {
               "raw": "{{base_url}}/api/v1/documents",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "documents"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "documents"
+              ]
             },
             "description": "Retrieve documents from internal service via API Gateway (requires authentication)"
           },
@@ -338,8 +413,14 @@
             ],
             "url": {
               "raw": "{{base_url}}/api/v1/reports",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "reports"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "reports"
+              ]
             },
             "description": "Retrieve reports from internal service via API Gateway (requires authentication)"
           },
@@ -357,8 +438,14 @@
             ],
             "url": {
               "raw": "{{base_url}}/api/v1/portfolio",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "portfolio"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "portfolio"
+              ]
             },
             "description": "Retrieve portfolio information from internal service via API Gateway (requires authentication)"
           },
@@ -376,8 +463,14 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/api/v1/documents",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "documents"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "documents"
+              ]
             },
             "description": "This request should FAIL with 403 Forbidden (no authorization token provided)"
           },
@@ -395,8 +488,14 @@
             ],
             "url": {
               "raw": "{{base_url}}/api/v1/documents",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "documents"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "documents"
+              ]
             },
             "description": "This request should FAIL with 401 Unauthorized (invalid token)"
           },
@@ -414,8 +513,14 @@
             ],
             "url": {
               "raw": "{{base_url}}/api/v1/documents",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "documents"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "documents"
+              ]
             },
             "description": "This request should FAIL - Authorization header format is invalid"
           },
@@ -438,8 +543,14 @@
             ],
             "url": {
               "raw": "{{base_url}}/api/v1/documents",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "documents"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "documents"
+              ]
             },
             "description": "Single request to test rate limiting headers"
           },
@@ -457,8 +568,14 @@
             ],
             "url": {
               "raw": "{{base_url}}/api/v1/documents",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "documents"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "documents"
+              ]
             },
             "description": "⚠️ BULK TEST - Run this request 101 times in sequence\n\nExpected behavior:\n- First 100 requests: 200 OK (with X-RateLimit-Remaining header)\n- Request 101+: 429 Too Many Requests\n\n✅ To run:\n1. Save request\n2. Click \"Runner\" button in Postman\n3. Select this request\n4. Set \"Iterations\" to 101\n5. Run"
           },
@@ -485,8 +602,15 @@
             },
             "url": {
               "raw": "{{user_url}}/api/v1/auth/register",
-              "host": ["{{user_url}}"],
-              "path": ["api", "v1", "auth", "register"]
+              "host": [
+                "{{user_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "register"
+              ]
             },
             "description": "Test validation - should FAIL with 422 Unprocessable Entity (invalid email format)"
           },
@@ -508,8 +632,15 @@
             },
             "url": {
               "raw": "{{user_url}}/api/v1/auth/register",
-              "host": ["{{user_url}}"],
-              "path": ["api", "v1", "auth", "register"]
+              "host": [
+                "{{user_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "register"
+              ]
             },
             "description": "Test validation - should FAIL with 422 (password too weak)"
           },
@@ -531,8 +662,14 @@
             },
             "url": {
               "raw": "{{auth_url}}/api/v1/tokens",
-              "host": ["{{auth_url}}"],
-              "path": ["api", "v1", "tokens"]
+              "host": [
+                "{{auth_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tokens"
+              ]
             },
             "description": "Test authentication - should FAIL with 401 (invalid credentials)"
           },
@@ -554,8 +691,14 @@
             },
             "url": {
               "raw": "{{user_url}}/api/v1/confirm-reset",
-              "host": ["{{user_url}}"],
-              "path": ["api", "v1", "confirm-reset"]
+              "host": [
+                "{{user_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "confirm-reset"
+              ]
             },
             "description": "Test password validation - should FAIL (password too weak)"
           },
@@ -601,8 +744,15 @@
             ],
             "url": {
               "raw": "{{base_url}}/api/v1/documents/types",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "documents", "types"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "documents",
+                "types"
+              ]
             },
             "description": "🔐 SECURITY TEST 1: API Gateway Access\n\n✅ Expected Result: 200 OK\n\nProves that:\n• Legitimate authenticated access works\n• API Gateway is accessible\n• User JWT is validated\n• Service JWT generated internally\n• Document Processor accessible via Gateway\n\nThis is the CORRECT and RECOMMENDED way to access Document Processor."
           },
@@ -641,9 +791,16 @@
             "url": {
               "raw": "http://localhost:8070/api/v1/documents/types",
               "protocol": "http",
-              "host": ["localhost"],
+              "host": [
+                "localhost"
+              ],
               "port": "8070",
-              "path": ["api", "v1", "documents", "types"]
+              "path": [
+                "api",
+                "v1",
+                "documents",
+                "types"
+              ]
             },
             "description": "🔐 SECURITY TEST 2: Direct Port 8070 Access\n\n❌ Expected Result: Connection Refused (Cannot Connect)\n\nProves that:\n• Port 8070 is NOT exposed to host machine\n• Direct access is blocked\n• Only API Gateway (8000) is accessible\n• Security architecture is working\n\n⚠️ This request will fail - that's the point!\nPort 8070 should NOT be accessible from the host.\n\nThis proves protection is working correctly."
           },
@@ -666,8 +823,15 @@
             ],
             "url": {
               "raw": "{{base_url}}/api/v1/documents/types",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "documents", "types"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "documents",
+                "types"
+              ]
             },
             "description": "Get supported document types from Document Processor service via API Gateway.\n\n✅ Requires: Valid user JWT token\n✅ Gateway validates user token\n✅ Gateway generates service token for internal communication\n✅ Returns: List of supported document types\n\n**Expected Response:**\n```json\n[\n  \"BROKER_PORTFOLIO\",\n  \"MUTUAL_FUND\",\n  \"NPS_STATEMENT\",\n  \"COMPANY_FINANCIAL_REPORT\",\n  \"STOCK_PORTFOLIO\",\n  \"NSE_INDICES\"\n]\n```"
           },
@@ -705,8 +869,15 @@
             },
             "url": {
               "raw": "{{base_url}}/api/v1/documents/process",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "documents", "process"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "documents",
+                "process"
+              ]
             },
             "description": "Upload and process a document via API Gateway.\n\n✅ Requires: Valid user JWT token\n✅ Gateway validates user token\n✅ Gateway generates service token\n✅ Document Processor validates service token\n✅ Processes document and returns result\n\n**Form Data:**\n- file: Document file to upload\n- documentType: One of the supported types\n- portfolioId: (Optional) Portfolio identifier"
           },
@@ -724,8 +895,16 @@
             ],
             "url": {
               "raw": "{{base_url}}/api/v1/documents/status/{{process_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "documents", "status", "{{process_id}}"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "documents",
+                "status",
+                "{{process_id}}"
+              ]
             },
             "description": "Get processing status for a document.\n\n✅ Requires: Valid user JWT token\n✅ Replace {{process_id}} with actual process ID from upload response"
           },
@@ -743,8 +922,12 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/health",
-              "host": ["{{base_url}}"],
-              "path": ["health"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "health"
+              ]
             },
             "description": "🔐 SECURITY ARCHITECTURE - Document Processor Access\n\n**KEY PRINCIPLE: Port 8070 is NOT exposed to the host machine**\n\n✅ CORRECT ACCESS (Recommended):\n   • Use API Gateway (port 8000)\n   • Send user JWT token\n   • Gateway validates user token\n   • Gateway generates service JWT\n   • Gateway proxies to internal Document Processor\n   • See Section 9 for examples\n\n❌ DIRECT ACCESS (NOT from host):\n   • Port 8070 is internal-only (no port mapping in docker-compose.yml)\n   • NOT accessible from localhost:8070 ❌\n   • Only accessible from within Docker network\n   • Only for internal service-to-service communication\n   • Only for testing from other containers\n\n🧪 TESTING INTERNAL ACCESS (For debugging):\n   If you need to test from within Docker network:\n   \n   ```bash\n   # From API Gateway container\n   docker exec am-am-api-gateway-1 python3 -c \\\n     \"import urllib.request; print(urllib.request.urlopen('http://am-document-processor:8070/api/v1/documents/types').read().decode())\"\n   ```\n\n**SECURITY BENEFITS:**\n✅ Client must authenticate with user JWT first\n✅ Service tokens never leave internal network\n✅ API Gateway controls all access to internal services\n✅ Prevents direct unauthorized access\n✅ Audit trail through API Gateway\n\n**ENDPOINTS:**\n   Public (no auth):\n   - GET /api/v1/documents/types\n   - GET /actuator/health\n   - GET /swagger-ui/**\n   \n   Protected (service JWT):\n   - POST /api/v1/documents/process\n   - POST /api/v1/documents/batch-process\n   - GET /api/v1/documents/status/{id}"
           },
@@ -767,8 +950,16 @@
             ],
             "url": {
               "raw": "{{base_url}}/api/v1/portfolio/market-index/all",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "portfolio", "market-index", "all"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "portfolio",
+                "market-index",
+                "all"
+              ]
             },
             "description": "Get all market indices from Portfolio Service via API Gateway.\n\n✅ Requires: Valid user JWT token\n✅ Gateway validates user token\n✅ Gateway generates service token for internal communication\n✅ Returns: List of market indices\n\n**Architecture:**\n- API Gateway: http://localhost:8000 (exposed)\n- Portfolio Service: http://am-portfolio:8080 (internal only)\n- Port 8080 NOT exposed to host (network isolation)\n\n**Security Flow:**\n1. Client → API Gateway with user JWT\n2. Gateway validates user JWT\n3. Gateway generates service JWT\n4. Gateway → Portfolio Service with service JWT\n5. Portfolio Service validates service JWT\n6. Returns data to client"
           },
@@ -786,8 +977,15 @@
             ],
             "url": {
               "raw": "{{base_url}}/api/v1/portfolio/portfolios?userId={{user_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "portfolio", "portfolios"],
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "portfolio",
+                "portfolios"
+              ],
               "query": [
                 {
                   "key": "userId",
@@ -811,8 +1009,16 @@
             ],
             "url": {
               "raw": "{{base_url}}/api/v1/portfolio/portfolios/:portfolioId",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "portfolio", "portfolios", ":portfolioId"],
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "portfolio",
+                "portfolios",
+                ":portfolioId"
+              ],
               "variable": [
                 {
                   "key": "portfolioId",
@@ -836,8 +1042,16 @@
             ],
             "url": {
               "raw": "{{base_url}}/api/v1/portfolio/portfolios/summary?userId={{user_id}}&interval=1M",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "portfolio", "portfolios", "summary"],
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "portfolio",
+                "portfolios",
+                "summary"
+              ],
               "query": [
                 {
                   "key": "userId",
@@ -872,8 +1086,16 @@
             ],
             "url": {
               "raw": "{{base_url}}/api/v1/portfolio/portfolios/holdings?userId={{user_id}}&interval=1M",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "portfolio", "portfolios", "holdings"],
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "portfolio",
+                "portfolios",
+                "holdings"
+              ],
               "query": [
                 {
                   "key": "userId",
@@ -908,8 +1130,16 @@
             ],
             "url": {
               "raw": "{{base_url}}/api/v1/portfolio/portfolios/list?userId={{user_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "portfolio", "portfolios", "list"],
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "portfolio",
+                "portfolios",
+                "list"
+              ],
               "query": [
                 {
                   "key": "userId",
@@ -929,9 +1159,17 @@
             "url": {
               "raw": "http://localhost:8080/api/v1/portfolio/market-index/all",
               "protocol": "http",
-              "host": ["localhost"],
+              "host": [
+                "localhost"
+              ],
               "port": "8080",
-              "path": ["api", "v1", "portfolio", "market-index", "all"]
+              "path": [
+                "api",
+                "v1",
+                "portfolio",
+                "market-index",
+                "all"
+              ]
             },
             "description": "🔐 SECURITY TEST - This should FAIL\n\n**Expected Result:** Connection refused ❌\n\n**Why?**\n- Port 8080 is NOT exposed in docker-compose.yml\n- Portfolio Service is internal-only\n- Network isolation enforced\n- Must go through API Gateway\n\n**Security Benefits:**\n✅ Prevents direct unauthorized access\n✅ Forces authentication through Gateway\n✅ Service tokens never exposed externally\n✅ Audit trail through Gateway\n\n**Correct Access:**\nUse API Gateway endpoints above (Section 11) with Bearer token."
           },
@@ -940,7 +1178,118 @@
       ]
     },
     {
-      "name": "13. Documentation & Reference",
+      "name": "13. Market Data Service",
+      "item": [
+        {
+          "name": "Calculate Breakeven (Via Gateway)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/brokerage/breakeven?symbol=RELIANCE&price=2500&quantity=10&exchange=NSE&tradeType=DELIVERY&brokerType=DISCOUNT",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "brokerage",
+                "breakeven"
+              ],
+              "query": [
+                {
+                  "key": "symbol",
+                  "value": "RELIANCE"
+                },
+                {
+                  "key": "price",
+                  "value": "2500"
+                },
+                {
+                  "key": "quantity",
+                  "value": "10"
+                },
+                {
+                  "key": "exchange",
+                  "value": "NSE"
+                },
+                {
+                  "key": "tradeType",
+                  "value": "DELIVERY"
+                },
+                {
+                  "key": "brokerType",
+                  "value": "DISCOUNT"
+                }
+              ]
+            },
+            "description": "Calculate brokerage and breakeven via API Gateway.\n\n✅ Requires: Valid user JWT token\n✅ Gateway proxies to Market Data Service\n✅ Returns: Brokerage calculation details"
+          },
+          "response": []
+        },
+        {
+          "name": "Calculate Breakeven (Direct - Should Fail)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8092/api/v1/brokerage/breakeven?symbol=RELIANCE&price=2500&quantity=10&exchange=NSE&tradeType=DELIVERY&brokerType=DISCOUNT",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8092",
+              "path": [
+                "api",
+                "v1",
+                "brokerage",
+                "breakeven"
+              ],
+              "query": [
+                {
+                  "key": "symbol",
+                  "value": "RELIANCE"
+                },
+                {
+                  "key": "price",
+                  "value": "2500"
+                },
+                {
+                  "key": "quantity",
+                  "value": "10"
+                },
+                {
+                  "key": "exchange",
+                  "value": "NSE"
+                },
+                {
+                  "key": "tradeType",
+                  "value": "DELIVERY"
+                },
+                {
+                  "key": "brokerType",
+                  "value": "DISCOUNT"
+                }
+              ]
+            },
+            "description": "🔐 SECURITY TEST - This should FAIL\n\n**Expected Result:** Connection refused ❌\n\n**Why?**\n- Port 8092 is NOT exposed in docker-compose.yml\n- Market Data Service is internal-only\n- Network isolation enforced"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "14. Documentation & Reference",
       "item": [
         {
           "name": "🔗 API Gateway - Swagger UI",
@@ -949,8 +1298,12 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/docs",
-              "host": ["{{base_url}}"],
-              "path": ["docs"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "docs"
+              ]
             },
             "description": "Open in browser: http://localhost:8000/docs - Interactive API documentation"
           },
@@ -963,8 +1316,12 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/redoc",
-              "host": ["{{base_url}}"],
-              "path": ["redoc"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "redoc"
+              ]
             },
             "description": "Open in browser: http://localhost:8000/redoc - Alternative API documentation"
           },
@@ -977,8 +1334,12 @@
             "header": [],
             "url": {
               "raw": "{{user_url}}/docs",
-              "host": ["{{user_url}}"],
-              "path": ["docs"]
+              "host": [
+                "{{user_url}}"
+              ],
+              "path": [
+                "docs"
+              ]
             },
             "description": "Open in browser: http://localhost:8010/docs"
           },
@@ -991,8 +1352,12 @@
             "header": [],
             "url": {
               "raw": "{{auth_url}}/docs",
-              "host": ["{{auth_url}}"],
-              "path": ["docs"]
+              "host": [
+                "{{auth_url}}"
+              ],
+              "path": [
+                "docs"
+              ]
             },
             "description": "Open in browser: http://localhost:8001/docs"
           },

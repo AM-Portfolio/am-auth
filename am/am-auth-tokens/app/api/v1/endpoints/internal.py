@@ -88,9 +88,13 @@ async def generate_service_token(request: ServiceTokenRequest):
         now = datetime.utcnow()
         payload = {
             "service_id": request.service_id,
+            "sub": request.service_id,
             "service_name": request.service_name,
+            "username": request.service_name,
             "type": "service_token",
+            "roles": permissions,
             "permissions": permissions,
+            "scope": " ".join(permissions),
             "exp": now + timedelta(minutes=request.expiry_minutes),
             "iat": now,
             "iss": "am-auth-tokens"
