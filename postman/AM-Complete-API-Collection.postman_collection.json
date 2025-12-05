@@ -317,7 +317,7 @@
           "response": []
         },
         {
-          "name": "2. Login with Google Token",
+          "name": "2. Login with Google Token (Mock Flow)",
           "event": [
             {
               "listen": "test",
@@ -360,7 +360,55 @@
                 "token"
               ]
             },
-            "description": "Exchange Google ID token for App Access Token (JWT)."
+            "description": "Exchange Google ID token for App Access Token (JWT). Uses the token generated in Step 1."
+          },
+          "response": []
+        },
+        {
+          "name": "3. Login with Real Google Token (Manual)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set(\"access_token\", jsonData.access_token);",
+                  "    pm.test(\"Google login successful\", function() {",
+                  "        pm.expect(jsonData).to.have.property('access_token');",
+                  "        pm.expect(jsonData.token_type).to.equal('bearer');",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_token\": \"PASTE_YOUR_REAL_GOOGLE_ID_TOKEN_HERE\"\n}"
+            },
+            "url": {
+              "raw": "{{auth_url}}/api/v1/auth/google/token",
+              "host": [
+                "{{auth_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "google",
+                "token"
+              ]
+            },
+            "description": "Exchange a REAL Google ID token for App Access Token (JWT).\n\n**Instructions:**\n1. Get a token from Google OAuth Playground or your Frontend.\n2. Paste it into the `id_token` field in the Body.\n3. Send request.\n4. The `access_token` environment variable will be updated automatically."
           },
           "response": []
         }
