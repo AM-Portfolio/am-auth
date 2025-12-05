@@ -48,6 +48,7 @@ async def authenticate_with_google(request: GoogleTokenRequest):
     """
     try:
         use_mock = not settings.GOOGLE_CLIENT_ID or settings.GOOGLE_CLIENT_ID == ""
+        print(f"DEBUG: GOOGLE_CLIENT_ID='{settings.GOOGLE_CLIENT_ID}', use_mock={use_mock}")
         
         id_info = await google_auth_service.verify_google_token(
             request.id_token,
