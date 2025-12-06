@@ -10,7 +10,7 @@ from fastapi.responses import JSONResponse
 import logging
 import time
 
-from api.v1.endpoints import documents, reports, trades, market_data, document_processor, portfolio_service
+from api.v1.endpoints import documents, reports, trades, market_data, document_processor, portfolio_service, diagnostics
 from middleware.rate_limiter import RateLimiterMiddleware
 from middleware.logging_middleware import LoggingMiddleware
 
@@ -86,6 +86,7 @@ app.include_router(trades.router, prefix="/api/v1", tags=["Trades"])
 app.include_router(market_data.router, prefix="/api/v1", tags=["Market Data"])
 app.include_router(document_processor.router, prefix="/api/v1", tags=["Document Processor"])
 app.include_router(portfolio_service.router, prefix="/api/v1", tags=["Portfolio Service"])
+app.include_router(diagnostics.router, prefix="/api/v1", tags=["System Diagnostics"])
 
 
 # Global exception handler
