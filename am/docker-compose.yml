@@ -21,7 +21,7 @@ services:
       - USER_MANAGEMENT_URL=http://am-user-management:8000
       - PYTHON_SERVICE_URL=http://am-python-internal-service:8002
       - JAVA_SERVICE_URL=http://am-java-internal-service:8003
-      - TRADE_SERVICE_URL=http://am-trade-service:8080
+      - TRADE_SERVICE_URL=http://host.docker.internal:8077
       - PORTFOLIO_SERVICE_URL=http://am-portfolio:8080
       - DOCUMENT_PROCESSOR_URL=http://am-document-processor:8070
       - MARKET_DATA_SERVICE_URL=http://am-market-data:8092

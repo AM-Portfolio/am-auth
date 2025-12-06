@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     DOCUMENT_PROCESSOR_SERVICE_ID: str = "document-processor"
     PORTFOLIO_SERVICE_URL: str = "http://am-portfolio:8080"
     PORTFOLIO_SERVICE_ID: str = "portfolio-service"
-    TRADE_SERVICE_URL: str = "http://am-trade-service:8080"
+    TRADE_SERVICE_URL: str = "http://host.docker.internal:8077"
     TRADE_SERVICE_ID: str = "trade-service"
     MARKET_DATA_SERVICE_URL: str = "http://am-market-data:8092"
     MARKET_DATA_SERVICE_ID: str = "market-data-service"
