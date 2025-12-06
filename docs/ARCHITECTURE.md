@@ -1,395 +1,264 @@
-# AM System Architecture
+# Module Architecture & Organization
 
-## Current Production-Ready Architecture
-
-```
-┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃                            INTERNET / CLIENTS                      ┃
-┃              (Postman, Browser, Mobile Apps, etc.)                 ┃
-┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
-                              │
-                              │ HTTPS (443)
-                              │
-        ┏━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━┓
-        ┃          EXPOSED SERVICES                  ┃
-        ┃          (Docker Bridge Network)           ┃
-        ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
-                    │
-        ┌───────────┼───────────────────┐
-        │           │                   │
-        ▼           ▼                   ▼
-┏━━━━━━━━━━━━┓ ┏━━━━━━━━━━━━┓ ┏━━━━━━━━━━━━━━━━━┓
-┃  API       ┃ ┃   User     ┃ ┃   Auth Tokens   ┃
-┃  Gateway   ┃ ┃ Management ┃ ┃   Service       ┃
-┃            ┃ ┃            ┃ ┃                 ┃
-┃ Port: 8000 ┃ ┃ Port: 8010 ┃ ┃   Port: 8001    ┃
-┃            ┃ ┃            ┃ ┃                 ┃
-┃ Features:  ┃ ┃ Features:  ┃ ┃   Features:     ┃
-┃ - Route    ┃ ┃ - Register ┃ ┃   - Login       ┃
-┃ - Auth     ┃ ┃ - Activate ┃ ┃   - Validate    ┃
-┃ - Rate Lmt ┃ ┃ - Profile  ┃ ┃   - Refresh     ┃
-┃ - Logging  ┃ ┃ - RBAC     ┃ ┃   - Service JWT ┃
-┗━━━━━┳━━━━━━┛ ┗━━━━━━━━━━━━┛ ┗━━━━━━━━━━━━━━━━━┛
-      │
-      │ Internal Docker Network
-      │ (No External Ports)
-      │
-      ┌─────────────┴─────────────┐
-      │                           │
-      ▼                           ▼
-┏━━━━━━━━━━━━━━━━━━┓    ┏━━━━━━━━━━━━━━━━━━┓
-┃ Python Internal  ┃    ┃  Java Internal   ┃
-┃    Service       ┃    ┃    Service       ┃
-┃                  ┃    ┃                  ┃
-┃  Port: 8002      ┃    ┃   Port: 8003     ┃
-┃  (Internal Only) ┃    ┃  (Internal Only) ┃
-┃                  ┃    ┃                  ┃
-┃  Features:       ┃    ┃   Features:      ┃
-┃  - Documents     ┃    ┃   - Reports      ┃
-┃  - Processing    ┃    ┃   - Analytics    ┃
-┃  - Business      ┃    ┃   - Business     ┃
-┃    Logic         ┃    ┃     Logic        ┃
-┗━━━━━━━━━━━━━━━━━━┛    ┗━━━━━━━━━━━━━━━━━━┛
-      │                           │
-      └────────────┬──────────────┘
-                   │
-                   ▼
-         ┏━━━━━━━━━━━━━━━━━┓
-         ┃    PostgreSQL    ┃
-         ┃                  ┃
-         ┃   Port: 5432     ┃
-         ┃  (Database)      ┃
-         ┗━━━━━━━━━━━━━━━━━┛
-```
-
-## Security Layers
-
-### Layer 1: Network Isolation
-```
-Internet → Can Access:
-  ✅ API Gateway (8000)
-  ✅ User Management (8010) - For registration/login
-  ✅ Auth Tokens (8001) - For token operations
-
-Internet → CANNOT Access:
-  ⛔ Python Internal Service (8002) - No port mapping
-  ⛔ Java Internal Service (8003) - No port mapping
-  ⛔ PostgreSQL (5432) - Behind network
-```
-
-### Layer 2: JWT Authentication
-```
-Client Request:
-  Authorization: Bearer <user_jwt>
-         │
-         ▼
-  API Gateway validates user JWT
-         │
-         ▼
-  API Gateway generates service JWT
-         │
-         ▼
-  Internal service validates service JWT
-         │
-         ▼
-  Process request and return data
-```
-
-## Request Flow Example
-
-### Getting User Documents
+## High-Level Architecture
 
 ```
-1. Client makes request:
-   GET http://localhost:8000/api/v1/documents
-   Header: Authorization: Bearer <user_token>
-
-2. API Gateway (Port 8000):
-   ├─ Rate limiter checks: 95/100 requests used
-   ├─ Logging middleware: Start timer
-   ├─ Authenticate user via auth-tokens service
-   ├─ User validation success: user_id=123, roles=[user]
-   ├─ Generate service token for Python service
-   └─ Service token created with permissions=[read:documents]
-
-3. API Gateway → Python Service (Internal):
-   GET http://am-python-internal-service:8002/internal/documents
-   Header: Authorization: Bearer <service_token>
-
-4. Python Service (Port 8002):
-   ├─ Validate service token
-   ├─ Execute business logic
-   ├─ Query database
-   └─ Return documents: [{id: 1, name: "doc1.pdf"}]
-
-5. API Gateway → Client:
-   ├─ Log response time: 234ms
-   ├─ Add headers: X-Process-Time, X-RateLimit-Remaining
-   └─ Return response to client
-
-Response:
-{
-  "documents": [
-    {"id": 1, "name": "doc1.pdf", "size": "2.5MB"}
-  ],
-  "user_id": "123",
-  "timestamp": "2024-01-01T12:00:00Z"
-}
-
-Headers:
-  X-Process-Time: 0.234
-  X-RateLimit-Limit: 100
-  X-RateLimit-Remaining: 94
-  X-RateLimit-Reset: 1703001234
+AM Portfolio
+│
+├── 🟦 Shared Infrastructure (ROOT LEVEL)
+│   ├── shared/auth/              - JWT validation & security
+│   ├── shared/logging/           - Centralized logging
+│   └── shared/testing/           - Testing utilities & fixtures
+│
+├── 🟩 Services
+│   ├── am/am-api-gateway/        - API Gateway (port 8000)
+│   ├── am/am-user-management/    - User Service (port 8010)
+│   ├── am/am-auth-tokens/        - Auth Service (port 8001)
+│   ├── am/am-python-internal/    - Python Service (port 8002)
+│   └── am/am-java-internal/      - Java Service (port 8003)
+│
+├── 🟨 Testing
+│   └── am/am-tests/              - Integration & E2E tests
+│
+└── 📚 Documentation
+    ├── shared/README.md           - Shared modules guide
+    └── SHARED_MODULES_GUIDE.md    - Consolidation plan
 ```
 
-## Service Communication Matrix
-
-| From Service | To Service | Network | Auth Required | Purpose |
-|-------------|------------|---------|---------------|---------|
-| Client | API Gateway | External | User JWT | All requests |
-| Client | User Management | External | None (register), User JWT (update) | User operations |
-| Client | Auth Tokens | External | User JWT | Token operations |
-| API Gateway | Python Service | Internal | Service JWT | Documents API |
-| API Gateway | Java Service | Internal | Service JWT | Reports API |
-| API Gateway | Auth Service | Internal | User JWT | Validate/Generate tokens |
-| All Services | PostgreSQL | Internal | DB credentials | Data persistence |
-| Internal Services | Auth Service | Internal | Service JWT | Token validation |
-
-## Rate Limiting Architecture
+## Detailed Shared Module Hierarchy
 
 ```
-┏━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃   API Gateway           ┃
-┃                         ┃
-┃  Rate Limiter           ┃
-┃  ┌──────────────────┐   ┃
-┃  │ In-Memory Store  │   ┃
-┃  │                  │   ┃
-┃  │ {               │   ┃
-┃  │  "192.168.1.1": │   ┃
-┃  │    {            │   ┃
-┃  │     count: 95,  │   ┃
-┃  │     reset: 1703 │   ┃
-┃  │    }            │   ┃
-┃  │ }               │   ┃
-┃  └──────────────────┘   ┃
-┃                         ┃
-┃  Limit: 100 req/60s     ┃
-┃  Per: IP Address        ┃
-┗━━━━━━━━━━━━━━━━━━━━━━━━━┛
+shared/
+│
+├── auth/
+│   ├── jwt_utils.py
+│   │   ├── JWTValidator
+│   │   │   ├── validate_user_token()
+│   │   │   ├── validate_service_token()
+│   │   │   └── generate_service_token()
+│   │   └── Token validation strategies
+│   │
+│   └── validation.py
+│       └── Input validation helpers
+│
+├── logging/
+│   ├── logger.py
+│   │   ├── AMLogger (main logger)
+│   │   ├── EnhancedJSONFormatter
+│   │   └── Advanced logging features
+│   │
+│   ├── middleware.py
+│   │   └── LoggingMiddleware (FastAPI)
+│   │
+│   ├── config.py
+│   │   └── Logging configuration
+│   │
+│   └── setup.py
+│       └── initialize_logging()
+│
+└── testing/
+    ├── utils/
+    │   ├── token_generator.py
+    │   │   └── TokenGenerator
+    │   │       ├── generate_user_token()
+    │   │       ├── generate_service_token()
+    │   │       ├── generate_expired_token()
+    │   │       └── generate_invalid_token()
+    │   │
+    │   └── test_client.py
+    │       ├── get_test_client()
+    │       ├── get_sync_test_client()
+    │       └── create_headers()
+    │
+    └── fixtures/
+        ├── users.py
+        │   ├── create_test_user()
+        │   ├── get_test_user_payload()
+        │   └── get_test_user_registration_payload()
+        │
+        └── services.py
+            ├── get_service_headers()
+            ├── get_user_headers()
+            └── get_admin_headers()
 ```
 
-**Note**: For production with multiple API Gateway instances, use Redis for distributed rate limiting.
-
-## Monitoring Points
+## Import Dependencies
 
 ```
-┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃              Observability                ┃
-┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
-           │
-    ┌──────┼──────┐
-    │      │      │
-    ▼      ▼      ▼
-┌─────┐ ┌─────┐ ┌────────┐
-│Logs │ │Metrics│ │Traces │
-└─────┘ └──────┘ └────────┘
-
-Current Implementation:
-✅ Logs: Middleware logs all requests
-   - Request: Method, path, IP, user
-   - Response: Status, time, size
-
-📝 Future: Metrics (Prometheus)
-   - Request rate, error rate
-   - Latency percentiles (p50, p95, p99)
-   - Service availability
-
-📝 Future: Traces (OpenTelemetry)
-   - Request flow across services
-   - Bottleneck identification
-   - Dependency mapping
+Services
+    ↓
+shared.auth           ← JWT validation
+    ↓
+shared.logging        ← Structured logs
+    ↓
+shared.testing        ← Test utilities
+    ↓
+Test Suite (am-tests/)
 ```
 
-## Scalability Pattern
+## Service Integration Points
 
-### Current (Development)
-```
-1 instance of each service on single Docker host
-```
+### User Management Service
+```python
+# Imports
+from shared.auth import JWTValidator
+from shared.logging import initialize_logging, get_logger
+from shared.testing import TokenGenerator  # For internal tests
 
-### Future (Production)
-```
-┏━━━━━━━━━━━━━━━━━━━━━━━┓
-┃   Load Balancer        ┃
-┃   (AWS ALB/NGINX)      ┃
-┗━━━━━━━━━┳━━━━━━━━━━━━━┛
-          │
-    ┌─────┴─────┐
-    │           │
-    ▼           ▼
-┌─────────┐ ┌─────────┐
-│ Gateway │ │ Gateway │  (N instances)
-│ Pod 1   │ │ Pod 2   │
-└─────────┘ └─────────┘
-    │           │
-    └─────┬─────┘
-          │
-    ┌─────┴─────┬──────────┐
-    │           │          │
-    ▼           ▼          ▼
-┌────────┐ ┌────────┐ ┌────────┐
-│Python  │ │ Java   │ │Portfolio│
-│Service │ │Service │ │Service  │
-│(3 pods)│ │(3 pods)│ │(3 pods) │
-└────────┘ └────────┘ └────────┘
+# Initialization
+initialize_logging("am-user-management")
+logger = get_logger(__name__)
+
+# Token validation in dependencies
+validator = JWTValidator()
+payload = validator.validate_user_token(token)
 ```
 
-## Security Comparison
+### Auth Tokens Service
+```python
+# Imports
+from shared.auth import JWTValidator
+from shared.logging import initialize_logging, get_logger
 
-### ❌ Before (Monolith / Exposed Services)
-```
-Internet
-   │
-   ├─→ User Service (8000)      ← Attack vector
-   ├─→ Auth Service (8001)      ← Attack vector
-   ├─→ Document Service (8002)  ← Attack vector
-   ├─→ Report Service (8003)    ← Attack vector
-   ├─→ Portfolio Service (8004) ← Attack vector
-   ├─→ Trade Service (8005)     ← Attack vector
-   └─→ Market Service (8006)    ← Attack vector
-
-= 7 attack vectors
-= 7 services to secure individually
-= 7 rate limiters to configure
-= 7 log sources to aggregate
+# Token generation and validation
+validator = JWTValidator()
+service_token = validator.generate_service_token(user_id)
 ```
 
-### ✅ After (API Gateway Pattern)
-```
-Internet
-   │
-   ├─→ API Gateway (8000)       ← 1 attack vector
-   │   └─→ [Internal Services]      (protected)
-   │
-   ├─→ User Service (8010)      ← For registration only
-   └─→ Auth Service (8001)      ← For token operations
+### API Gateway
+```python
+# Imports
+from shared.auth import JWTValidator
+from shared.logging import LoggingMiddleware, initialize_logging
 
-= 3 exposed services (vs 7)
-= 1 primary entry point
-= Centralized security
-= Centralized logging
-= Single rate limiter
+# Middleware setup
+app.add_middleware(LoggingMiddleware)
+
+# Token validation for all requests
+validator = JWTValidator()
 ```
 
-## Attack Surface Reduction
+### Test Suite
+```python
+# Imports
+from shared.testing import (
+    TokenGenerator,
+    get_user_headers,
+    get_service_headers,
+    create_test_user,
+    get_test_client,
+)
 
-```
-Before API Gateway:
-┌────────────────────────────────┐
-│ Internet                       │
-│  ↓ ↓ ↓ ↓ ↓ ↓ ↓               │
-│ [All 7 services exposed]       │
-│                                │
-│ Attack Surface: ████████       │  100%
-└────────────────────────────────┘
-
-After API Gateway:
-┌────────────────────────────────┐
-│ Internet                       │
-│  ↓ ↓ ↓                        │
-│ [Only 3 services exposed]      │
-│                                │
-│ Attack Surface: ███            │   43%
-└────────────────────────────────┘
-
-Reduction: 57% fewer exposed services
+# Usage
+gen = TokenGenerator()
+token = gen.generate_user_token()
+headers = get_user_headers()
+client = await get_test_client()
 ```
 
-## Token Flow Diagram
+## Data Flow
 
+### Authentication Flow
 ```
-┌─────────┐                    ┌─────────────┐
-│ Client  │                    │   Auth      │
-│         │                    │   Tokens    │
-└────┬────┘                    └──────┬──────┘
-     │                                │
-     │ 1. POST /login                 │
-     │ (email, password)              │
-     ├───────────────────────────────>│
-     │                                │
-     │ 2. Validate credentials        │
-     │    Generate USER JWT           │
-     │<───────────────────────────────┤
-     │ {access_token: "eyJhbGc..."}   │
-     │                                │
-     │                                │
-┌────┴────┐                    ┌──────┴──────┐
-│ Client  │                    │  API        │
-│         │                    │  Gateway    │
-└────┬────┘                    └──────┬──────┘
-     │                                │
-     │ 3. GET /api/v1/documents       │
-     │    Bearer: USER_JWT            │
-     ├───────────────────────────────>│
-     │                                │
-     │                         ┌──────┴──────┐
-     │                         │   Auth      │
-     │                         │   Tokens    │
-     │                         └──────┬──────┘
-     │                                │
-     │                         4. Validate USER_JWT
-     │                         │
-     │                         5. Generate SERVICE_JWT
-     │                         │    (with permissions)
-     │                         │
-     │                         ┌──────┴──────┐
-     │                         │   Python    │
-     │                         │   Service   │
-     │                         └──────┬──────┘
-     │                                │
-     │                         6. GET /internal/documents
-     │                            Bearer: SERVICE_JWT
-     │                         │
-     │                         7. Validate SERVICE_JWT
-     │                         │
-     │                         8. Execute business logic
-     │                         │
-     │                         9. Return data
-     │<────────────────────────┤
-     │ {documents: [...]}             │
-     │                                │
+Client Request
+    ↓
+API Gateway (validates with shared.auth)
+    ↓
+Service (uses same shared.auth for validation)
+    ↓
+Success: Process Request
+Failure: 401/403 Response
 ```
 
-## Deployment Checklist
+### Logging Flow
+```
+Service Code
+    ↓
+shared.logging.logger (structured output)
+    ↓
+LoggingMiddleware (request context)
+    ↓
+JSON formatted logs to stdout/file
+    ↓
+Monitoring/Aggregation
+```
 
-### ✅ Completed (Development)
-- [x] API Gateway service created
-- [x] Rate limiting implemented
-- [x] JWT authentication flow
-- [x] Service token generation
-- [x] Internal services isolated
-- [x] Logging middleware
-- [x] Health checks
-- [x] Documentation
+### Testing Flow
+```
+Test Case
+    ↓
+shared.testing.TokenGenerator (create tokens)
+    ↓
+shared.testing.fixtures (test data)
+    ↓
+shared.testing.test_client (HTTP calls)
+    ↓
+Service Endpoint
+    ↓
+Assert Response
+```
 
-### 📋 TODO (Production)
-- [ ] SSL/TLS certificates
-- [ ] Distributed rate limiting (Redis)
-- [ ] Circuit breakers
-- [ ] Response caching
-- [ ] API versioning
-- [ ] Monitoring dashboards
-- [ ] Alert rules
-- [ ] Load testing
-- [ ] Kubernetes deployment
-- [ ] CI/CD pipeline
+## Key Design Principles
 
----
+| Principle | Implementation |
+|-----------|----------------|
+| **DRY (Don't Repeat Yourself)** | Single `shared/` directory, no duplicates |
+| **Single Responsibility** | Each module handles one concern |
+| **Open/Closed** | Open for extension, closed for modification |
+| **Dependency Inversion** | Services depend on abstractions (shared/) |
+| **Interface Segregation** | Import only needed utilities |
 
-**This architecture provides:**
-- ✅ Security through network isolation + JWT
-- ✅ Scalability through independent services
-- ✅ Observability through centralized logging
-- ✅ Maintainability through clear separation of concerns
+## Module Dependencies Map
+
+```
+┌─────────────────────────────────────────┐
+│         External Dependencies           │
+│  (FastAPI, JWT, SQLAlchemy, etc.)       │
+└────────────────┬────────────────────────┘
+                 ↓
+        ┌─────────────────┐
+        │ shared/logging  │  ← Uses external logging/config
+        └────────┬────────┘
+                 ↓
+        ┌─────────────────┐
+        │  shared/auth    │  ← Uses JWT for validation
+        └────────┬────────┘
+                 ↓
+        ┌─────────────────┐
+        │ shared/testing  │  ← Uses auth & logging for tests
+        └────────┬────────┘
+                 ↓
+        ┌─────────────────┐
+        │   Services      │  ← Depend on shared modules
+        └────────┬────────┘
+                 ↓
+        ┌─────────────────┐
+        │   Test Suite    │  ← Uses testing utilities
+        └─────────────────┘
+```
+
+## File Statistics
+
+| Category | Count | Purpose |
+|----------|-------|---------|
+| **Auth Modules** | 2 | JWT validation & security |
+| **Logging Modules** | 4 | Structured logging infrastructure |
+| **Testing Utils** | 2 | Test automation tools |
+| **Test Fixtures** | 2 | Pre-built test data |
+| **Documentation** | 3 | Usage guides & architecture |
+
+## Removed Duplicates
+
+- ❌ `am/shared/` (all files consolidated to root `shared/`)
+- ❌ Scattered test utilities (centralized to `shared/testing/`)
+- ❌ Duplicate token generation logic (unified in `TokenGenerator`)
+
+## Added Structure
+
+- ✅ `shared/testing/` module (NEW)
+- ✅ `shared/testing/utils/` (token_generator, test_client)
+- ✅ `shared/testing/fixtures/` (users, services)
+- ✅ Comprehensive documentation
+- ✅ Clear import patterns
+
+This organization ensures **zero duplication**, **maximum reusability**, and **consistent patterns** across all services! 🚀
