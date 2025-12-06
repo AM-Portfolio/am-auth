@@ -4,12 +4,10 @@ import datetime
 import sys
 import time
 
-import os
-
 # Configuration
-API_GATEWAY_URL = os.environ.get("API_GATEWAY_URL", "http://localhost:8000")
-JWT_SECRET = os.environ.get("JWT_SECRET", "jwt-super-secret-signing-key-change-in-production-must-be-32chars-minimum-xyz")
-JWT_ALGORITHM = os.environ.get("JWT_ALGORITHM", "HS256")
+API_GATEWAY_URL = "http://localhost:8000"
+JWT_SECRET = "jwt-super-secret-signing-key-change-in-production-must-be-32chars-minimum-xyz"
+JWT_ALGORITHM = "HS256"
 
 def generate_test_token():
     """Generate a valid user token for testing"""
