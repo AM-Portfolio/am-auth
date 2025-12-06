@@ -8,12 +8,12 @@ services:
       - "8000:8000"
     environment:
       # Service URLs (internal Docker network)
-      - AUTH_SERVICE_URL=http://auth-tokens:8001
-      - USER_MANAGEMENT_URL=http://am-user-management:8000
-      - PYTHON_SERVICE_URL=http://am-python-internal-service:8002
-      - JAVA_SERVICE_URL=http://am-java-internal-service:8003
+      - AUTH_SERVICE_URL=${AUTH_SERVICE_URL}
+      - USER_MANAGEMENT_URL=${USER_MANAGEMENT_URL}
+      - PYTHON_SERVICE_URL=${PYTHON_SERVICE_URL}
+      - JAVA_SERVICE_URL=${JAVA_SERVICE_URL}
       # JWT Configuration
-      - JWT_SECRET=jwt-super-secret-signing-key-change-in-production-must-be-32chars-minimum-xyz
+      - JWT_SECRET=${JWT_SECRET}
       - JWT_ALGORITHM=HS256
       # Rate Limiting
       - RATE_LIMIT_REQUESTS=100
@@ -55,7 +55,9 @@ services:
       - USER_MGMT_LOG_LEVEL=INFO
       - ENVIRONMENT=docker
       # Auth service connection
-      - AUTH_SERVICE_URL=http://auth-tokens:8001
+      - AUTH_SERVICE_URL=${AUTH_SERVICE_URL}
+      # JWT Configuration
+      - JWT_SECRET=${JWT_SECRET}
       # Email verification - disabled for testing
       - ENABLE_EMAIL_VERIFICATION=false
     volumes:
@@ -87,12 +89,12 @@ services:
       - AUTH_TOKENS_LOG_LEVEL=INFO
       - ENVIRONMENT=docker
       # User service connection
-      - USER_SERVICE_URL=http://am-user-management:8000
+      - USER_SERVICE_URL=${USER_MANAGEMENT_URL}
       # JWT Configuration
-      - JWT_SECRET=jwt-super-secret-signing-key-change-in-production-must-be-32chars-minimum-xyz
+      - JWT_SECRET=${JWT_SECRET}
       - JWT_ALGORITHM=HS256
       # Database connection (uses host machine's PostgreSQL)
-      - DATABASE_URL=postgresql://postgres:password@host.docker.internal:5432/postgres
+      - DATABASE_URL=${DATABASE_URL}
     volumes:
       - ../shared:/app/shared # Mount shared logging infrastructure
     networks:
@@ -123,9 +125,9 @@ services:
       - INTERNAL_SERVICE_LOG_LEVEL=INFO
       - ENVIRONMENT=docker
       # JWT Configuration
-      - JWT_SECRET=jwt-super-secret-signing-key-change-in-production-must-be-32chars-minimum-xyz
+      - JWT_SECRET=${JWT_SECRET}
       - JWT_ALGORITHM=HS256
-      - INTERNAL_JWT_SECRET=internal-service-super-secret-key-32chars-minimum-change-in-prod
+      - INTERNAL_JWT_SECRET=${INTERNAL_JWT_SECRET}
     volumes:
       - ../shared:/app/shared # Mount shared logging infrastructure
     networks:
@@ -155,8 +157,8 @@ services:
       - INTERNAL_SERVICE_LOG_LEVEL=INFO
       - ENVIRONMENT=docker
       # JWT Configuration
-      - JWT_SECRET=jwt-super-secret-signing-key-change-in-production-must-be-32chars-minimum-xyz
-      - INTERNAL_JWT_SECRET=internal-service-super-secret-key-32chars-minimum-change-in-prod
+      - JWT_SECRET=${JWT_SECRET}
+      - INTERNAL_JWT_SECRET=${INTERNAL_JWT_SECRET}
     networks:
       - am-network
     depends_on:
@@ -165,7 +167,7 @@ services:
 
   am-document-processor:
     build:
-      context: /Users/munishm/Documents/AM-Repos/am-document-processor
+      context: ${AM_REPO_PATH}/am-document-processor
       dockerfile: Dockerfile
     container_name: am-document-processor
     environment:
@@ -191,7 +193,7 @@ services:
 
   am-portfolio:
     build:
-      context: /Users/munishm/Documents/AM-Repos/am-portfolio
+      context: ${AM_REPO_PATH}/am-portfolio
       dockerfile: Dockerfile
     container_name: am-portfolio
     environment:
@@ -216,7 +218,7 @@ services:
 
   am-trade-api:
     build:
-      context: /Users/munishm/Documents/AM-Repos/am-trade-management
+      context: ${AM_REPO_PATH}/am-trade-management
       dockerfile: Dockerfile
     container_name: am-trade-api
     environment:
@@ -236,7 +238,7 @@ services:
 
   am-market-data:
     build:
-      context: /Users/munishm/Documents/AM-Repos/am-market-data
+      context: ${AM_REPO_PATH}/am-market-data
       dockerfile: Dockerfile
     container_name: am-market-data
     environment:
