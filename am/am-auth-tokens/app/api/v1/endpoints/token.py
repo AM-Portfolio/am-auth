@@ -1,7 +1,9 @@
 from datetime import timedelta
+from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel
+from sqlalchemy.ext.asyncio import AsyncSession
 import httpx
 import os
 from app.core.security import create_access_token, Token
@@ -12,9 +14,16 @@ from app.services.user_validation import (
 )
 from app.api.v1.deps import get_user_validation_service
 from shared_infra.config.settings import settings
+from app.database.config import db_config
+from app.services.refresh_token_service import refresh_token_service
 
 
 router = APIRouter()
+
+
+async def get_db():
+    async for session in db_config.get_session():
+        yield session
 
 
 class TokenRequest(BaseModel):
@@ -30,6 +39,7 @@ class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
     expires_in: int
+    refresh_token: Optional[str] = None
     user_id: str
     username: str
     email: str
@@ -52,7 +62,8 @@ class ServiceTokenResponse(BaseModel):
 @router.post("/tokens", response_model=TokenResponse)
 async def create_token(
     token_request: TokenRequest,
-    user_service: UserValidationService = Depends(get_user_validation_service)
+    user_service: UserValidationService = Depends(get_user_validation_service),
+    db: AsyncSession = Depends(get_db)
 ):
     """
     Create a new access token for valid user credentials.
@@ -60,9 +71,10 @@ async def create_token(
     Args:
         token_request: User credentials for token creation
         user_service: User validation service dependency
+        db: Database session
     
     Returns:
-        TokenResponse with access token and user information
+        TokenResponse with access token, refresh token, and user information
     
     Raises:
         HTTPException: If credentials are invalid
@@ -106,10 +118,18 @@ async def create_token(
         expires_delta=access_token_expires
     )
     
+    # Create refresh token
+    refresh_token = await refresh_token_service.create_refresh_token(
+        db, 
+        user_id=validation_result.user_id,
+        scopes=validation_result.scopes
+    )
+    
     return TokenResponse(
         access_token=access_token,
         token_type="bearer",
         expires_in=settings.JWT_EXPIRE_MINUTES * 60,  # Convert to seconds
+        refresh_token=refresh_token,
         user_id=validation_result.user_id,
         username=validation_result.username,
         email=validation_result.email
@@ -119,7 +139,8 @@ async def create_token(
 @router.post("/tokens/by-user-id", response_model=TokenResponse)
 async def create_token_by_user_id(
     request: TokenByUserIdRequest,
-    user_service: UserValidationService = Depends(get_user_validation_service)
+    user_service: UserValidationService = Depends(get_user_validation_service),
+    db: AsyncSession = Depends(get_db)
 ):
     """
     Create a new access token for a validated user ID.
@@ -129,6 +150,7 @@ async def create_token_by_user_id(
     Args:
         request: Request containing user_id
         user_service: User validation service dependency
+        db: Database session
     
     Returns:
         TokenResponse with access token and user information
@@ -166,10 +188,18 @@ async def create_token_by_user_id(
         expires_delta=access_token_expires
     )
     
+    # Create refresh token
+    refresh_token = await refresh_token_service.create_refresh_token(
+        db, 
+        user_id=request.user_id,
+        scopes=user_data.get("scopes", ["read"])
+    )
+    
     return TokenResponse(
         access_token=access_token,
         token_type="bearer",
         expires_in=settings.JWT_EXPIRE_MINUTES * 60,  # Convert to seconds
+        refresh_token=refresh_token,
         user_id=request.user_id,
         username=token_user_data["username"],
         email=token_user_data["email"]
@@ -179,7 +209,8 @@ async def create_token_by_user_id(
 @router.post("/tokens/oauth", response_model=TokenResponse)
 async def create_token_oauth(
     form_data: OAuth2PasswordRequestForm = Depends(),
-    user_service: UserValidationService = Depends(get_user_validation_service)
+    user_service: UserValidationService = Depends(get_user_validation_service),
+    db: AsyncSession = Depends(get_db)
 ):
     """
     OAuth2 compatible token endpoint.
@@ -189,6 +220,7 @@ async def create_token_oauth(
     Args:
         form_data: OAuth2 password form data
         user_service: User validation service dependency
+        db: Database session
     
     Returns:
         TokenResponse with access token and user information
@@ -245,10 +277,18 @@ async def create_token_oauth(
                 expires_delta=access_token_expires
             )
             
+            # Create refresh token
+            refresh_token = await refresh_token_service.create_refresh_token(
+                db, 
+                user_id=user_data_response["user_id"],
+                scopes=user_data_response.get("scopes", ["read"])
+            )
+            
             return TokenResponse(
                 access_token=access_token,
                 token_type="bearer",
                 expires_in=settings.JWT_EXPIRE_MINUTES * 60,
+                refresh_token=refresh_token,
                 user_id=user_data_response["user_id"],
                 username=user_data["username"],
                 email=user_data_response["email"]

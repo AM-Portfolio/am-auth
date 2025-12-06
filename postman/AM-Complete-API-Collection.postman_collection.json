@@ -200,6 +200,9 @@
                   "if (pm.response.code === 200) {",
                   "    var jsonData = pm.response.json();",
                   "    pm.environment.set(\"access_token\", jsonData.access_token);",
+                  "    if (jsonData.refresh_token) {",
+                  "        pm.environment.set(\"refresh_token\", jsonData.refresh_token);",
+                  "    }",
                   "    pm.test(\"Login successful\", function() {",
                   "        pm.expect(jsonData).to.have.property('access_token');",
                   "        pm.expect(jsonData.token_type).to.equal('bearer');",
@@ -264,6 +267,86 @@
             "description": "Validate a JWT token. Pass the token in the request body.\n\n**Response:**\n```json\n{\n  \"valid\": true,\n  \"user_id\": \"...\",\n  \"username\": \"...\",\n  \"email\": \"...\",\n  \"type\": \"user\",\n  \"scopes\": [\"read\", \"write\"],\n  \"expires_at\": \"...\",\n  \"message\": \"Token is valid\"\n}\n```"
           },
           "response": []
+        },
+        {
+          "name": "Refresh Access Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set(\"access_token\", jsonData.access_token);",
+                  "    if (jsonData.refresh_token) {",
+                  "        pm.environment.set(\"refresh_token\", jsonData.refresh_token);",
+                  "    }",
+                  "    pm.test(\"Token refreshed successfully\", function() {",
+                  "        pm.expect(jsonData).to.have.property('access_token');",
+                  "        pm.expect(jsonData).to.have.property('refresh_token');",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh_token\": \"{{refresh_token}}\"\n}"
+            },
+            "url": {
+              "raw": "{{auth_url}}/api/v1/auth/refresh",
+              "host": [
+                "{{auth_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "refresh"
+              ]
+            },
+            "description": "Get a new Access Token using the Refresh Token. This also rotates the Refresh Token (issues a new one)."
+          },
+          "response": []
+        },
+        {
+          "name": "Logout (Revoke Token)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh_token\": \"{{refresh_token}}\"\n}"
+            },
+            "url": {
+              "raw": "{{auth_url}}/api/v1/auth/logout",
+              "host": [
+                "{{auth_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "logout"
+              ]
+            },
+            "description": "Logout by revoking the Refresh Token."
+          },
+          "response": []
         }
       ]
     },
@@ -326,6 +409,9 @@
                   "if (pm.response.code === 200) {",
                   "    var jsonData = pm.response.json();",
                   "    pm.environment.set(\"access_token\", jsonData.access_token);",
+                  "    if (jsonData.refresh_token) {",
+                  "        pm.environment.set(\"refresh_token\", jsonData.refresh_token);",
+                  "    }",
                   "    pm.test(\"Google login successful\", function() {",
                   "        pm.expect(jsonData).to.have.property('access_token');",
                   "        pm.expect(jsonData.token_type).to.equal('bearer');",
@@ -374,6 +460,9 @@
                   "if (pm.response.code === 200) {",
                   "    var jsonData = pm.response.json();",
                   "    pm.environment.set(\"access_token\", jsonData.access_token);",
+                  "    if (jsonData.refresh_token) {",
+                  "        pm.environment.set(\"refresh_token\", jsonData.refresh_token);",
+                  "    }",
                   "    pm.test(\"Google login successful\", function() {",
                   "        pm.expect(jsonData).to.have.property('access_token');",
                   "        pm.expect(jsonData.token_type).to.equal('bearer');",

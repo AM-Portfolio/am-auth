@@ -1,16 +1,24 @@
 """Google OAuth authentication endpoints"""
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Depends
 from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
 from datetime import datetime, timedelta
+from sqlalchemy.ext.asyncio import AsyncSession
 import httpx
 
 from app.services.google_auth_service import google_auth_service
 from app.core.security import create_access_token
 from shared_infra.config.settings import settings
+from app.database.config import db_config
+from app.services.refresh_token_service import refresh_token_service
 
 
 router = APIRouter()
+
+
+async def get_db():
+    async for session in db_config.get_session():
+        yield session
 
 
 class GoogleTokenRequest(BaseModel):
@@ -22,6 +30,7 @@ class GoogleAuthResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
     expires_in: int
+    refresh_token: Optional[str] = None
     user: Dict[str, Any]
     scopes: List[str]
 
@@ -35,7 +44,10 @@ class GoogleAuthErrorResponse(BaseModel):
 
 
 @router.post("/auth/google/token", response_model=GoogleAuthResponse)
-async def authenticate_with_google(request: GoogleTokenRequest):
+async def authenticate_with_google(
+    request: GoogleTokenRequest,
+    db: AsyncSession = Depends(get_db)
+):
     """
     Authenticate user with Google ID token
     
@@ -44,7 +56,8 @@ async def authenticate_with_google(request: GoogleTokenRequest):
     2. Extracts user profile information
     3. Creates/updates user in the user management service
     4. Generates internal JWT access token
-    5. Returns the token and user information
+    5. Generates refresh token
+    6. Returns the tokens and user information
     """
     try:
         use_mock = not settings.GOOGLE_CLIENT_ID or settings.GOOGLE_CLIENT_ID == ""
@@ -86,11 +99,19 @@ async def authenticate_with_google(request: GoogleTokenRequest):
             expires_delta=timedelta(minutes=settings.JWT_EXPIRE_MINUTES)
         )
         
+        # Create refresh token
+        refresh_token = await refresh_token_service.create_refresh_token(
+            db, 
+            user_id=user_data["user_id"],
+            scopes=scopes
+        )
+        
         return GoogleAuthResponse(
             success=True,
             access_token=access_token,
             token_type="bearer",
             expires_in=settings.JWT_EXPIRE_MINUTES * 60,
+            refresh_token=refresh_token,
             user={
                 "id": user_data["user_id"],
                 "email": user_data["email"],

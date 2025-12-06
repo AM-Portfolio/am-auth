@@ -247,25 +247,12 @@ services:
       - SERVER_PORT=8092
       - INTERNAL_JWT_SECRET=${INTERNAL_JWT_SECRET}
       - JWT_SECRET=${INTERNAL_JWT_SECRET}
-      - REDIS_HOSTNAME=redis
     restart: always
     networks:
       - am-network
     depends_on:
       am-api-gateway:
         condition: service_healthy
-
-  redis:
-    image: redis:alpine
-    ports:
-      - "6379:6379"
-    networks:
-      - am-network
-    healthcheck:
-      test: [ "CMD", "redis-cli", "ping" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
 networks:
   am-network:
