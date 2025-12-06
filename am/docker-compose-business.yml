@@ -1,7 +1,7 @@
 services:
   am-document-processor:
     build:
-      context: ${AM_REPO_PATH}/am-document-processor
+      context: ../../am-document-processor
       dockerfile: Dockerfile
     container_name: am-document-processor
     env_file:
@@ -56,7 +56,7 @@ services:
 
   am-portfolio:
     build:
-      context: ${AM_REPO_PATH}/am-portfolio
+      context: ../../am-portfolio
       dockerfile: Dockerfile
     container_name: am-portfolio
     env_file:
@@ -127,11 +127,11 @@ services:
       retries: 5
       start_period: 60s
 
-  am-trade-api:
+  am-trade-service:
     build:
-      context: ${AM_REPO_PATH}/am-trade-management
+      context: ../../am-trade-managment
       dockerfile: Dockerfile
-    container_name: am-trade-api
+    container_name: am-trade-service
     env_file:
       - ./.env.docker
       - ./config/app.env
@@ -143,90 +143,35 @@ services:
       - ./config/features.env
       - ./config/trade.env
     environment:
-      # Spring Configuration
-      - SPRING_PROFILES_ACTIVE=docker
-      - SPRING_APPLICATION_NAME=am-trade-api
-      - SERVER_PORT=8073
-      
-      # MongoDB Configuration
-      - SPRING_DATA_MONGODB_URI=${MONGODB_URI}
-      - SPRING_DATA_MONGODB_DATABASE=${MONGODB_DATABASE}
-      - SPRING_DATA_MONGODB_USERNAME=${MONGODB_USERNAME}
-      - SPRING_DATA_MONGODB_PASSWORD=${MONGODB_PASSWORD}
+      # Market Data API
+      - AM_MARKET_DATA_API_URL=${AM_MARKET_DATA_API_URL}
       
       # Kafka Configuration
-      - SPRING_KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BOOTSTRAP_SERVERS}
-      - SPRING_KAFKA_CONSUMER_GROUP_ID=${KAFKA_CONSUMER_GROUP_ID}
+      - KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BOOTSTRAP_SERVERS}
       
-      # Trade Topics
-      - APP_KAFKA_CREATION_TOPIC=${TRADE_CREATION_TOPIC}
-      - APP_KAFKA_EXECUTION_TOPIC=${TRADE_EXECUTION_TOPIC}
-      - APP_KAFKA_SETTLEMENT_TOPIC=${TRADE_SETTLEMENT_TOPIC}
-      - APP_KAFKA_CANCELLATION_TOPIC=${TRADE_CANCELLATION_TOPIC}
+      # Spring Profile
+      - SPRING_PROFILES_ACTIVE=docker
       
-      # Trade Configuration
-      - APP_TRADE_MIN_QUANTITY=${TRADE_MIN_QUANTITY}
-      - APP_TRADE_MAX_QUANTITY=${TRADE_MAX_QUANTITY}
-      - APP_TRADE_MIN_PRICE=${TRADE_MIN_PRICE}
-      - APP_TRADE_EXECUTION_TIMEOUT=${TRADE_EXECUTION_TIMEOUT_SECONDS}
+      # MongoDB Configuration
+      - MONGODB_URI=${MONGODB_URI}
+      - MONGODB_DATABASE=${MONGODB_DATABASE}
+      - MONGODB_AUTHENTICATION_DATABASE=admin
       
-      # Cache Configuration
-      - SPRING_REDIS_HOST=${TRADE_REDIS_HOST}
-      - SPRING_REDIS_PORT=${TRADE_REDIS_PORT}
-      - SPRING_REDIS_PASSWORD=${TRADE_REDIS_PASSWORD}
-      - SPRING_REDIS_DATABASE=${TRADE_REDIS_DB}
-      
-      # Thread Pool Configuration
-      - APP_THREAD_POOL_SIZE=${TRADE_THREAD_POOL_SIZE}
-      - APP_THREAD_POOL_QUEUE_CAPACITY=${TRADE_THREAD_POOL_QUEUE_CAPACITY}
-      
-      # Retry Configuration
-      - APP_RETRY_MAX_ATTEMPTS=${TRADE_RETRY_MAX_ATTEMPTS}
-      - APP_RETRY_DELAY_MS=${TRADE_RETRY_DELAY_MS}
-      - AM_TRADE_MAX_RETRIES=${AM_TRADE_MAX_RETRIES}
-      
-      # Order Management
-      - APP_ORDER_MAX_PENDING=${TRADE_ORDER_MAX_PENDING}
-      - APP_ORDER_VALIDATION_ENABLED=${TRADE_ORDER_VALIDATION_ENABLED}
-      - APP_ORDER_AUDIT_ENABLED=${TRADE_ORDER_AUDIT_ENABLED}
-      
-      # Risk Management
-      - APP_RISK_CHECK_ENABLED=${TRADE_RISK_CHECK_ENABLED}
-      - APP_MAX_DAILY_LOSS_PERCENT=${TRADE_MAX_DAILY_LOSS_PERCENT}
-      - APP_MAX_POSITION_SIZE_PERCENT=${TRADE_MAX_POSITION_SIZE_PERCENT}
-      
-      # Trading Hours
-      - APP_MARKET_OPEN_TIME=${TRADE_MARKET_OPEN_TIME}
-      - APP_MARKET_CLOSE_TIME=${TRADE_MARKET_CLOSE_TIME}
-      - APP_ENFORCE_MARKET_HOURS=${TRADE_ENFORCE_MARKET_HOURS}
-      
-      # Settlement Configuration
-      - APP_SETTLEMENT_TYPE=${TRADE_SETTLEMENT_TYPE}
-      - APP_AUTO_SETTLEMENT_ENABLED=${TRADE_AUTO_SETTLEMENT_ENABLED}
-      
-      # Integration
-      - APP_MARKET_DATA_API_URL=${TRADE_MARKET_DATA_SERVICE_URL}
-      - AM_MARKET_DATA_API_URL=${AM_MARKET_DATA_API_URL}
-      - APP_PORTFOLIO_SERVICE_URL=${TRADE_PORTFOLIO_SERVICE_URL}
+      # Redis Configuration
+      - REDIS_HOSTNAME=${REDIS_HOSTNAME}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - REDIS_PORT=${REDIS_PORT}
       
       # JWT Configuration
-      - INTERNAL_JWT_SECRET=${INTERNAL_JWT_SECRET}
-      - JWT_SECRET=${INTERNAL_JWT_SECRET}
-      
-      # Logging & Security
-      - LOGGING_LEVEL_ROOT=${LOG_LEVEL}
-      - LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY=DEBUG
-      - LOGGING_LEVEL_COM_EXAMPLE=${TRADE_LOG_LEVEL}
-      
-      # Audit & Compliance
-      - APP_AUDIT_LOG_ENABLED=${TRADE_AUDIT_LOG_ENABLED}
-      - APP_AUDIT_RETENTION_DAYS=${TRADE_AUDIT_LOG_RETENTION_DAYS}
-      - APP_COMPLIANCE_CHECK_ENABLED=${TRADE_COMPLIANCE_CHECK_ENABLED}
+      - INTERNAL_JWT_SECRET=${JWT_SECRET}
+      - JWT_SECRET=${JWT_SECRET}
     restart: always
     networks:
       - am-network
+    ports:
+      - "8077:8080"
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8073/actuator/health" ]
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
       interval: 15s
       timeout: 10s
       retries: 5
@@ -234,7 +179,7 @@ services:
 
   am-market-data:
     build:
-      context: ${AM_REPO_PATH}/am-market-data
+      context: ../../am-market-data
       dockerfile: Dockerfile
     container_name: am-market-data
     env_file:
