@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     JWT_EXPIRE_MINUTES: int = int(os.getenv("JWT_EXPIRE_MINUTES", "1440"))  # 24 hours
     
     # User Management Service
-    USER_SERVICE_URL: str = os.getenv("USER_SERVICE_URL", "http://localhost:8000")
+    USER_SERVICE_URL: str = os.getenv("USER_SERVICE_URL", "https://api.munish.org/auth")
     USER_SERVICE_TIMEOUT: int = int(os.getenv("USER_SERVICE_TIMEOUT", "30"))
     
     # API Configuration

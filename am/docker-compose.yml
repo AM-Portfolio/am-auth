@@ -72,7 +72,7 @@ services:
       - USER_MGMT_LOG_LEVEL=INFO
       - ENVIRONMENT=docker
       # Auth service connection
-      - AUTH_SERVICE_URL=${AUTH_SERVICE_URL}
+      - AUTH_SERVICE_URL=http://auth-tokens:8001
       # JWT Configuration
       - JWT_SECRET=${JWT_SECRET}
       # Email verification - disabled for testing
@@ -113,12 +113,12 @@ services:
       - AUTH_TOKENS_LOG_LEVEL=INFO
       - ENVIRONMENT=docker
       # User service connection
-      - USER_SERVICE_URL=${USER_MANAGEMENT_URL}
+      - USER_SERVICE_URL=http://am-user-management:8000
       # JWT Configuration
       - JWT_SECRET=${JWT_SECRET}
       - JWT_ALGORITHM=HS256
-      # Database connection (uses host machine's PostgreSQL)
-      - DATABASE_URL=${DATABASE_URL}
+      # Database connection (uses shared PostgreSQL container)
+      - DATABASE_URL=postgresql://postgres:postgres@am-market-data-postgres-1:5432/postgres
     volumes:
       - ./am-auth-tokens:/app
       - ./shared:/app/shared # Mount shared logging infrastructure
