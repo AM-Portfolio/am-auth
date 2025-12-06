@@ -22,9 +22,9 @@ services:
       - PYTHON_SERVICE_URL=http://am-python-internal-service:8002
       - JAVA_SERVICE_URL=http://am-java-internal-service:8003
       - TRADE_SERVICE_URL=http://host.docker.internal:8077
-      - PORTFOLIO_SERVICE_URL=http://am-portfolio:8080
-      - DOCUMENT_PROCESSOR_URL=http://am-document-processor:8070
-      - MARKET_DATA_SERVICE_URL=http://am-market-data:8092
+      - PORTFOLIO_SERVICE_URL=http://host.docker.internal:8072
+      - DOCUMENT_PROCESSOR_URL=http://host.docker.internal:8070
+      - MARKET_DATA_SERVICE_URL=http://host.docker.internal:8092
       # JWT Configuration
       - JWT_SECRET=${JWT_SECRET}
       - JWT_ALGORITHM=HS256
