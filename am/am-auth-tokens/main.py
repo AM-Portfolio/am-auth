@@ -91,12 +91,29 @@ app.include_router(test_router)  # Test routes for Google OAuth testing
 @app.get("/")
 async def root():
     """Root endpoint providing service information."""
-    logger.debug("Root endpoint accessed", extra={"endpoint": "/"})
+    logger.info("📋 Root endpoint accessed", extra={
+        "endpoint": "/",
+        "method": "GET"
+    })
     return {
         "service": settings.PROJECT_NAME,
         "version": settings.VERSION,
         "status": "running",
         "environment": settings.ENVIRONMENT
+    }
+
+
+@app.get("/health")
+async def health():
+    """Health check endpoint."""
+    logger.debug("Health check", extra={
+        "endpoint": "/health",
+        "status": "healthy"
+    })
+    return {
+        "status": "healthy",
+        "service": settings.PROJECT_NAME,
+        "version": settings.VERSION
     }
 
 

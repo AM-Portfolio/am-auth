@@ -4,6 +4,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel
 import httpx
 import os
+import time
 from app.core.security import create_access_token, Token
 from app.services.user_validation import (
     UserValidationService, 
@@ -13,6 +14,15 @@ from app.services.user_validation import (
 from app.api.v1.deps import get_user_validation_service
 from shared_infra.config.settings import settings
 
+# Import logging
+import sys
+from pathlib import Path
+shared_path = Path(__file__).parent.parent.parent.parent.parent.parent / "shared"
+if str(shared_path) not in sys.path:
+    sys.path.insert(0, str(shared_path))
+from shared.logging import get_logger
+
+logger = get_logger("am-auth-tokens.token")
 
 router = APIRouter()
 
@@ -67,15 +77,41 @@ async def create_token(
     Raises:
         HTTPException: If credentials are invalid
     """
+    start_time = time.time()
+    logger.info(f"🔐 Token creation request received", extra={
+        "username": token_request.username,
+        "endpoint": "/tokens",
+        "method": "POST"
+    })
+    
     # Validate user credentials
+    logger.debug(f"Validating credentials for user: {token_request.username}", extra={
+        "username": token_request.username,
+        "step": "credential_validation"
+    })
+    
     credentials = UserCredentials(
         username=token_request.username,
         password=token_request.password
     )
     
+    validation_start = time.time()
     validation_result = await user_service.validate_user_credentials(credentials)
+    validation_duration = (time.time() - validation_start) * 1000
+    
+    logger.info(f"User validation completed", extra={
+        "username": token_request.username,
+        "valid": validation_result.valid,
+        "duration_ms": round(validation_duration, 2),
+        "step": "validation_complete"
+    })
     
     if not validation_result.valid:
+        logger.warning(f"❌ Authentication failed for user: {token_request.username}", extra={
+            "username": token_request.username,
+            "reason": validation_result.message,
+            "status_code": 401
+        })
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=validation_result.message or "Invalid credentials",
@@ -86,6 +122,12 @@ async def create_token(
     # Treat missing status as security failure - reject if status is absent or not ACTIVE
     if not validation_result.status or validation_result.status.upper() != "ACTIVE":
         status_msg = validation_result.status if validation_result.status else "unknown"
+        logger.warning(f"⛔ User account not active: {token_request.username}", extra={
+            "username": token_request.username,
+            "user_id": validation_result.user_id,
+            "status": status_msg,
+            "status_code": 403
+        })
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail=f"User account is not active: {status_msg}",
@@ -93,6 +135,14 @@ async def create_token(
         )
     
     # Create token with user data
+    logger.debug(f"Creating JWT token for user: {validation_result.username}", extra={
+        "user_id": validation_result.user_id,
+        "username": validation_result.username,
+        "email": validation_result.email,
+        "scopes": validation_result.scopes,
+        "step": "token_creation"
+    })
+    
     user_data = {
         "username": validation_result.username,
         "email": validation_result.email,
@@ -100,11 +150,24 @@ async def create_token(
     }
     
     access_token_expires = timedelta(minutes=settings.JWT_EXPIRE_MINUTES)
+    token_start = time.time()
     access_token = create_access_token(
         subject=validation_result.user_id,
         user_data=user_data,
         expires_delta=access_token_expires
     )
+    token_duration = (time.time() - token_start) * 1000
+    
+    total_duration = (time.time() - start_time) * 1000
+    logger.info(f"✅ Token created successfully for user: {validation_result.username}", extra={
+        "user_id": validation_result.user_id,
+        "username": validation_result.username,
+        "email": validation_result.email,
+        "expires_in_minutes": settings.JWT_EXPIRE_MINUTES,
+        "token_creation_ms": round(token_duration, 2),
+        "total_duration_ms": round(total_duration, 2),
+        "status_code": 200
+    })
     
     return TokenResponse(
         access_token=access_token,
