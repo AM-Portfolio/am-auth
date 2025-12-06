@@ -6,6 +6,15 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8000:8000"
+    env_file:
+      - ./.env.docker
+      - ./config/app.env
+      - ./config/services.env
+      - ./config/database.env
+      - ./config/security.env
+      - ./config/logging.env
+      - ./config/build.env
+      - ./config/features.env
     environment:
       # Service URLs (internal Docker network)
       - AUTH_SERVICE_URL=${AUTH_SERVICE_URL}
@@ -23,6 +32,7 @@ services:
       - LONG_TIMEOUT=60.0
     volumes:
       - ./am-api-gateway:/app
+      - ./shared:/app/shared
     networks:
       - am-network
     depends_on:
@@ -69,7 +79,7 @@ services:
       - ENABLE_EMAIL_VERIFICATION=false
     volumes:
       - ./am-user-management:/app
-      - ../shared:/app/shared # Mount shared logging infrastructure
+      - ./shared:/app/shared # Mount shared logging infrastructure
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     networks:
       - am-network
@@ -110,7 +120,8 @@ services:
       # Database connection (uses host machine's PostgreSQL)
       - DATABASE_URL=${DATABASE_URL}
     volumes:
-      - ../shared:/app/shared # Mount shared logging infrastructure
+      - ./am-auth-tokens:/app
+      - ./shared:/app/shared # Mount shared logging infrastructure
     networks:
       - am-network
     depends_on:
@@ -150,7 +161,8 @@ services:
       - JWT_ALGORITHM=HS256
       - INTERNAL_JWT_SECRET=${INTERNAL_JWT_SECRET}
     volumes:
-      - ../shared:/app/shared # Mount shared logging infrastructure
+      - ./am-python-internal-service:/app
+      - ./shared:/app/shared # Mount shared logging infrastructure
     networks:
       - am-network
     depends_on:
@@ -187,32 +199,10 @@ services:
       # JWT Configuration
       - JWT_SECRET=${JWT_SECRET}
       - INTERNAL_JWT_SECRET=${INTERNAL_JWT_SECRET}
-    networks:
-      - am-network
-    depends_on:
-      am-user-management:
-        condition: service_healthy
-
-  am-document-processor:
-    build:
-      context: ${AM_REPO_PATH}/am-document-processor
-      dockerfile: Dockerfile
-    container_name: am-document-processor
-    env_file:
-      - ./.env.docker
-      - ./config/app.env
-      - ./config/services.env
-      - ./config/database.env
-      - ./config/security.env
-      - ./config/logging.env
-      - ./config/build.env
-      - ./config/features.env
-    environment:
       - MONGODB_URL=${DOCUMENT_MONGODB_URL}
       - KAFKA_BOOTSTRAP_SERVERS=${DOCUMENT_KAFKA_SERVERS}
       - SPRING_APPLICATION_NAME=am-document-processor
       - SERVER_PORT=8070
-      - INTERNAL_JWT_SECRET=${INTERNAL_JWT_SECRET}
       - JWT_SECRET=${INTERNAL_JWT_SECRET}
       - SPRING_AUTOCONFIGURE_EXCLUDE=org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
     # NO ports exposed - internal network only (security: network isolation)
@@ -228,112 +218,7 @@ services:
       retries: 5
       start_period: 60s
 
-  am-portfolio:
-    build:
-      context: ${AM_REPO_PATH}/am-portfolio
-      dockerfile: Dockerfile
-    container_name: am-portfolio
-    env_file:
-      - ./.env.docker
-      - ./config/app.env
-      - ./config/services.env
-      - ./config/database.env
-      - ./config/security.env
-      - ./config/logging.env
-      - ./config/build.env
-      - ./config/features.env
-    environment:
-      - MONGODB_URL=${PORTFOLIO_MONGODB_URL}
-      - KAFKA_BOOTSTRAP_SERVERS=${PORTFOLIO_KAFKA_SERVERS}
-      - SPRING_APPLICATION_NAME=am-portfolio
-      - SERVER_PORT=8080
-      - INTERNAL_JWT_SECRET=${INTERNAL_JWT_SECRET}
-      - JWT_SECRET=${INTERNAL_JWT_SECRET}
-    # NO ports exposed - internal network only (security: network isolation)
-    networks:
-      - am-network
-    depends_on:
-      am-api-gateway:
-        condition: service_healthy
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
-      interval: 15s
-      timeout: 10s
-      retries: 5
-      start_period: 60s
-
-  am-trade-api:
-    build:
-      context: ${AM_REPO_PATH}/am-trade-management
-      dockerfile: Dockerfile
-    container_name: am-trade-api
-    env_file:
-      - ./.env.docker
-      - ./config/app.env
-      - ./config/services.env
-      - ./config/database.env
-      - ./config/security.env
-      - ./config/logging.env
-      - ./config/build.env
-      - ./config/features.env
-    environment:
-      - MONGODB_URL=${TRADE_MONGODB_URL}
-      - KAFKA_BOOTSTRAP_SERVERS=${TRADE_KAFKA_SERVERS}
-      - SPRING_APPLICATION_NAME=am-trade-api
-      - SERVER_PORT=8073
-      - INTERNAL_JWT_SECRET=${INTERNAL_JWT_SECRET}
-      - JWT_SECRET=${INTERNAL_JWT_SECRET}
-      - LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY=DEBUG
-    restart: always
-    networks:
-      - am-network
-    depends_on:
-      am-api-gateway:
-        condition: service_healthy
-
-  am-market-data:
-    build:
-      context: ${AM_REPO_PATH}/am-market-data
-      dockerfile: Dockerfile
-    container_name: am-market-data
-    env_file:
-      - ./.env.docker
-      - ./config/app.env
-      - ./config/services.env
-      - ./config/database.env
-      - ./config/security.env
-      - ./config/logging.env
-      - ./config/build.env
-      - ./config/features.env
-    environment:
-      - MONGODB_URL=${MARKET_DATA_MONGODB_URL}
-      - KAFKA_BOOTSTRAP_SERVERS=${MARKET_DATA_KAFKA_SERVERS}
-      - SPRING_APPLICATION_NAME=am-market-data
-      - SERVER_PORT=8092
-      - INTERNAL_JWT_SECRET=${INTERNAL_JWT_SECRET}
-      - JWT_SECRET=${INTERNAL_JWT_SECRET}
-      - REDIS_HOSTNAME=${MARKET_DATA_REDIS_HOSTNAME}
-      - REDIS_PORT=${MARKET_DATA_REDIS_PORT}
-      - REDIS_URL=${MARKET_DATA_REDIS_URL}
-    restart: always
-    networks:
-      - am-network
-    depends_on:
-      am-api-gateway:
-        condition: service_healthy
-
-  redis:
-    image: redis:alpine
-    ports:
-      - "6379:6379"
-    networks:
-      - am-network
-    healthcheck:
-      test: [ "CMD", "redis-cli", "ping" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
 networks:
   am-network:
     driver: bridge
+    name: am-network

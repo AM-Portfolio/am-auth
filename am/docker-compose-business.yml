@@ -1,0 +1,307 @@
+services:
+  am-document-processor:
+    build:
+      context: ${AM_REPO_PATH}/am-document-processor
+      dockerfile: Dockerfile
+    container_name: am-document-processor
+    env_file:
+      - ./.env.docker
+      - ./config/app.env
+      - ./config/services.env
+      - ./config/database.env
+      - ./config/security.env
+      - ./config/logging.env
+      - ./config/build.env
+      - ./config/features.env
+      - ./config/document-processor.env
+    environment:
+      # Spring Configuration
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_APPLICATION_NAME=am-document-processor
+      - SERVER_PORT=8070
+      
+      # JWT Configuration
+      - INTERNAL_JWT_SECRET=${INTERNAL_JWT_SECRET}
+      - JWT_SECRET=${INTERNAL_JWT_SECRET}
+      - JWT_ALGORITHM=HS256
+      
+      # MongoDB Configuration (from document-processor.env)
+      - SPRING_DATA_MONGODB_URI=${MONGODB_URL}
+      - SPRING_DATA_MONGODB_AUTO_INDEX_CREATION=true
+      
+      # Kafka Configuration (from document-processor.env)
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BOOTSTRAP_SERVERS}
+      - SPRING_KAFKA_SECURITY_PROTOCOL=${KAFKA_SECURITY_PROTOCOL}
+      - SPRING_KAFKA_SASL_MECHANISM=${KAFKA_SASL_MECHANISM}
+      - SPRING_KAFKA_CONSUMER_AUTO_OFFSET_RESET=earliest
+      
+      # Document Processor Configuration (from document-processor.env)
+      - AM_DOCUMENT_PROCESSOR_MAX_RETRIES=${AM_DOCUMENT_PROCESSOR_MAX_RETRIES}
+      
+      # Logging Configuration
+      - LOGGING_LEVEL_ROOT=INFO
+      - LOGGING_LEVEL_COM_AM_DOCUMENT=DEBUG
+      - LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY=DEBUG
+      
+      # Spring Autoconfigure
+      - SPRING_AUTOCONFIGURE_EXCLUDE=org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
+    networks:
+      - am-network
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8070/actuator/health" ]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  am-portfolio:
+    build:
+      context: ${AM_REPO_PATH}/am-portfolio
+      dockerfile: Dockerfile
+    container_name: am-portfolio
+    env_file:
+      - ./.env.docker
+      - ./config/app.env
+      - ./config/services.env
+      - ./config/database.env
+      - ./config/security.env
+      - ./config/logging.env
+      - ./config/build.env
+      - ./config/features.env
+      - ./config/portfolio.env
+    environment:
+      # Spring Configuration
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_APPLICATION_NAME=am-portfolio
+      - SERVER_PORT=8080
+      
+      # JWT Configuration
+      - INTERNAL_JWT_SECRET=${INTERNAL_JWT_SECRET}
+      - JWT_SECRET=${INTERNAL_JWT_SECRET}
+      - JWT_ALGORITHM=HS256
+      
+      # MongoDB Configuration (from portfolio.env)
+      - SPRING_DATA_MONGODB_URI=${PORTFOLIO_MONGODB_URL}
+      - SPRING_DATA_MONGODB_DATABASE=${PORTFOLIO_MONGODB_DATABASE}
+      - SPRING_DATA_MONGODB_AUTO_INDEX_CREATION=true
+      
+      # Kafka Configuration (from portfolio.env)
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=${PORTFOLIO_KAFKA_BOOTSTRAP_SERVERS}
+      - SPRING_KAFKA_SECURITY_PROTOCOL=${PORTFOLIO_KAFKA_SECURITY_PROTOCOL}
+      - SPRING_KAFKA_SASL_MECHANISM=${PORTFOLIO_KAFKA_SASL_MECHANISM}
+      - SPRING_KAFKA_CONSUMER_AUTO_OFFSET_RESET=earliest
+      
+      # Portfolio Topics
+      - APP_KAFKA_PORTFOLIO_CREATION_TOPIC=${PORTFOLIO_CREATION_TOPIC}
+      - APP_KAFKA_PORTFOLIO_UPDATE_TOPIC=${PORTFOLIO_UPDATE_TOPIC}
+      - APP_KAFKA_PORTFOLIO_DELETION_TOPIC=${PORTFOLIO_DELETION_TOPIC}
+      - APP_KAFKA_PORTFOLIO_REBALANCE_TOPIC=${PORTFOLIO_REBALANCE_TOPIC}
+      
+      # Portfolio Configuration (from portfolio.env)
+      - APP_PORTFOLIO_MAX_HOLDINGS=${PORTFOLIO_MAX_HOLDINGS}
+      - APP_PORTFOLIO_MIN_INVESTMENT=${PORTFOLIO_MIN_INVESTMENT}
+      - APP_PORTFOLIO_REBALANCE_THRESHOLD=${PORTFOLIO_REBALANCE_THRESHOLD_PERCENT}
+      
+      # Redis Cache Configuration
+      - SPRING_REDIS_HOST=${PORTFOLIO_REDIS_HOST}
+      - SPRING_REDIS_PORT=${PORTFOLIO_REDIS_PORT}
+      - SPRING_REDIS_PASSWORD=${PORTFOLIO_REDIS_PASSWORD}
+      - SPRING_REDIS_DATABASE=${PORTFOLIO_REDIS_DB}
+      - APP_CACHE_ENABLED=${PORTFOLIO_CACHE_ENABLED}
+      - APP_CACHE_TTL_MINUTES=${PORTFOLIO_CACHE_TTL_MINUTES}
+      
+      # Thread Pool Configuration
+      - APP_THREAD_POOL_SIZE=${PORTFOLIO_THREAD_POOL_SIZE}
+      - APP_THREAD_QUEUE_CAPACITY=100
+      
+      # Logging Configuration
+      - LOGGING_LEVEL_ROOT=INFO
+      - LOGGING_LEVEL_COM_AM_PORTFOLIO=DEBUG
+      - LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY=DEBUG
+    networks:
+      - am-network
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8070/actuator/health" ]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  am-trade-api:
+    build:
+      context: ${AM_REPO_PATH}/am-trade-management
+      dockerfile: Dockerfile
+    container_name: am-trade-api
+    env_file:
+      - ./.env.docker
+      - ./config/app.env
+      - ./config/services.env
+      - ./config/database.env
+      - ./config/security.env
+      - ./config/logging.env
+      - ./config/build.env
+      - ./config/features.env
+      - ./config/trade.env
+    environment:
+      # Spring Configuration
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_APPLICATION_NAME=am-trade-api
+      - SERVER_PORT=8073
+      
+      # MongoDB Configuration
+      - SPRING_DATA_MONGODB_URI=${MONGODB_URI}
+      - SPRING_DATA_MONGODB_DATABASE=${MONGODB_DATABASE}
+      - SPRING_DATA_MONGODB_USERNAME=${MONGODB_USERNAME}
+      - SPRING_DATA_MONGODB_PASSWORD=${MONGODB_PASSWORD}
+      
+      # Kafka Configuration
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BOOTSTRAP_SERVERS}
+      - SPRING_KAFKA_CONSUMER_GROUP_ID=${KAFKA_CONSUMER_GROUP_ID}
+      
+      # Trade Topics
+      - APP_KAFKA_CREATION_TOPIC=${TRADE_CREATION_TOPIC}
+      - APP_KAFKA_EXECUTION_TOPIC=${TRADE_EXECUTION_TOPIC}
+      - APP_KAFKA_SETTLEMENT_TOPIC=${TRADE_SETTLEMENT_TOPIC}
+      - APP_KAFKA_CANCELLATION_TOPIC=${TRADE_CANCELLATION_TOPIC}
+      
+      # Trade Configuration
+      - APP_TRADE_MIN_QUANTITY=${TRADE_MIN_QUANTITY}
+      - APP_TRADE_MAX_QUANTITY=${TRADE_MAX_QUANTITY}
+      - APP_TRADE_MIN_PRICE=${TRADE_MIN_PRICE}
+      - APP_TRADE_EXECUTION_TIMEOUT=${TRADE_EXECUTION_TIMEOUT_SECONDS}
+      
+      # Cache Configuration
+      - SPRING_REDIS_HOST=${TRADE_REDIS_HOST}
+      - SPRING_REDIS_PORT=${TRADE_REDIS_PORT}
+      - SPRING_REDIS_PASSWORD=${TRADE_REDIS_PASSWORD}
+      - SPRING_REDIS_DATABASE=${TRADE_REDIS_DB}
+      
+      # Thread Pool Configuration
+      - APP_THREAD_POOL_SIZE=${TRADE_THREAD_POOL_SIZE}
+      - APP_THREAD_POOL_QUEUE_CAPACITY=${TRADE_THREAD_POOL_QUEUE_CAPACITY}
+      
+      # Retry Configuration
+      - APP_RETRY_MAX_ATTEMPTS=${TRADE_RETRY_MAX_ATTEMPTS}
+      - APP_RETRY_DELAY_MS=${TRADE_RETRY_DELAY_MS}
+      - AM_TRADE_MAX_RETRIES=${AM_TRADE_MAX_RETRIES}
+      
+      # Order Management
+      - APP_ORDER_MAX_PENDING=${TRADE_ORDER_MAX_PENDING}
+      - APP_ORDER_VALIDATION_ENABLED=${TRADE_ORDER_VALIDATION_ENABLED}
+      - APP_ORDER_AUDIT_ENABLED=${TRADE_ORDER_AUDIT_ENABLED}
+      
+      # Risk Management
+      - APP_RISK_CHECK_ENABLED=${TRADE_RISK_CHECK_ENABLED}
+      - APP_MAX_DAILY_LOSS_PERCENT=${TRADE_MAX_DAILY_LOSS_PERCENT}
+      - APP_MAX_POSITION_SIZE_PERCENT=${TRADE_MAX_POSITION_SIZE_PERCENT}
+      
+      # Trading Hours
+      - APP_MARKET_OPEN_TIME=${TRADE_MARKET_OPEN_TIME}
+      - APP_MARKET_CLOSE_TIME=${TRADE_MARKET_CLOSE_TIME}
+      - APP_ENFORCE_MARKET_HOURS=${TRADE_ENFORCE_MARKET_HOURS}
+      
+      # Settlement Configuration
+      - APP_SETTLEMENT_TYPE=${TRADE_SETTLEMENT_TYPE}
+      - APP_AUTO_SETTLEMENT_ENABLED=${TRADE_AUTO_SETTLEMENT_ENABLED}
+      
+      # Integration
+      - APP_MARKET_DATA_API_URL=${TRADE_MARKET_DATA_SERVICE_URL}
+      - AM_MARKET_DATA_API_URL=${AM_MARKET_DATA_API_URL}
+      - APP_PORTFOLIO_SERVICE_URL=${TRADE_PORTFOLIO_SERVICE_URL}
+      
+      # JWT Configuration
+      - INTERNAL_JWT_SECRET=${INTERNAL_JWT_SECRET}
+      - JWT_SECRET=${INTERNAL_JWT_SECRET}
+      
+      # Logging & Security
+      - LOGGING_LEVEL_ROOT=${LOG_LEVEL}
+      - LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY=DEBUG
+      - LOGGING_LEVEL_COM_EXAMPLE=${TRADE_LOG_LEVEL}
+      
+      # Audit & Compliance
+      - APP_AUDIT_LOG_ENABLED=${TRADE_AUDIT_LOG_ENABLED}
+      - APP_AUDIT_RETENTION_DAYS=${TRADE_AUDIT_LOG_RETENTION_DAYS}
+      - APP_COMPLIANCE_CHECK_ENABLED=${TRADE_COMPLIANCE_CHECK_ENABLED}
+    restart: always
+    networks:
+      - am-network
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8073/actuator/health" ]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  am-market-data:
+    build:
+      context: ${AM_REPO_PATH}/am-market-data
+      dockerfile: Dockerfile
+    container_name: am-market-data
+    env_file:
+      - ./.env.docker
+      - ./config/app.env
+      - ./config/services.env
+      - ./config/database.env
+      - ./config/security.env
+      - ./config/logging.env
+      - ./config/build.env
+      - ./config/features.env
+      - ./config/market-data.env
+    environment:
+      # Spring Profile
+      - SPRING_PROFILES_ACTIVE=docker
+
+      # Database Configuration
+      - SPRING_DATASOURCE_URL=${MARKET_DATA_POSTGRES_URL}/${MARKET_DATA_POSTGRES_DATABASE}
+      - SPRING_DATASOURCE_USERNAME=${MARKET_DATA_POSTGRES_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${MARKET_DATA_POSTGRES_PASSWORD}
+
+      # InfluxDB Configuration
+      - SPRING_INFLUXDB_URL=${INFLUXDB_URL}:8086
+      - SPRING_INFLUXDB_TOKEN=${INFLUXDB_TOKEN}
+      - SPRING_INFLUXDB_ORG=${INFLUXDB_ORG}
+      - SPRING_INFLUXDB_BUCKET=${INFLUXDB_BUCKET}
+
+      # Kafka Configuration
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=${MARKET_DATA_KAFKA_BOOTSTRAP_SERVERS}
+      - SPRING_KAFKA_CONSUMER_GROUP_ID=${KAFKA_CONSUMER_GROUP_ID}
+      - SPRING_KAFKA_CONSUMER_AUTO_OFFSET_RESET=${KAFKA_CONSUMER_AUTO_OFFSET_RESET}
+
+      # Application Topics
+      - APP_KAFKA_STOCK_PRICE_TOPIC=${STOKUPATE_TOPIC_NAME}
+      - APP_KAFKA_NSE_INDICES_TOPIC=${NSE_INDICES_TOPIC_NAME}
+      - APP_KAFKA_NSE_ETF_TOPIC=${NSE_ETF_TOPIC_NAME}
+
+      # Retry Configuration
+      - APP_RETRY_MAX_ATTEMPTS=${MARKET_DATA_MAX_RETRIES}
+      - APP_RETRY_BASE_DELAY_MS=${MARKET_DATA_RETRY_DELAY_MS}
+
+      # Thread Pool Configuration
+      - APP_THREAD_POOL_SIZE=${MARKET_DATA_THREAD_POOL_SIZE}
+      - APP_THREAD_POOL_QUEUE_CAPACITY=${MARKET_DATA_THREAD_QUEUE_CAPACITY}
+
+      # Validation Configuration
+      - APP_VALIDATION_MAX_AGE_MINUTES=${MARKET_DATA_MAX_AGE_MINUTES}
+
+      # Upstox Configuration
+      - UPSTOX_AUTH_CODE=${UPSTOX_CODE}
+      - UPSTOX_AUTH_API_KEY=${UPSTOX_API_KEY}
+      - UPSTOX_AUTH_SECRET_KEY=${UPSTOX_SECRET_KEY}
+      - UPSTOX_AUTH_ACCESS_TOKEN=${UPSTOX_ACCESS_TOKEN}
+      - UPSTOX_AUTH_BASE_URL=https://api.upstox.com/v2
+      - UPSTOX_AUTH_REDIRECT_URI=http://localhost:8080
+      - UPSTOX_AUTH_TOKEN_REFRESH_INTERVAL=3600000
+      - UPSTOX_INTERVAL=I1
+
+      # Legacy/Shared Envs (Retained if needed)
+      - SERVER_PORT=8092
+      - INTERNAL_JWT_SECRET=${INTERNAL_JWT_SECRET}
+      - JWT_SECRET=${INTERNAL_JWT_SECRET}
+      - SPRING_APPLICATION_NAME=am-market-data
+    restart: always
+    networks:
+      - am-network
+
+networks:
+  am-network:
+    external: true
