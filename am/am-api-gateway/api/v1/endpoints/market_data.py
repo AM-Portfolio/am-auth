@@ -14,14 +14,24 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
-@router.api_route("/market-data/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
+@router.api_route("/am/market-data/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
 async def proxy_market_data_service(
     path: str,
     request: Request,
     current_user: CurrentUser = Depends(get_current_user)
 ):
     """
-    Generic proxy for ALL Market Data Service endpoints
+    Generic proxy for ALL Market Data Microservice endpoints
+    
+    Gateway URL Pattern: /am/market-data/{path}
+    Market Data Service URL: /{path} (passes entire path as-is)
+    
+    Examples:
+    - Gateway: GET /am/market-data/api/v1/stocks/{symbol}
+      → Market Data Service: GET /api/v1/stocks/{symbol}
+    
+    - Gateway: GET /am/market-data/api/v1/brokerage/calculate
+      → Market Data Service: GET /api/v1/brokerage/calculate
     """
     
     try:
@@ -37,7 +47,7 @@ async def proxy_market_data_service(
         if request.method in ["POST", "PUT", "PATCH"]:
             body = await request.body()
         
-        # Forward request to Market Data Service
+        # Forward entire path as-is to Market Data Service
         target_url = f"{settings.MARKET_DATA_SERVICE_URL}/{path}"
         logger.info(f"Proxying to Market Data Service: {target_url}")
         

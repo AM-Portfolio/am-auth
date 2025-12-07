@@ -10,7 +10,7 @@ from fastapi.responses import JSONResponse
 import logging
 import time
 
-from api.v1.endpoints import documents, reports, trades, market_data, document_processor, portfolio_service, diagnostics
+from api.v1.endpoints import trades, market_data, document_processor, portfolio_service, diagnostics
 from middleware.rate_limiter import RateLimiterMiddleware
 from middleware.logging_middleware import LoggingMiddleware
 
@@ -67,13 +67,11 @@ async def root():
             "redoc": "/redoc"
         },
         "endpoints": {
-            "documents": "/api/v1/documents",
-            "reports": "/api/v1/reports",
-            "portfolio": "/api/v1/portfolio/{path}",
-            "trades": "/api/v1/trades/{path}",
-            "market_data": "/api/v1/market-data",
-            "document_processor": "/api/v1/documents/types",
-            "document_processing": "/api/v1/documents/process"
+            "trades": "/am/trade/{path}",
+            "portfolio": "/am/portfolio/{path}",
+            "market_data": "/am/market-data/{path}",
+            "documents": "/am/documents/{path}",
+            "diagnostics": "/api/v1/diagnostics"
         },
         "note": "All endpoints require authentication via Bearer token"
     }

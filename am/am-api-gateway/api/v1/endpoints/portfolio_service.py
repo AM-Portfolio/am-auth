@@ -29,17 +29,20 @@ async def proxy_portfolio_service(
     current_user: CurrentUser = Depends(get_current_user)
 ):
     """
-    Generic proxy for ALL Portfolio Service endpoints
+    Generic proxy for ALL Portfolio Microservice endpoints
     
-    This single function handles:
-    - GET /portfolio/portfolios
-    - GET /portfolio/portfolios/{id}
-    - POST /portfolio/portfolios
-    - PUT /portfolio/portfolios/{id}
-    - DELETE /portfolio/portfolios/{id}
-    - GET /portfolio/analytics
-    - GET /portfolio/market-data
-    - ... and any future endpoints added to Portfolio Service
+    Gateway URL Pattern: /am/portfolio/{path}
+    Portfolio Service URL: /{path} (passes entire path as-is)
+    
+    Examples:
+    - Gateway: GET /am/portfolio/api/v1/portfolios?userId=123
+      → Portfolio Service: GET /api/v1/portfolios?userId=123
+    
+    - Gateway: GET /am/portfolio/api/v1/holdings/{id}
+      → Portfolio Service: GET /api/v1/holdings/{id}
+    
+    This allows the portfolio microservice to have multiple API paths without 
+    hardcoding each one in the gateway.
     
     Flow:
     1. get_current_user validates user JWT ✅
@@ -61,7 +64,7 @@ async def proxy_portfolio_service(
         if request.method in ["POST", "PUT", "PATCH"]:
             body = await request.body()
         
-        # Forward request to Portfolio Service
+        # Forward entire path as-is to Portfolio Service
         async with httpx.AsyncClient(timeout=settings.LONG_TIMEOUT) as client:
             response = await client.request(
                 method=request.method,
