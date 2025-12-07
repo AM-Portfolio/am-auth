@@ -1,14 +1,22 @@
 """Integrated FastAPI application using the modular architecture"""
 import os
+import sys
 import asyncio
-import logging
+from pathlib import Path
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator, Optional
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+# Add shared logging to path
+shared_path = Path(__file__).parent.parent.parent / "shared"
+if str(shared_path) not in sys.path:
+    sys.path.insert(0, str(shared_path))
+
+# Initialize centralized logging
+from shared.logging import initialize_user_management_logging, get_logger
+
+# Initialize logging at startup - this replaces the basic logging configuration
+logger_instance = initialize_user_management_logging()
+logger = get_logger("am-user-management.main")
 
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -26,6 +34,10 @@ from modules.account_management.application.use_cases.login import LoginUseCase,
 
 # Import service registration router
 from modules.account_management.api.service_registration import router as service_router
+from modules.account_management.api.public.auth_router import router as auth_router
+from modules.account_management.api.public.google_auth_router import router as google_auth_router
+from modules.account_management.api.public.user_status_router import router as user_status_router
+from modules.account_management.api.public.password_reset_router import router as password_reset_router
 
 
 # Dependency injection setup
@@ -81,25 +93,41 @@ async def get_login_use_case(
 async def lifespan(app: FastAPI):
     """Manage application lifecycle"""
     # Startup
-    print("🚀 Starting AM User Management API...")
+    logger.info("🚀 Starting AM User Management API...", extra={"event": "startup"})
 
     # Create database tables
     try:
         await db_config.create_tables()
-        print("✅ PostgreSQL database tables created successfully")
-        print(f"📊 Database URL: {db_config.database_url}")
+        logger.info("✅ PostgreSQL database tables created successfully", extra={
+            "event": "database_setup",
+            "status": "success",
+            "database_url": str(db_config.database_url).split("@")[-1]  # Hide credentials
+        })
+        logger.debug(f"📊 Full Database URL pattern: {db_config.database_url[:20]}...", extra={
+            "event": "database_setup",
+            "url_prefix": str(db_config.database_url)[:20]
+        })
     except Exception as e:
-        print(f"❌ Failed to create PostgreSQL database tables: {e}")
-        print(
-            "💡 Make sure PostgreSQL is running: brew services start postgresql@15"
-        )
-        print("� Make sure database exists: createdb am_user_management")
+        logger.error(f"❌ Failed to create PostgreSQL database tables: {e}", extra={
+            "event": "database_setup",
+            "status": "failed",
+            "error": str(e),
+            "error_type": type(e).__name__
+        }, exc_info=True)
+        logger.warning("💡 Make sure PostgreSQL is running: brew services start postgresql@15", extra={
+            "event": "database_setup",
+            "troubleshooting": "postgresql_not_running"
+        })
+        logger.warning("💡 Make sure database exists: createdb am_user_management", extra={
+            "event": "database_setup", 
+            "troubleshooting": "database_not_exists"
+        })
         raise e  # Don't fall back to SQLite, we want PostgreSQL
 
     yield
 
     # Shutdown
-    print("🛑 Shutting down AM User Management API...")
+    logger.info("🛑 Shutting down AM User Management API...", extra={"event": "shutdown"})
     await db_config.close()
 
 
@@ -112,6 +140,18 @@ app = FastAPI(
     debug=True,
     lifespan=lifespan)
 
+# Add logging middleware (before CORS)
+try:
+    from shared.logging.middleware import LoggingMiddleware
+    app.add_middleware(
+        LoggingMiddleware,
+        service_name="am-user-management",
+        exclude_paths=["/health", "/metrics", "/docs", "/openapi.json", "/"]
+    )
+    logger.info("Added logging middleware", extra={"middleware": "logging"})
+except ImportError:
+    logger.warning("FastAPI logging middleware not available", extra={"middleware": "logging"})
+
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
@@ -120,9 +160,14 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+logger.info("Added CORS middleware", extra={"middleware": "cors"})
 
 # Include routers
 app.include_router(service_router)
+app.include_router(auth_router, prefix="/api/v1")
+app.include_router(google_auth_router, prefix="/api/v1")
+app.include_router(user_status_router, prefix="/api/v1")
+app.include_router(password_reset_router, prefix="/api/v1")
 
 
 # Pydantic models for API requests/responses
@@ -190,6 +235,12 @@ async def register(request: RegisterRequest,
                        get_create_user_use_case)):
     """Register a new user"""
     try:
+        logger.info("User registration attempt", extra={
+            "email": request.email,
+            "has_phone": bool(request.phone_number),
+            "endpoint": "/api/v1/auth/register"
+        })
+        
         # Convert API request to use case request
         use_case_request = CreateUserRequest(email=request.email,
                                              password=request.password,
@@ -197,17 +248,34 @@ async def register(request: RegisterRequest,
 
         # Execute use case
         response = await create_user_use_case.execute(use_case_request)
+        
+        logger.info("User registration successful", extra={
+            "user_id": response.user_id,
+            "email": request.email
+        })
+        
         return response
 
     except ValueError as e:
+        logger.warning("User registration validation error", extra={
+            "email": request.email,
+            "error": str(e),
+            "error_type": "ValueError"
+        })
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail=str(e))
     except Exception as e:
+        logger.error("User registration failed", extra={
+            "email": request.email,
+            "error": str(e),
+            "error_type": type(e).__name__
+        }, exc_info=True)
+        
         if "already exists" in str(e).lower():
             raise HTTPException(status_code=status.HTTP_409_CONFLICT,
                                 detail=str(e))
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                            detail="Internal server error occurred")
+                            detail=f"Internal server error: {str(e)}")
 
 
 @app.post("/api/v1/auth/login")
@@ -222,15 +290,14 @@ async def login(request: LoginRequestModel,
         # Execute use case (authenticate user)
         auth_response = await login_use_case.execute(use_case_request)
 
-        # Return user data for Auth Tokens service to create JWT
+        # Return user data with access token
         return {
             "user_id": auth_response.user_id,
             "username": auth_response.email,  # Using email as username
             "email": auth_response.email,
-            "status":
-            auth_response.status,  # Include status for Auth Tokens to verify
-            "scopes":
-            ["read", "write"]  # Default scopes, can be extended based on roles
+            "status": auth_response.status,
+            "scopes": auth_response.scopes,
+            "access_token": auth_response.access_token
         }
 
     except ValueError as e:
@@ -272,13 +339,18 @@ async def get_user_internal(
             user.status.value).upper()  # Ensure uppercase comparison
         is_active = status_value == "ACTIVE"
 
+        # Determine user scopes based on email (admin users get admin scope)
+        scopes = ["read", "write"]
+        if user.email.value in ["admin@example.com", "ne2@example.com"]:
+            scopes.append("admin")
+
         return {
             "user_id":
             str(user.id.value),  # Fixed: use user.id instead of user.user_id
             "username": user.email.value,  # Using email as username
             "email": user.email.value,
             "status": status_value,
-            "scopes": ["read", "write"],  # Based on user roles/permissions
+            "scopes": scopes,  # Based on user roles/permissions
             "active": is_active
         }
 
@@ -288,6 +360,150 @@ async def get_user_internal(
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                             detail="Internal server error occurred")
+
+
+@app.post("/internal/v1/auth/validate-credentials")
+async def validate_credentials_internal(
+    credentials: dict,
+    user_repository: SQLAlchemyUserRepository = Depends(get_user_repository)):
+    """
+    Internal endpoint for auth-tokens service to validate user credentials.
+    This endpoint validates email/password WITHOUT calling auth-tokens service
+    to avoid circular dependency.
+    """
+    try:
+        from core.value_objects.email import Email
+        from modules.account_management.application.use_cases.login import LoginUseCase
+        from shared_infra.logging.logger import get_logger
+        
+        logger = get_logger(__name__)
+        
+        email_str = credentials.get("email")
+        password = credentials.get("password")
+        
+        if not email_str or not password:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Email and password are required"
+            )
+        
+        # Validate email format
+        try:
+            email = Email(email_str)
+        except ValueError as e:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid credentials"
+            )
+        
+        # Find user by email
+        user = await user_repository.get_by_email(email)
+        
+        if not user:
+            logger.warning(f"Login failed: User not found for email {email_str}")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid credentials"
+            )
+        
+        # Check account status
+        if user.status.value.upper() != "ACTIVE":
+            logger.warning(f"Login failed: User {user.id.value} status is {user.status.value}")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid credentials"
+            )
+        
+        # Verify password
+        if not user.verify_password(password):
+            logger.warning(f"Login failed: Invalid password for user {user.id.value}")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid credentials"
+            )
+        
+        # Return user data for token creation
+        return {
+            "user_id": str(user.id.value),
+            "username": user.email.value,
+            "email": user.email.value,
+            "status": user.status.value.upper(),
+            "scopes": ["read", "write"]
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Unexpected error during credential validation: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error occurred"
+        )
+
+
+# Internal service-to-service endpoints
+@app.get("/internal/v1/service-info")
+async def get_service_info():
+    """
+    Internal endpoint for service discovery and health checking.
+    Called by other internal services.
+    """
+    return {
+        "service_id": "am-user-management",
+        "service_name": "User Management Service",
+        "version": "1.0.0",
+        "capabilities": [
+            "user_authentication",
+            "user_registration", 
+            "user_management",
+            "jwt_token_validation"
+        ],
+        "endpoints": {
+            "internal": [
+                "/internal/v1/users/{user_id}",
+                "/internal/v1/service-info"
+            ],
+            "public": [
+                "/api/v1/auth/register",
+                "/api/v1/auth/login", 
+                "/api/v1/auth/status"
+            ]
+        }
+    }
+
+
+@app.post("/api/v1/admin/reset-database")
+async def reset_database():
+    """Reset database - Drop and recreate all tables (DEV ONLY)"""
+    try:
+        logger.warning("Database reset requested - dropping all tables", extra={
+            "endpoint": "/api/v1/admin/reset-database",
+            "action": "reset_database"
+        })
+        
+        # Drop all tables
+        await db_config.drop_tables()
+        logger.info("All database tables dropped successfully")
+        
+        # Recreate all tables with current schema
+        await db_config.create_tables()
+        logger.info("All database tables recreated successfully")
+        
+        return {
+            "status": "success",
+            "message": "Database reset completed successfully",
+            "action": "tables_dropped_and_recreated"
+        }
+        
+    except Exception as e:
+        logger.error("Database reset failed", extra={
+            "error": str(e),
+            "error_type": type(e).__name__
+        }, exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Database reset failed: {str(e)}"
+        )
 
 
 if __name__ == "__main__":

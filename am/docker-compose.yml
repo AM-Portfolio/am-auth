@@ -1,0 +1,228 @@
+services:
+  # API Gateway - Single Entry Point for All Client Requests
+  am-api-gateway:
+    build:
+      context: ./am-api-gateway
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./.env.docker
+      - ./config/app.env
+      - ./config/services.env
+      - ./config/database.env
+      - ./config/security.env
+      - ./config/logging.env
+      - ./config/build.env
+      - ./config/features.env
+    environment:
+      # Service URLs (internal Docker network)
+      - AUTH_SERVICE_URL=http://auth-tokens:8001
+      - USER_MANAGEMENT_URL=http://am-user-management:8000
+      - PYTHON_SERVICE_URL=http://am-python-internal-service:8002
+      - JAVA_SERVICE_URL=http://am-java-internal-service:8003
+      - TRADE_SERVICE_URL=http://host.docker.internal:8077
+      - PORTFOLIO_SERVICE_URL=http://host.docker.internal:8072
+      - DOCUMENT_PROCESSOR_URL=http://host.docker.internal:8070
+      - MARKET_DATA_SERVICE_URL=http://host.docker.internal:8092
+      # JWT Configuration
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_ALGORITHM=HS256
+      # Rate Limiting
+      - RATE_LIMIT_REQUESTS=100
+      - RATE_LIMIT_WINDOW=60
+      # Timeouts
+      - DEFAULT_TIMEOUT=30.0
+      - LONG_TIMEOUT=60.0
+    volumes:
+      - ./am-api-gateway:/app
+      - ./shared:/app/shared
+    networks:
+      - am-network
+    depends_on:
+      auth-tokens:
+        condition: service_healthy
+      am-user-management:
+        condition: service_healthy
+      am-python-internal-service:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Real User Management Service
+  am-user-management:
+    build:
+      context: ./am-user-management
+      dockerfile: Dockerfile
+    ports:
+      - "8010:8000" # Map external port 8010 to internal port 8000
+    env_file:
+      - ./.env.docker
+      - ./config/app.env
+      - ./config/services.env
+      - ./config/database.env
+      - ./config/security.env
+      - ./config/logging.env
+      - ./config/build.env
+      - ./config/features.env
+    environment:
+      # Centralized logging configuration
+      - LOG_FORMAT=json
+      - LOG_CONSOLE=true
+      - USER_MGMT_LOG_LEVEL=INFO
+      - ENVIRONMENT=docker
+      # Auth service connection
+      - AUTH_SERVICE_URL=http://auth-tokens:8001
+      # JWT Configuration
+      - JWT_SECRET=${JWT_SECRET}
+      # Email verification - disabled for testing
+      - ENABLE_EMAIL_VERIFICATION=false
+    volumes:
+      - ./am-user-management:/app
+      - ./shared:/app/shared # Mount shared logging infrastructure
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    networks:
+      - am-network
+    healthcheck:
+      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Auth Tokens Service
+  auth-tokens:
+    build:
+      context: ./am-auth-tokens
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8001"
+    env_file:
+      - ./.env.docker
+      - ./config/app.env
+      - ./config/services.env
+      - ./config/database.env
+      - ./config/security.env
+      - ./config/logging.env
+      - ./config/build.env
+      - ./config/features.env
+    environment:
+      # Centralized logging configuration
+      - LOG_FORMAT=json
+      - LOG_CONSOLE=true
+      - AUTH_TOKENS_LOG_LEVEL=INFO
+      - ENVIRONMENT=docker
+      # User service connection
+      - USER_SERVICE_URL=http://am-user-management:8000
+      # JWT Configuration
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_ALGORITHM=HS256
+      # Database connection (uses shared PostgreSQL container)
+      - DATABASE_URL=postgresql://postgres:postgres@am-market-data-postgres-1:5432/postgres
+    volumes:
+      - ./am-auth-tokens:/app
+      - ./shared:/app/shared # Mount shared logging infrastructure
+    networks:
+      - am-network
+    depends_on:
+      am-user-management:
+        condition: service_healthy
+    command: sh -c "pip install pydantic[email] && python -m uvicorn main:app --host 0.0.0.0 --port 8001 --reload"
+    healthcheck:
+      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Python Internal Service (Document Processing)
+  am-python-internal-service:
+    build:
+      context: ./am-python-internal-service
+      dockerfile: Dockerfile
+    # No external ports exposed - internal network only
+    env_file:
+      - ./.env.docker
+      - ./config/app.env
+      - ./config/services.env
+      - ./config/database.env
+      - ./config/security.env
+      - ./config/logging.env
+      - ./config/build.env
+      - ./config/features.env
+    environment:
+      # Centralized logging configuration
+      - LOG_FORMAT=json
+      - LOG_CONSOLE=true
+      - INTERNAL_SERVICE_LOG_LEVEL=INFO
+      - ENVIRONMENT=docker
+      # JWT Configuration
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_ALGORITHM=HS256
+      - INTERNAL_JWT_SECRET=${INTERNAL_JWT_SECRET}
+    volumes:
+      - ./am-python-internal-service:/app
+      - ./shared:/app/shared # Mount shared logging infrastructure
+    networks:
+      - am-network
+    depends_on:
+      am-user-management:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8002/health')" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Java Internal Service (Reporting)
+  am-java-internal-service:
+    build:
+      context: ./am-java-internal-service
+      dockerfile: Dockerfile
+    # No external ports exposed - internal network only
+    env_file:
+      - ./.env.docker
+      - ./config/app.env
+      - ./config/services.env
+      - ./config/database.env
+      - ./config/security.env
+      - ./config/logging.env
+      - ./config/build.env
+      - ./config/features.env
+    environment:
+      # Centralized logging configuration
+      - LOG_FORMAT=json
+      - LOG_CONSOLE=true
+      - INTERNAL_SERVICE_LOG_LEVEL=INFO
+      - ENVIRONMENT=docker
+      # JWT Configuration
+      - JWT_SECRET=${JWT_SECRET}
+      - INTERNAL_JWT_SECRET=${INTERNAL_JWT_SECRET}
+      - MONGODB_URL=${DOCUMENT_MONGODB_URL}
+      - KAFKA_BOOTSTRAP_SERVERS=${DOCUMENT_KAFKA_SERVERS}
+      - SPRING_APPLICATION_NAME=am-document-processor
+      - SERVER_PORT=8070
+      - JWT_SECRET=${INTERNAL_JWT_SECRET}
+      - SPRING_AUTOCONFIGURE_EXCLUDE=org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
+    # NO ports exposed - internal network only (security: network isolation)
+    networks:
+      - am-network
+    depends_on:
+      am-api-gateway:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8070/actuator/health" ]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+networks:
+  am-network:
+    driver: bridge
+    name: am-network

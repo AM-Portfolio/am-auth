@@ -92,8 +92,10 @@ class LoginUseCase:
             user.record_successful_login()
             await self._user_repository.save(user)
             
-            # Get user scopes (default scopes for now)
+            # Get user scopes (add admin scope for admin users)
             scopes = ["read", "write"]
+            if str(user.email) in ["admin@example.com", "ne2@example.com"]:
+                scopes.append("admin")
             
             # Call Auth Tokens service to get JWT token using validated user_id
             access_token = await self._get_access_token(str(user.id))

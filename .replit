@@ -31,20 +31,20 @@ outputType = "console"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd am/am-auth-tokens && python main.py"
+args = "cd am/am-auth-tokens && GOOGLE_CLIENT_ID=\"test-google-client-id.apps.googleusercontent.com\" python main.py"
 waitForPort = 8080
 
 [[workflows.workflow]]
 name = "User Management"
 author = "agent"
 
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "cd am/am-user-management && python main.py"
-waitForPort = 8000
-
 [workflows.workflow.metadata]
 outputType = "console"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd am/am-user-management && PYTHONDONTWRITEBYTECODE=1 python -B main.py"
+waitForPort = 8000
 
 [[ports]]
 localPort = 5000
@@ -57,6 +57,10 @@ externalPort = 8000
 [[ports]]
 localPort = 8080
 externalPort = 8080
+
+[[ports]]
+localPort = 37861
+externalPort = 3000
 
 [deployment]
 deploymentTarget = "autoscale"
