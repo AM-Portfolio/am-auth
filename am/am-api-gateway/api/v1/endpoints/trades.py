@@ -24,22 +24,33 @@ router = APIRouter()
 
 
 
-@router.api_route("/trades/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
+@router.api_route("/am/trade/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
 async def proxy_trade_service(
     path: str,
     request: Request,
     current_user: CurrentUser = Depends(get_current_user)
 ):
     """
-    Generic proxy for ALL Trade Service endpoints
+    Generic proxy for ALL Trade Microservice endpoints
     
-    This single function handles:
-    - GET /trades/all
-    - GET /trades/{id}
-    - POST /trades
-    - PUT /trades/{id}
-    - DELETE /trades/{id}
-    - ... and any future endpoints added to Trade Service
+    Gateway URL Pattern: /api/v1/am/trade/{path}
+    Trade Service URL: /{path} (passes entire path as-is)
+    
+    Examples:
+    - Gateway: GET /api/v1/am/trade/api/v1/trades/filter?portfolioIds=123
+      → Trade Service: GET /api/v1/trades/filter?portfolioIds=123
+    
+    - Gateway: GET /api/v1/am/trade/api/v1/journal/{journalId}
+      → Trade Service: GET /api/v1/journal/{journalId}
+    
+    - Gateway: GET /api/v1/am/trade/api/v1/portfolio/{portfolioId}
+      → Trade Service: GET /api/v1/portfolio/{portfolioId}
+    
+    - Gateway: POST /api/v1/am/trade/api/v1/trades
+      → Trade Service: POST /api/v1/trades
+    
+    This allows the trade microservice to have multiple API paths (trades, journal, 
+    portfolio, etc.) without hardcoding each one in the gateway.
     
     Flow:
     1. get_current_user validates user JWT ✅
@@ -61,8 +72,8 @@ async def proxy_trade_service(
         if request.method in ["POST", "PUT", "PATCH"]:
             body = await request.body()
         
-        # Forward request to Trade Service
-        target_url = f"{settings.TRADE_SERVICE_URL}/api/v1/trades/{path}"
+        # Forward entire path as-is to Trade Service
+        target_url = f"{settings.TRADE_SERVICE_URL}/{path}"
         logger.info(f"Proxying to Trade Service: {target_url}")
         
         async with httpx.AsyncClient(timeout=settings.LONG_TIMEOUT) as client:

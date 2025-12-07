@@ -1,0 +1,315 @@
+openapi: 3.0.3
+info:
+  title: Auth Tokens Service API v1
+  description: |
+    **JWT Token Authentication Service**
+    
+    Create and validate JWT tokens for user authentication and service-to-service communication.
+    
+    ## Authentication Flow
+    1. User provides credentials → receives JWT access token
+    2. Client includes token in `Authorization: Bearer <token>` header
+    3. For service-to-service calls, exchange user token for service token
+    
+    ## Base URL
+    - **Direct**: `http://localhost:8001/api/v1`
+    - **Via Gateway**: `http://localhost:8000/api/v1` (Production)
+    
+  version: 1.0.0
+  contact:
+    name: AM Portfolio Auth Team
+    email: auth@amportfolio.com
+
+servers:
+  - url: http://localhost:8001/api/v1
+    description: Auth Tokens Service Direct
+  - url: http://localhost:8000/api/v1
+    description: API Gateway (Production)
+
+tags:
+  - name: Authentication
+    description: Token creation and user login
+
+paths:
+  /tokens:
+    post:
+      tags:
+        - Authentication
+      summary: Create Access Token (Login)
+      description: |
+        Authenticate user with email and password, returns JWT access token.
+        
+        **Authentication Flow:**
+        1. Receives username (email) and password
+        2. Validates credentials with User Management Service
+        3. Checks user account status (must be ACTIVE)
+        4. Creates JWT token with user claims (user_id, email, scopes)
+        5. Returns token with expiration info (default 1 hour)
+        
+        **JWT Token Payload:**
+        ```json
+        {
+          "sub": "user-id",
+          "email": "user@example.com",
+          "scopes": ["read", "write"],
+          "exp": 1733523600,
+          "iat": 1733520000
+        }
+        ```
+        
+        **Important:**
+        - User must be **ACTIVE** status (not PENDING, SUSPENDED, or DELETED)
+        - Password is validated against bcrypt hash in User Management Service
+        - Token expires after 1 hour (configurable via JWT_EXPIRE_MINUTES)
+        
+      operationId: createToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRequest'
+            examples:
+              validLogin:
+                summary: Valid user credentials
+                value:
+                  username: user@example.com
+                  password: SecurePass123!
+              adminLogin:
+                summary: Admin user login
+                value:
+                  username: admin@amportfolio.com
+                  password: AdminPass456!
+      responses:
+        '200':
+          description: Token created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+              examples:
+                success:
+                  summary: Successful login
+                  value:
+                    access_token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4ZWRmZjE5Yi1lN2Q3LTQ4MmYtYWVmYi01ZDJkNTVhOWM4NDQiLCJlbWFpbCI6InVzZXJAZXhhbXBsZS5jb20iLCJzY29wZXMiOlsicmVhZCIsIndyaXRlIl0sImV4cCI6MTczMzUyMzYwMCwiaWF0IjoxNzMzNTIwMDAwfQ.signature
+                    token_type: bearer
+                    expires_in: 3600
+                    user_id: 8edff19b-e7d7-482f-aefb-5d2d55a9c844
+                    username: user@example.com
+                    email: user@example.com
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
+              examples:
+                invalidPassword:
+                  summary: Wrong password
+                  value:
+                    detail: Invalid credentials
+                    error_code: INVALID_CREDENTIALS
+                userNotFound:
+                  summary: User does not exist
+                  value:
+                    detail: User not found
+                    error_code: USER_NOT_FOUND
+        '403':
+          description: User account not active
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenError'
+              examples:
+                pendingActivation:
+                  summary: Account pending activation
+                  value:
+                    detail: "User account is not active: PENDING"
+                    error_code: ACCOUNT_NOT_ACTIVE
+                suspendedAccount:
+                  summary: Account suspended
+                  value:
+                    detail: "User account is not active: SUSPENDED"
+                    error_code: ACCOUNT_SUSPENDED
+        '422':
+          description: Validation error (missing/invalid fields)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              examples:
+                missingPassword:
+                  summary: Password field missing
+                  value:
+                    detail:
+                      - loc: ["body", "password"]
+                        msg: field required
+                        type: value_error.missing
+                invalidEmail:
+                  summary: Invalid email format
+                  value:
+                    detail:
+                      - loc: ["body", "username"]
+                        msg: value is not a valid email address
+                        type: value_error.email
+        '503':
+          description: User Management Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceUnavailableError'
+              examples:
+                serviceDown:
+                  summary: User service unreachable
+                  value:
+                    detail: User management service is unavailable
+                    error_code: SERVICE_UNAVAILABLE
+
+components:
+  schemas:
+    TokenRequest:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          format: email
+          description: User's email address (used as username)
+          example: user@example.com
+          minLength: 5
+          maxLength: 255
+        password:
+          type: string
+          format: password
+          description: User's password
+          example: SecurePass123!
+          minLength: 8
+          maxLength: 100
+      description: Login credentials for token creation
+
+    TokenResponse:
+      type: object
+      required:
+        - access_token
+        - token_type
+        - expires_in
+        - user_id
+        - username
+        - email
+      properties:
+        access_token:
+          type: string
+          description: JWT access token (use in Authorization header)
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4ZWRmZjE5Yi1lN2Q3LTQ4MmYtYWVmYi01ZDJkNTVhOWM4NDQiLCJlbWFpbCI6InVzZXJAZXhhbXBsZS5jb20iLCJzY29wZXMiOlsicmVhZCIsIndyaXRlIl0sImV4cCI6MTczMzUyMzYwMH0.signature
+        token_type:
+          type: string
+          enum: [bearer]
+          description: Token type (always "bearer")
+          example: bearer
+        expires_in:
+          type: integer
+          description: Token lifetime in seconds (default 3600 = 1 hour)
+          example: 3600
+          minimum: 1
+        user_id:
+          type: string
+          format: uuid
+          description: User's unique identifier
+          example: 8edff19b-e7d7-482f-aefb-5d2d55a9c844
+        username:
+          type: string
+          format: email
+          description: User's email/username
+          example: user@example.com
+        email:
+          type: string
+          format: email
+          description: User's email address
+          example: user@example.com
+      description: Successful authentication response with JWT token
+
+    UnauthorizedError:
+      type: object
+      required:
+        - detail
+      properties:
+        detail:
+          type: string
+          description: Error message
+          example: Invalid credentials
+        error_code:
+          type: string
+          description: Machine-readable error code
+          example: INVALID_CREDENTIALS
+          enum:
+            - INVALID_CREDENTIALS
+            - USER_NOT_FOUND
+            - INVALID_PASSWORD
+      description: Authentication failed (401)
+
+    ForbiddenError:
+      type: object
+      required:
+        - detail
+      properties:
+        detail:
+          type: string
+          description: Error message with account status
+          example: "User account is not active: PENDING"
+        error_code:
+          type: string
+          description: Machine-readable error code
+          example: ACCOUNT_NOT_ACTIVE
+          enum:
+            - ACCOUNT_NOT_ACTIVE
+            - ACCOUNT_SUSPENDED
+            - ACCOUNT_DELETED
+      description: Account not active or insufficient permissions (403)
+
+    ValidationError:
+      type: object
+      required:
+        - detail
+      properties:
+        detail:
+          type: array
+          description: List of validation errors
+          items:
+            type: object
+            required:
+              - loc
+              - msg
+              - type
+            properties:
+              loc:
+                type: array
+                description: Location of the error (e.g., ["body", "username"])
+                items:
+                  type: string
+                example: ["body", "username"]
+              msg:
+                type: string
+                description: Human-readable error message
+                example: field required
+              type:
+                type: string
+                description: Error type identifier
+                example: value_error.missing
+      description: Request validation failed (422)
+
+    ServiceUnavailableError:
+      type: object
+      required:
+        - detail
+      properties:
+        detail:
+          type: string
+          description: Error message
+          example: User management service is unavailable
+        error_code:
+          type: string
+          description: Machine-readable error code
+          example: SERVICE_UNAVAILABLE
+      description: External service unavailable (503)

@@ -1,0 +1,130 @@
+openapi: 3.0.3
+info:
+  title: Trade Service API v1
+  description: |
+    **Trade Management and Execution Service**
+    
+    Comprehensive trade lifecycle management including creation, execution, monitoring, and history tracking.
+    
+    ## Authentication
+    All endpoints require JWT Bearer token obtained from `/api/v1/tokens` endpoint.
+    
+    ## Access Pattern
+    - **Direct Access**: `http://localhost:8077/api/v1/trades/*` (for testing)
+    - **Production**: `http://localhost:8000/api/v1/trades/*` (via API Gateway)
+    
+    ## Key Features
+    - Trade order creation and validation
+    - Real-time trade execution
+    - Portfolio-based trade filtering
+    - Trade history and analytics
+    - Risk validation and compliance checks
+    
+  version: 1.0.0
+  contact:
+    name: AM Portfolio Trading Team
+    email: trading@amportfolio.com
+
+servers:
+  - url: http://localhost:8077/api/v1
+    description: Trade Service Direct (Testing)
+  - url: http://localhost:8000/api/v1
+    description: API Gateway (Production)
+
+tags:
+  - name: Trade Creation
+    description: Create and submit trade orders
+  - name: Trade Query
+    description: Retrieve trade information and history
+  - name: Trade Execution
+    description: Execute and manage trade orders
+  - name: Portfolio Trades
+    description: Portfolio-specific trade operations
+  - name: Analytics
+    description: Trade analytics and reporting
+
+paths:
+  /trades:
+    post:
+      tags:
+        - Trade Creation
+      summary: Create New Trade Order
+      description: |
+        Create a new trade order with validation.
+        
+        **Validation Checks:**
+        - Portfolio ownership verification
+        - Sufficient balance/holdings check
+        - Instrument availability validation
+        - Risk compliance verification
+        
+        **Order Types:**
+        - MARKET: Execute at current market price
+        - LIMIT: Execute at specified price or better
+        - STOP_LOSS: Trigger sell when price falls below threshold
+        - STOP_LIMIT: Combination of stop and limit orders
+        
+      operationId: createTrade
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTradeRequest'
+            examples:
+              marketBuy:
+                summary: Market Buy Order
+                value:
+                  portfolioId: "8a57024c-05c2-475b-a2c4-0545865efa4a"
+                  symbol: "RELIANCE"
+                  quantity: 10
+                  orderType: "MARKET"
+                  side: "BUY"
+                  validity: "DAY"
+              limitSell:
+                summary: Limit Sell Order
+                value:
+                  portfolioId: "8a57024c-05c2-475b-a2c4-0545865efa4a"
+                  symbol: "TCS"
+                  quantity: 5
+                  orderType: "LIMIT"
+                  side: "SELL"
+                  price: 3500.00
+                  validity: "GTC"
+              stopLoss:
+                summary: Stop Loss Order
+                value:
+                  portfolioId: "8a57024c-05c2-475b-a2c4-0545865efa4a"
+                  symbol: "INFY"
+                  quantity: 15
+                  orderType: "STOP_LOSS"
+                  side: "SELL"
+                  stopPrice: 1450.00
+                  validity: "GTC"
+      responses:
+        '201':
+          description: Trade order created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateTradeResponse'
+        '400':
+          description: Invalid trade parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Insufficient permissions or balance
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InsufficientBalanceError'
+        '404':
+          description: Portfolio or symbol not found
+        '422':
+          description: Validation error
+        '503':
+          description: Market data service unavailable

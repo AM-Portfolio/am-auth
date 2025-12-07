@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-@router.api_route("/portfolios/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
+@router.api_route("/am/portfolio/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
 async def proxy_portfolio_service(
     path: str,
     request: Request,
@@ -65,7 +65,7 @@ async def proxy_portfolio_service(
         async with httpx.AsyncClient(timeout=settings.LONG_TIMEOUT) as client:
             response = await client.request(
                 method=request.method,
-                url=f"{settings.PORTFOLIO_SERVICE_URL}/api/v1/portfolios/{path}",
+                url=f"{settings.PORTFOLIO_SERVICE_URL}/{path}",
                 headers={
                     "Authorization": f"Bearer {service_token}",
                     "X-User-ID": str(current_user.user_id),

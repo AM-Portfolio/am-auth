@@ -38,7 +38,7 @@ async def proxy_market_data_service(
             body = await request.body()
         
         # Forward request to Market Data Service
-        target_url = f"{settings.MARKET_DATA_SERVICE_URL}/api/v1/market-data/{path}"
+        target_url = f"{settings.MARKET_DATA_SERVICE_URL}/{path}"
         logger.info(f"Proxying to Market Data Service: {target_url}")
         
         async with httpx.AsyncClient(timeout=settings.LONG_TIMEOUT) as client:
