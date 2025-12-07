@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-@router.api_route("/documents/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
+@router.api_route("/am/document/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
 async def proxy_document_processor(
     path: str,
     request: Request,
@@ -63,7 +63,7 @@ async def proxy_document_processor(
         async with httpx.AsyncClient(timeout=settings.LONG_TIMEOUT) as client:
             response = await client.request(
                 method=request.method,
-                url=f"{settings.DOCUMENT_PROCESSOR_URL}/api/v1/documents/{path}",
+                url=f"{settings.DOCUMENT_PROCESSOR_URL}/{path}",
                 headers={
                     "Authorization": f"Bearer {service_token}",
                     "X-User-ID": str(current_user.user_id),

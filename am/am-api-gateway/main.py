@@ -79,13 +79,11 @@ async def root():
     }
 
 # Register routers
-app.include_router(documents.router, prefix="/api/v1", tags=["Documents"])
-app.include_router(reports.router, prefix="/api/v1", tags=["Reports"])
 # Old portfolio router removed - replaced with portfolio_service generic proxy
 app.include_router(trades.router, tags=["Trades"])  # No prefix - handles /am/trade/{path} directly
-app.include_router(market_data.router, prefix="/api/v1", tags=["Market Data"])
-app.include_router(document_processor.router, prefix="/api/v1", tags=["Document Processor"])
-app.include_router(portfolio_service.router, prefix="/api/v1", tags=["Portfolio Service"])
+app.include_router(market_data.router, tags=["Market Data"])
+app.include_router(document_processor.router, tags=["Document Processor"])
+app.include_router(portfolio_service.router, tags=["Portfolio Service"])
 app.include_router(diagnostics.router, prefix="/api/v1", tags=["System Diagnostics"])
 
 
