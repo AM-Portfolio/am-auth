@@ -60,3 +60,26 @@ class TokenRecordORM(Base):
     
     def __repr__(self):
         return f"<TokenRecordORM(jti={self.jti}, user_id={self.user_id}, is_revoked={self.is_revoked})>"
+
+
+class RefreshTokenORM(Base):
+    """SQLAlchemy ORM model for refresh tokens"""
+    
+    __tablename__ = "refresh_tokens"
+    
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4, index=True)
+    
+    token = Column(String(255), unique=True, nullable=False, index=True)
+    user_id = Column(String(64), nullable=False, index=True)
+    
+    scopes = Column(ARRAY(String), nullable=False, default=[])
+    
+    is_revoked = Column(Boolean, default=False, nullable=False)
+    revoked_at = Column(DateTime(timezone=True), nullable=True)
+    replaced_by = Column(String(255), nullable=True)  # For token rotation
+    
+    expires_at = Column(DateTime(timezone=True), nullable=False)
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
+    
+    def __repr__(self):
+        return f"<RefreshTokenORM(user_id={self.user_id}, is_revoked={self.is_revoked})>"
