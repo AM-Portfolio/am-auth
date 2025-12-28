@@ -15,7 +15,7 @@ set -e
 INFLUXDB_URL="${INFLUXDB_URL:-http://localhost:8086}"
 INFLUXDB_ORG="${INFLUXDB_ORG:-am-portfolio}"
 INFLUXDB_BUCKET="${INFLUXDB_BUCKET:-market-data-bucket}"
-INFLUXDB_TOKEN="${INFLUXDB_TOKEN:-${INFLUXDB_TOKEN}}"
+INFLUXDB_TOKEN="${INFLUXDB_TOKEN:-my-super-secret-auth-token}"
 RETENTION_DAYS=30
 
 echo "============================================"

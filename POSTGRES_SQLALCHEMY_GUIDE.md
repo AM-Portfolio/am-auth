@@ -12,13 +12,13 @@
 
 ### Database Config (`config/database.env`)
 ```dotenv
-DATABASE_URL=postgresql://postgres:postgres@host.docker.internal:5432/postgres
+DATABASE_URL=postgresql://postgres:password123@host.docker.internal:5432/postgres
 ```
 
 ### What Docker Container Sees
 - **URL Format:** `postgresql+asyncpg://postgres:postgres@host.docker.internal:5432/postgres`
 - **User:** `postgres`
-- **Password:** `postgres`
+- **Password:** `password123`
 - **Host:** `host.docker.internal` (Docker's special DNS for accessing host machine)
 - **Port:** `5432` (standard PostgreSQL port)
 - **Database:** `postgres` (default database)

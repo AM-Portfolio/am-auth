@@ -122,7 +122,7 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       - JWT_ALGORITHM=HS256
       # Database connection (uses shared PostgreSQL container)
-      - DATABASE_URL=postgresql://postgres:postgres@am-market-data-postgres-1:5432/postgres
+      - DATABASE_URL=postgresql://postgres:password123@am-market-data-postgres-1:5432/postgres
     volumes:
       - ./am-auth-tokens:/app
       - ./shared:/app/shared # Mount shared logging infrastructure

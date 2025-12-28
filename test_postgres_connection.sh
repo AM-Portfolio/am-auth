@@ -12,8 +12,8 @@ timeout 3 bash -c "</dev/tcp/host.docker.internal/5432" 2>/dev/null && echo "✓
 echo ""
 
 # Test 2: Try connecting with postgres:postgres
-echo "2. Testing connection with postgres:postgres..."
-PGPASSWORD="postgres" psql -h host.docker.internal -U postgres -d postgres -c "SELECT version();" 2>&1 | head -3
+echo "2. Testing connection with postgres:password123..."
+PGPASSWORD="password123" psql -h host.docker.internal -U postgres -d postgres -c "SELECT version();" 2>&1 | head -3
 echo ""
 
 # Test 3: Try connecting with postgrid:postgrid
@@ -29,7 +29,7 @@ echo ""
 echo "=========================================="
 echo "Current Database Configuration:"
 echo "=========================================="
-echo "DATABASE_URL=postgresql://postgres:postgres@host.docker.internal:5432/postgres"
+echo "DATABASE_URL=postgresql://postgres:password123@host.docker.internal:5432/postgres"
 echo ""
 echo "To fix the authentication error:"
 echo "1. Verify which credentials PostgreSQL accepts"
