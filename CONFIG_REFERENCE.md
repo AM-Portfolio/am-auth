@@ -278,7 +278,7 @@ docker-compose up -d
 
 ### Scenario 2: Running Business Services Only
 ```bash
-cd am/
+cd 
 docker-compose -f docker-compose-business.yml up -d
 
 # Services will load all config files and run independently
@@ -345,7 +345,7 @@ docker-compose up -d
 
 ### Validate Configuration Syntax
 ```bash
-cd am/
+cd 
 
 # Check core services config
 docker-compose config > /dev/null && echo "✅ Valid"

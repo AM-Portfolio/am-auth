@@ -26,7 +26,7 @@ auth-test/
 │       ├── SERVICE_TO_SERVICE_AUTH_PROMPT.md
 │       ├── USER_STATUS_MANAGEMENT.md
 │       └── replit.md
-├── am/
+├── 
 │   ├── am-api-gateway/
 │   │   ├── README.md                  # ✅ Service documentation
 │   │   └── QUICK_START.md             # ✅ Testing guide
@@ -217,7 +217,7 @@ auth-test/
 3. Refer to [docs/SECURITY.md](./SECURITY.md) for security questions
 
 ### For DevOps/Deployment
-1. Review [am/am-user-management/PRODUCTION_GUIDE.md](../am/am-user-management/PRODUCTION_GUIDE.md)
+1. Review [am-user-management/PRODUCTION_GUIDE.md](../am-user-management/PRODUCTION_GUIDE.md)
 2. Check [docs/SECURITY.md](./SECURITY.md) security checklist
 3. Follow [docs/DEVELOPMENT.md](./DEVELOPMENT.md) CI/CD section
 

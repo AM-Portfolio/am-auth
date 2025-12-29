@@ -34,13 +34,13 @@ This is a **complete authentication and authorization system** with:
 3. **Test the system:**
    - Follow [Quick Start Guide](./docs/QUICK_START.md) (5 min read)
    - Use [Postman Collection](./postman/README.md) (27 requests)
-   - Run automated tests: `bash am/test_all.sh`
+   - Run automated tests: `bash test_all.sh`
 
 ## 📁 Project Structure
 
 ```
 auth-test/
-├── am/                          # Microservices
+├──                           # Microservices
 │   ├── am-api-gateway/          # API Gateway (Port 8000) ✅ PUBLIC
 │   ├── am-user-management/      # User Service (Port 8010) ✅ PUBLIC
 │   ├── am-auth-tokens/          # Auth Service (Port 8001) ✅ PUBLIC
@@ -326,7 +326,7 @@ All passwords must have:
 ### Option 1: Automated Testing (Fast - 5 minutes)
 ```bash
 cd /path/to/auth-test-3
-bash am/test_all.sh
+bash test_all.sh
 ```
 **What it tests:**
 - ✅ All 5 services health checks
@@ -414,7 +414,7 @@ curl -s -X POST http://localhost:8010/api/v1/request-reset \
 → Then: `/docs/SECURITY.md` (security details)
 
 **🧪 I want to test everything**
-→ Run: `bash am/test_all.sh` (5 min)
+→ Run: `bash test_all.sh` (5 min)
 → Read: `/docs/TESTING.md` (comprehensive guide)
 → Use: Postman collection for manual testing
 
@@ -451,7 +451,7 @@ curl -s -X POST http://localhost:8010/api/v1/request-reset \
 ### Task 1: Run Complete End-to-End Test (10 minutes)
 1. Start services: `cd am && docker-compose up -d --build`
 2. Wait 30 seconds for services to be ready
-3. Run: `bash am/test_all.sh`
+3. Run: `bash test_all.sh`
 4. Check result: All tests pass ✅
 
 ### Task 2: Test Using Postman (15 minutes)
@@ -468,11 +468,11 @@ curl -s -X POST http://localhost:8010/api/v1/request-reset \
 
 ### Task 3: Add New API Endpoint (1-2 hours)
 1. Read: `/.github/copilot-instructions.md` → "Adding New Endpoints"
-2. Create endpoint file in `am/am-api-gateway/api/v1/endpoints/`
+2. Create endpoint file in `am-api-gateway/api/v1/endpoints/`
 3. Register router in `main.py`
 4. Add tests to Postman collection
 5. Update documentation
-6. Run tests: `bash am/test_all.sh`
+6. Run tests: `bash test_all.sh`
 
 ### Task 4: Reset Password (5 minutes)
 1. Request reset: `POST /api/v1/request-reset` with email
@@ -577,7 +577,7 @@ docker-compose logs am-user-management | grep "Reset token"
 
 1. **Read relevant documentation** (see files guide above)
 2. **Check logs:** `docker-compose logs <service_name>`
-3. **Run tests:** `bash am/test_all.sh`
+3. **Run tests:** `bash test_all.sh`
 4. **Use Postman:** Test endpoints manually with collection
 5. **Read troubleshooting** sections in relevant docs
 
@@ -592,7 +592,7 @@ All services run in Docker with these configurations:
 - Database: `auth_db`
 - Auto-migration on startup
 
-**Environment Variables** (in `am/.env.docker`):
+**Environment Variables** (in `.env.docker`):
 ```
 JWT_SECRET=your-32-character-secret-key-here
 INTERNAL_JWT_SECRET=your-service-token-secret-key-here
@@ -758,7 +758,7 @@ Response headers show limit:
 2. Implement feature following patterns in `/.github/copilot-instructions.md`
 3. Add tests to Postman collection
 4. Update documentation
-5. Run: `bash am/test_all.sh` to verify
+5. Run: `bash test_all.sh` to verify
 6. Submit pull request with test results
 
 ### Code Quality
@@ -876,7 +876,7 @@ cd auth-test
 
 ### 2. Setup User Management Service
 ```bash
-cd am/am-user-management
+cd am-user-management
 
 # Install dependencies
 pip install -r requirements.txt
@@ -895,7 +895,7 @@ Service will be available at `http://localhost:8000`
 
 ### 3. Setup Auth Tokens Service
 ```bash
-cd am/am-auth-tokens
+cd am-auth-tokens
 
 # Install dependencies
 pip install -r requirements.txt
@@ -976,7 +976,7 @@ Here's how the services work together for a complete authentication flow:
 
 ```
 auth-test/
-├── am/
+├── 
 │   ├── am-user-management/          # User Management microservice
 │   │   ├── core/                    # Domain kernel (value objects, interfaces)
 │   │   ├── modules/                 # Feature modules (account management)
@@ -1003,13 +1003,13 @@ auth-test/
 
 ### User Management Service
 ```bash
-cd am/am-user-management
+cd am-user-management
 python -m pytest
 ```
 
 ### Auth Tokens Service
 ```bash
-cd am/am-auth-tokens
+cd am-auth-tokens
 pytest
 ```
 
@@ -1059,8 +1059,8 @@ Both services include Docker support. See individual service READMEs for Docker 
 
 ## 📚 Documentation
 
-- **User Management**: See `am/am-user-management/README.md` and `PRODUCTION_GUIDE.md`
-- **Auth Tokens**: See `am/am-auth-tokens/README.md` and `ENVIRONMENT_GUIDE.md`
+- **User Management**: See `am-user-management/README.md` and `PRODUCTION_GUIDE.md`
+- **Auth Tokens**: See `am-auth-tokens/README.md` and `ENVIRONMENT_GUIDE.md`
 - **Replit Setup**: See `replit.md` for cloud development environment setup
 
 ## 🤝 Contributing

@@ -74,11 +74,11 @@ Complete guide to all documentation for the authentication microservices system.
 
 | Service | Files |
 |---------|-------|
-| **API Gateway** | `am/am-api-gateway/README.md`, `QUICK_START.md` |
-| **User Management** | `am/am-user-management/README.md` |
-| **Auth Tokens** | `am/am-auth-tokens/README.md`, `ENVIRONMENT_GUIDE.md` |
-| **Python Internal** | `am/am-python-internal-service/` (implementation docs) |
-| **Java Internal** | `am/am-java-internal-service/` (Spring Boot patterns) |
+| **API Gateway** | `am-api-gateway/README.md`, `QUICK_START.md` |
+| **User Management** | `am-user-management/README.md` |
+| **Auth Tokens** | `am-auth-tokens/README.md`, `ENVIRONMENT_GUIDE.md` |
+| **Python Internal** | `am-python-internal-service/` (implementation docs) |
+| **Java Internal** | `am-java-internal-service/` (Spring Boot patterns) |
 
 ---
 
@@ -116,7 +116,7 @@ Complete guide to all documentation for the authentication microservices system.
 **Logging & Monitoring**
 - Shared logging: `/.github/copilot-instructions.md` → "Centralized Logging"
 - Implementation: `/shared/logging/` directory
-- Configuration: `/am/.env.docker`
+- Configuration: `/.env.docker`
 
 **Database & ORM**
 - SQLAlchemy patterns: `/.github/copilot-instructions.md` → "Dependency Injection Standard"
@@ -125,7 +125,7 @@ Complete guide to all documentation for the authentication microservices system.
 
 **Docker & Deployment**
 - Development setup: `/docs/QUICK_START.md`
-- Docker Compose: `/am/docker-compose.yml`
+- Docker Compose: `/docker-compose.yml`
 - Production: `/.github/copilot-instructions.md` → "Deployment Workflow"
 
 ---
@@ -141,7 +141,7 @@ Complete guide to all documentation for the authentication microservices system.
 ### Before Deploying
 - [ ] Run all tests: `/am/test_all.sh`
 - [ ] Review security checklist: `/docs/SECURITY.md` → end of file
-- [ ] Check logs format: `/am/.env.docker` → `LOG_FORMAT`
+- [ ] Check logs format: `/.env.docker` → `LOG_FORMAT`
 - [ ] Verify all environment variables set
 - [ ] Test health endpoints via `/postman/` collection
 
@@ -177,7 +177,7 @@ Complete guide to all documentation for the authentication microservices system.
 │   ├── QUICK_REFERENCE.md             ← 30-sec setup & common tasks
 │   ├── POSTMAN_COMPLETE_GUIDE.md      ← Comprehensive guide
 │   └── AM-Complete-API-Collection.json ← Ready-to-import collection
-├── am/
+├── 
 │   ├── test_all.sh                    ← Run all tests
 │   ├── docker-compose.yml             ← Service orchestration
 │   ├── am-api-gateway/
@@ -214,7 +214,7 @@ Complete guide to all documentation for the authentication microservices system.
 
 ### Workflow 3: Add New API Endpoint (1-2 hours)
 1. Read patterns: `/.github/copilot-instructions.md` → "Adding New Endpoints"
-2. Review example: `am/am-api-gateway/api/v1/endpoints/documents.py`
+2. Review example: `am-api-gateway/api/v1/endpoints/documents.py`
 3. Create endpoint file
 4. Register in main.py
 5. Add Postman request

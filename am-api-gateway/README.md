@@ -236,7 +236,7 @@ Headers added:
 
 ### Local Development
 ```bash
-cd am/am-api-gateway
+cd am-api-gateway
 pip install -r requirements.txt
 uvicorn main:app --reload --port 8000
 ```

@@ -258,7 +258,7 @@ PATCH /api/v1/users/email/newuser@example.com/status
 
 ## Files Created
 
-1. **Backend Router:** `am/am-user-management/modules/account_management/api/public/user_status_router.py`
+1. **Backend Router:** `am-user-management/modules/account_management/api/public/user_status_router.py`
 2. **Postman Collection:** Updated `postman/User-Management-Service.postman_collection.json`
 3. **Documentation:** This file
 

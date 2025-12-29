@@ -57,6 +57,8 @@ from .setup import (
     initialize_logging,
     initialize_auth_tokens_logging,
     initialize_user_management_logging,
+    initialize_internal_service_logging,
+    initialize_api_gateway_logging,
     quick_setup_development,
     quick_setup_production,
     quick_setup_testing
@@ -94,6 +96,8 @@ __all__ = [
     "initialize_logging",
     "initialize_auth_tokens_logging",
     "initialize_user_management_logging",
+    "initialize_internal_service_logging",
+    "initialize_api_gateway_logging",
     "quick_setup_development",
     "quick_setup_production", 
     "quick_setup_testing",

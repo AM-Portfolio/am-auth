@@ -45,7 +45,7 @@ The system uses **two separate JWT secrets**:
 - `JWT_SECRET` - For user tokens (client ↔ gateway)
 - `INTERNAL_JWT_SECRET` - For service tokens (gateway ↔ internal services)
 
-**Location:** Both defined in `am/.env.docker` and must be 32+ characters.
+**Location:** Both defined in `.env.docker` and must be 32+ characters.
 
 ### 3. Service Communication Flow
 **Client → Internal Service requests MUST go through this flow:**
@@ -201,7 +201,7 @@ docker-compose logs -f | grep "ERROR"
 ## Adding New Endpoints
 
 ### To API Gateway (for new internal service):
-1. Create endpoint file: `am/am-api-gateway/api/v1/endpoints/new_service.py`
+1. Create endpoint file: `am-api-gateway/api/v1/endpoints/new_service.py`
 2. Follow pattern from `documents.py` or `reports.py`
 3. Register router in `main.py`: `app.include_router(new_service.router, prefix="/api/v1", tags=["NewService"])`
 4. Update root endpoint in `main.py` to list new endpoint
@@ -215,7 +215,7 @@ Internal services should expose two endpoint types:
 
 ### Running Tests
 ```bash
-cd am/am-user-management
+cd am-user-management
 pytest tests/ -v
 
 # With coverage
@@ -255,7 +255,7 @@ Located in `postman/` directory. Import and set environment variables:
 
 ## Environment Variables
 
-**Key settings** in `am/.env.docker`:
+**Key settings** in `.env.docker`:
 - `JWT_SECRET` - User token signing (32+ chars)
 - `INTERNAL_JWT_SECRET` - Service token signing (32+ chars)
 - `DATABASE_URL` - PostgreSQL connection string

@@ -11,14 +11,14 @@ AM Portfolio
 │   └── shared/testing/           - Testing utilities & fixtures
 │
 ├── 🟩 Services
-│   ├── am/am-api-gateway/        - API Gateway (port 8000)
-│   ├── am/am-user-management/    - User Service (port 8010)
-│   ├── am/am-auth-tokens/        - Auth Service (port 8001)
-│   ├── am/am-python-internal/    - Python Service (port 8002)
-│   └── am/am-java-internal/      - Java Service (port 8003)
+│   ├── am-api-gateway/        - API Gateway (port 8000)
+│   ├── am-user-management/    - User Service (port 8010)
+│   ├── am-auth-tokens/        - Auth Service (port 8001)
+│   ├── am-python-internal/    - Python Service (port 8002)
+│   └── am-java-internal/      - Java Service (port 8003)
 │
 ├── 🟨 Testing
-│   └── am/am-tests/              - Integration & E2E tests
+│   └── am-tests/              - Integration & E2E tests
 │
 └── 📚 Documentation
     ├── shared/README.md           - Shared modules guide

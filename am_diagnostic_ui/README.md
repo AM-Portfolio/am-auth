@@ -82,7 +82,7 @@ Default test credentials (can be changed in login screen):
 
 1. **Navigate to project**:
    ```bash
-   cd am/am_diagnostic_ui
+   cd am_diagnostic_ui
    ```
 
 2. **Install dependencies**:
@@ -163,7 +163,7 @@ dependencies:
 ### Services Not Responding
 1. Ensure Docker containers are running:
    ```bash
-   docker-compose -f am/docker-compose.yml ps
+   docker-compose -f docker-compose.yml ps
    ```
 
 2. Check service health manually:

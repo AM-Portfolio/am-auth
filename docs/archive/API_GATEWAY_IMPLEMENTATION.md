@@ -2,7 +2,7 @@
 
 ## ✅ What Was Created
 
-### 1. New API Gateway Service (`am/am-api-gateway/`)
+### 1. New API Gateway Service (`am-api-gateway/`)
 
 Complete microservice with:
 
@@ -311,10 +311,10 @@ docker exec am-am-python-internal-service-1 python -c \
 
 ## 📖 Related Documentation
 
-- [API Gateway README](./am/am-api-gateway/README.md)
-- [API Gateway Quick Start](./am/am-api-gateway/QUICK_START.md)
-- [User Management Service](./am/am-user-management/README.md)
-- [Auth Tokens Service](./am/am-auth-tokens/README.md)
+- [API Gateway README](./am-api-gateway/README.md)
+- [API Gateway Quick Start](./am-api-gateway/QUICK_START.md)
+- [User Management Service](./am-user-management/README.md)
+- [Auth Tokens Service](./am-auth-tokens/README.md)
 
 ## 🤝 How to Use This Implementation
 
@@ -332,7 +332,7 @@ docker exec am-am-python-internal-service-1 python -c \
 5. Set up monitoring and alerting
 
 ### For Adding New Endpoints
-1. Create new file in `am/am-api-gateway/api/v1/endpoints/`
+1. Create new file in `am-api-gateway/api/v1/endpoints/`
 2. Follow pattern from `documents.py` or `reports.py`
 3. Register router in `main.py`
 4. Update README.md with new endpoints
@@ -354,6 +354,6 @@ You now have a production-ready API Gateway pattern implemented with:
 ---
 
 **Need Help?**
-- Check `am/am-api-gateway/QUICK_START.md` for quick testing
-- Review `am/am-api-gateway/README.md` for detailed documentation
+- Check `am-api-gateway/QUICK_START.md` for quick testing
+- Review `am-api-gateway/README.md` for detailed documentation
 - Look at docker-compose logs: `docker-compose logs -f`

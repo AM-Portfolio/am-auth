@@ -17,18 +17,18 @@
 ## 🔧 Service-Specific Documentation
 
 ### API Gateway
-- [API Gateway README](../am/am-api-gateway/README.md) - Service overview
-- [API Gateway Quick Start](../am/am-api-gateway/QUICK_START.md) - Testing guide
+- [API Gateway README](../am-api-gateway/README.md) - Service overview
+- [API Gateway Quick Start](../am-api-gateway/QUICK_START.md) - Testing guide
 
 ### User Management
-- [User Management README](../am/am-user-management/README.md) - Service overview
-- [Production Guide](../am/am-user-management/PRODUCTION_GUIDE.md) - Production deployment
-- [Postman Guide](../am/am-user-management/POSTMAN_GUIDE.md) - API testing
+- [User Management README](../am-user-management/README.md) - Service overview
+- [Production Guide](../am-user-management/PRODUCTION_GUIDE.md) - Production deployment
+- [Postman Guide](../am-user-management/POSTMAN_GUIDE.md) - API testing
 
 ### Auth Tokens
-- [Auth Tokens README](../am/am-auth-tokens/README.md) - Service overview
-- [Environment Guide](../am/am-auth-tokens/ENVIRONMENT_GUIDE.md) - Configuration
-- [Postman Guide](../am/am-auth-tokens/POSTMAN_GUIDE.md) - API testing
+- [Auth Tokens README](../am-auth-tokens/README.md) - Service overview
+- [Environment Guide](../am-auth-tokens/ENVIRONMENT_GUIDE.md) - Configuration
+- [Postman Guide](../am-auth-tokens/POSTMAN_GUIDE.md) - API testing
 
 ## 🧪 Testing
 
@@ -79,11 +79,11 @@ docs/
 
 #### ...develop new features
 1. Read [DEVELOPMENT.md](./DEVELOPMENT.md)
-2. Review [API Gateway README](../am/am-api-gateway/README.md)
+2. Review [API Gateway README](../am-api-gateway/README.md)
 3. Check existing endpoints for patterns
 
 #### ...deploy to production
-1. Review [User Management Production Guide](../am/am-user-management/PRODUCTION_GUIDE.md)
+1. Review [User Management Production Guide](../am-user-management/PRODUCTION_GUIDE.md)
 2. Check [SECURITY.md](./SECURITY.md) for security checklist
 3. Follow [DEVELOPMENT.md](./DEVELOPMENT.md) CI/CD section
 
@@ -94,7 +94,7 @@ docs/
 
 #### ...understand authentication
 1. Read [SECURITY.md](./SECURITY.md) authentication section
-2. Review [Auth Tokens README](../am/am-auth-tokens/README.md)
+2. Review [Auth Tokens README](../am-auth-tokens/README.md)
 3. Check [API Gateway Implementation](./API_GATEWAY_IMPLEMENTATION.md)
 
 #### ...troubleshoot issues
@@ -106,9 +106,9 @@ docs/
 
 | Service | Port | Access | Documentation |
 |---------|------|--------|---------------|
-| API Gateway | 8000 | Public | [README](../am/am-api-gateway/README.md) |
-| User Management | 8010 | Public | [README](../am/am-user-management/README.md) |
-| Auth Tokens | 8001 | Public | [README](../am/am-auth-tokens/README.md) |
+| API Gateway | 8000 | Public | [README](../am-api-gateway/README.md) |
+| User Management | 8010 | Public | [README](../am-user-management/README.md) |
+| Auth Tokens | 8001 | Public | [README](../am-auth-tokens/README.md) |
 | Python Service | 8002 | Internal | N/A |
 | Java Service | 8003 | Internal | N/A |
 | PostgreSQL | 5432 | Internal | N/A |
@@ -118,7 +118,7 @@ docs/
 ### API Gateway Pattern
 Single entry point for all client requests. See:
 - [ARCHITECTURE.md](./ARCHITECTURE.md)
-- [API Gateway README](../am/am-api-gateway/README.md)
+- [API Gateway README](../am-api-gateway/README.md)
 
 ### Service Mesh
 Internal services communicate via Docker network. See:
@@ -128,17 +128,17 @@ Internal services communicate via Docker network. See:
 ### JWT Authentication
 Two-token system: User JWT → Service JWT. See:
 - [SECURITY.md](./SECURITY.md) - Authentication Flow
-- [Auth Tokens README](../am/am-auth-tokens/README.md)
+- [Auth Tokens README](../am-auth-tokens/README.md)
 
 ### Rate Limiting
 100 requests per 60 seconds per IP. See:
-- [API Gateway README](../am/am-api-gateway/README.md) - Rate Limiting
+- [API Gateway README](../am-api-gateway/README.md) - Rate Limiting
 - [ARCHITECTURE.md](./ARCHITECTURE.md) - Rate Limiting Architecture
 
 ### RBAC (Role-Based Access Control)
 Users have roles (user, admin, service). See:
 - [SECURITY.md](./SECURITY.md) - RBAC Section
-- [User Management README](../am/am-user-management/README.md)
+- [User Management README](../am-user-management/README.md)
 
 ## 🗂️ Archive
 

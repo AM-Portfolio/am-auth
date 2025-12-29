@@ -87,7 +87,7 @@ curl -H "Authorization: Bearer YOUR_TOKEN" \
   "python_scripts": [
     {
       "script_name": "Document Processor Tests",
-      "location": "am/am-tests/unit/test_document_processor.py",
+      "location": "am-tests/unit/test_document_processor.py",
       "status": "success"
     }
     // ... more scripts
@@ -172,17 +172,17 @@ curl -H "Authorization: Bearer YOUR_TOKEN" \
   "scripts": [
     {
       "script_name": "Document Processor Tests",
-      "location": "am/am-tests/unit/test_document_processor.py",
+      "location": "am-tests/unit/test_document_processor.py",
       "status": "success"
     },
     {
       "script_name": "Service Verification",
-      "location": "am/am-tests/integration/verify_all_services.py",
+      "location": "am-tests/integration/verify_all_services.py",
       "status": "success"
     },
     {
       "script_name": "Market Data Proxy",
-      "location": "am/am-tests/e2e/test_market_data_proxy.py",
+      "location": "am-tests/e2e/test_market_data_proxy.py",
       "status": "success"
     }
   ]
@@ -250,7 +250,7 @@ curl -H "Authorization: Bearer YOUR_TOKEN" \
     "run_diagnostics": "/api/v1/system/diagnostics/run",
     "system_info": "/api/v1/system/info"
   },
-  "test_scripts_location": "am/am-tests/"
+  "test_scripts_location": "am-tests/"
 }
 ```
 
@@ -263,7 +263,7 @@ curl -H "Authorization: Bearer YOUR_TOKEN" \
 Run the test service diagnostics directly:
 
 ```bash
-cd am/am-tests
+cd am-tests
 python -m utils.service_diagnostics
 ```
 
@@ -346,7 +346,7 @@ print(f"Overall status: {health['overall_status']}")
 ### Option 3: Using pytest
 
 ```bash
-cd am/am-tests
+cd am-tests
 pytest integration/test_system_health.py -v
 ```
 
@@ -596,7 +596,7 @@ docker-compose logs am-api-gateway
 docker-compose logs postgres
 
 # Verify connection string in .env.docker
-cat am/.env.docker | grep DATABASE_URL
+cat .env.docker | grep DATABASE_URL
 ```
 
 ---

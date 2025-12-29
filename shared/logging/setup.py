@@ -70,6 +70,16 @@ def initialize_user_management_logging() -> AMLogger:
     return initialize_logging("am-user-management", config)
 
 
+def initialize_internal_service_logging() -> AMLogger:
+    """Initialize logging for internal services"""
+    return initialize_logging("am-internal-service")
+
+
+def initialize_api_gateway_logging() -> AMLogger:
+    """Initialize logging for API Gateway"""
+    return initialize_logging("am-api-gateway")
+
+
 # Convenience functions for FastAPI integration
 def setup_fastapi_logging_for_auth_tokens():
     """Setup FastAPI logging middleware for auth-tokens service"""
@@ -154,6 +164,8 @@ __all__ = [
     "initialize_logging",
     "initialize_auth_tokens_logging", 
     "initialize_user_management_logging",
+    "initialize_internal_service_logging",
+    "initialize_api_gateway_logging",
     "setup_fastapi_logging_for_auth_tokens",
     "setup_fastapi_logging_for_user_management",
     "quick_setup_development",

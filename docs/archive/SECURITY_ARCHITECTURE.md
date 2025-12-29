@@ -839,14 +839,14 @@ curl -H "Authorization: Bearer $TOKEN" \
 ## Configuration Files
 
 **Docker Compose:**
-- Location: `am/docker-compose.yml`
+- Location: `docker-compose.yml`
 - Ports: API Gateway (8000), Auth Tokens (8001), User Management (8010)
 - Networks: `am-network` (internal)
 
 **Backend Services:**
-- Auth Tokens: `am/am-auth-tokens/`
-- User Management: `am/am-user-management/`
-- API Gateway: `am/am-api-gateway/`
+- Auth Tokens: `am-auth-tokens/`
+- User Management: `am-user-management/`
+- API Gateway: `am-api-gateway/`
 - Document Processor: `AM-Repos/am-document-processor/`
 
 **Frontend:**

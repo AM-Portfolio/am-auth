@@ -283,7 +283,7 @@ docker-compose up -d --build
 ## 📚 Next Steps
 
 - Read [Architecture Documentation](./ARCHITECTURE.md)
-- Explore [API Gateway Details](../am/am-api-gateway/README.md)
+- Explore [API Gateway Details](../am-api-gateway/README.md)
 - Learn about [Security Architecture](./SECURITY.md)
 - Review [Development Guide](./DEVELOPMENT.md)
 

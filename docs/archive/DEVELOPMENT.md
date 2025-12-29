@@ -39,7 +39,7 @@
 
 ```
 auth-test/
-├── am/
+├── 
 │   ├── docker-compose.yml           # Orchestration
 │   ├── .env.docker                  # Environment variables
 │   │
@@ -79,7 +79,7 @@ auth-test/
 
 ### Working on API Gateway
 
-1. **Make changes** to files in `am/am-api-gateway/`
+1. **Make changes** to files in `am-api-gateway/`
 
 2. **Rebuild service**:
    ```bash
@@ -98,7 +98,7 @@ auth-test/
 
 ### Working on User Management
 
-1. **Make changes** to files in `am/am-user-management/`
+1. **Make changes** to files in `am-user-management/`
 
 2. **Rebuild**:
    ```bash
@@ -114,7 +114,7 @@ auth-test/
 
 1. **Create endpoint file**:
    ```bash
-   # am/am-api-gateway/api/v1/endpoints/my_feature.py
+   # am-api-gateway/api/v1/endpoints/my_feature.py
    ```
 
 2. **Follow existing pattern**:

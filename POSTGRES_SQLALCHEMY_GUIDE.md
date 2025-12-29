@@ -326,8 +326,8 @@ am-user-management/
 2. **Update `config/database.env`** with matching credentials
 3. **Restart Docker containers:**
    ```bash
-   docker-compose -f am/docker-compose.yml down
-   docker-compose -f am/docker-compose.yml up -d --build
+   docker-compose -f docker-compose.yml down
+   docker-compose -f docker-compose.yml up -d --build
    ```
 4. **Check logs:**
    ```bash

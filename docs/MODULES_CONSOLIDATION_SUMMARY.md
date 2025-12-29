@@ -4,7 +4,7 @@
 
 ### 1. Identified Duplicates and Consolidation Points
 - ✅ Found duplicate `am/shared/` directory (identical to root `shared/`)
-- ✅ Located scattered test utilities in `am/am-tests/`
+- ✅ Located scattered test utilities in `am-tests/`
 - ✅ Identified need for unified testing framework
 
 ### 2. Created Unified Shared Module Structure
@@ -74,9 +74,9 @@ shared/
 ```
 root/shared/               ← Production
 am/shared/                 ← DUPLICATE ❌
-am/am-tests/generate_token.py              ← Scattered
-am/am-tests/verify_all_services.py        ← Scattered
-am/am-tests/test_*.py                     ← Mixed organization
+am-tests/generate_token.py              ← Scattered
+am-tests/verify_all_services.py        ← Scattered
+am-tests/test_*.py                     ← Mixed organization
 ```
 
 ### After (Single Source of Truth)
@@ -88,7 +88,7 @@ root/shared/              ← ONLY LOCATION ✅
     ├── utils/
     └── fixtures/
 
-am/am-tests/              ← Organized test suite
+am-tests/              ← Organized test suite
 ├── integration/
 ├── security/
 └── e2e/
@@ -129,9 +129,9 @@ from shared.testing import TokenGenerator, get_user_headers
 ### Phase 2: Test File Migration
 - [ ] Convert shell scripts (`.sh`) to Python test files
 - [ ] Move test files to organized structure:
-  - `am/am-tests/integration/` - Integration tests
-  - `am/am-tests/security/` - Security tests
-  - `am/am-tests/e2e/` - End-to-end tests
+  - `am-tests/integration/` - Integration tests
+  - `am-tests/security/` - Security tests
+  - `am-tests/e2e/` - End-to-end tests
 
 ### Phase 3: Update All Imports
 - [ ] Update all service files to use `shared/`

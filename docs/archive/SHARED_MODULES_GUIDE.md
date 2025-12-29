@@ -14,7 +14,7 @@
   - Same logging infrastructure
 
 ### 📂 Test Organization
-- `am/am-tests/` contains various test files that should be organized into:
+- `am-tests/` contains various test files that should be organized into:
   - **Utility Tests**: Token generation, client creation
   - **Integration Tests**: API endpoint testing
   - **Security Tests**: Authentication/authorization testing
@@ -30,27 +30,27 @@ shared/testing/
 ├── README.md
 ├── utils/
 │   ├── __init__.py
-│   ├── token_generator.py      # FROM: am/am-tests/generate_token.py
+│   ├── token_generator.py      # FROM: am-tests/generate_token.py
 │   ├── test_client.py          # NEW: unified HTTP client
-│   └── service_validator.py    # FROM: am/am-tests/verify_all_services.py
+│   └── service_validator.py    # FROM: am-tests/verify_all_services.py
 ├── fixtures/
 │   ├── __init__.py
 │   ├── users.py                # User test data
 │   └── services.py             # Service authentication data
 
-am/am-tests/
+am-tests/
 ├── __init__.py
 ├── README.md
 ├── conftest.py                 # Pytest configuration & fixtures
 ├── integration/
 │   ├── __init__.py
 │   ├── test_auth_flow.py       # Authentication tests
-│   ├── test_protected_api.py   # FROM: am/am-tests/test_protected_api.sh
-│   └── test_document_processor.py  # FROM: am/am-tests/test_document_processor.py
+│   ├── test_protected_api.py   # FROM: am-tests/test_protected_api.sh
+│   └── test_document_processor.py  # FROM: am-tests/test_document_processor.py
 ├── security/
 │   ├── __init__.py
 │   ├── test_jwt_validation.py  # JWT security tests
-│   ├── test_google_auth.py     # FROM: am/am-tests/test_google_auth.sh
+│   ├── test_google_auth.py     # FROM: am-tests/test_google_auth.sh
 │   └── test_security_failure.py    # FROM: verify_security_failure.py
 └── e2e/
     ├── __init__.py
@@ -64,14 +64,14 @@ am/am-tests/
 | Original File | Destination | Type |
 |--------------|-------------|------|
 | `am/shared/` | DELETE | Duplicate |
-| `am/am-tests/generate_token.py` | `shared/testing/utils/token_generator.py` | Utility |
-| `am/am-tests/verify_all_services.py` | `shared/testing/utils/service_validator.py` | Utility |
-| `am/am-tests/test_protected_api.sh` | `am/am-tests/integration/test_protected_api.py` | Integration Test |
-| `am/am-tests/test_document_processor.py` | `am/am-tests/integration/test_document_processor.py` | Integration Test |
-| `am/am-tests/test_google_auth.sh` | `am/am-tests/security/test_google_auth.py` | Security Test |
-| `am/am-tests/test_market_data_proxy.py` | `am/am-tests/e2e/test_market_data.py` | E2E Test |
-| `am/am-tests/test_real_google_access.sh` | `am/am-tests/e2e/test_real_access.py` | E2E Test |
-| `am/am-tests/verify_security_failure.py` | `am/am-tests/security/test_security_failure.py` | Security Test |
+| `am-tests/generate_token.py` | `shared/testing/utils/token_generator.py` | Utility |
+| `am-tests/verify_all_services.py` | `shared/testing/utils/service_validator.py` | Utility |
+| `am-tests/test_protected_api.sh` | `am-tests/integration/test_protected_api.py` | Integration Test |
+| `am-tests/test_document_processor.py` | `am-tests/integration/test_document_processor.py` | Integration Test |
+| `am-tests/test_google_auth.sh` | `am-tests/security/test_google_auth.py` | Security Test |
+| `am-tests/test_market_data_proxy.py` | `am-tests/e2e/test_market_data.py` | E2E Test |
+| `am-tests/test_real_google_access.sh` | `am-tests/e2e/test_real_access.py` | E2E Test |
+| `am-tests/verify_security_failure.py` | `am-tests/security/test_security_failure.py` | Security Test |
 
 ## Migration Steps
 
@@ -84,9 +84,9 @@ am/am-tests/
 
 ### Phase 2: Reorganize Tests (TODO)
 - [ ] Convert shell scripts (`.sh`) to Python test files
-- [ ] Create `am/am-tests/integration/` directory
-- [ ] Create `am/am-tests/security/` directory
-- [ ] Create `am/am-tests/e2e/` directory
+- [ ] Create `am-tests/integration/` directory
+- [ ] Create `am-tests/security/` directory
+- [ ] Create `am-tests/e2e/` directory
 - [ ] Move and adapt test files
 
 ### Phase 3: Update Imports (TODO)
@@ -96,7 +96,7 @@ am/am-tests/
 
 ### Phase 4: Cleanup (TODO)
 - [ ] Remove duplicate `am/shared/` directory
-- [ ] Delete original test files from `am/am-tests/`
+- [ ] Delete original test files from `am-tests/`
 - [ ] Update `.gitignore` if needed
 - [ ] Verify no broken imports
 
@@ -143,4 +143,4 @@ token = gen.generate_user_token()
 Review:
 1. `shared/README.md` - Module documentation
 2. `shared/testing/__init__.py` - Testing module exports
-3. Existing test files in `am/am-tests/` - Usage patterns
+3. Existing test files in `am-tests/` - Usage patterns

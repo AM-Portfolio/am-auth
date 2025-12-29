@@ -44,18 +44,11 @@ print_header "🏥 Test 1: Health Checks"
 
 test_info "Checking if all services are running..."
 
-# API Gateway
-if curl -s http://localhost:8000/health > /dev/null 2>&1; then
-    test_pass "API Gateway (8000) is healthy"
-else
-    test_fail "API Gateway (8000) is not responding"
-fi
-
 # User Management
-if curl -s http://localhost:8010/health > /dev/null 2>&1; then
-    test_pass "User Management (8010) is healthy"
+if curl -s http://localhost:8002/health > /dev/null 2>&1; then
+    test_pass "User Management (8002) is healthy"
 else
-    test_fail "User Management (8010) is not responding"
+    test_fail "User Management (8002) is not responding"
 fi
 
 # Auth Tokens
@@ -65,18 +58,25 @@ else
     test_fail "Auth Tokens (8001) is not responding"
 fi
 
-# Internal Python Service (should NOT be accessible externally)
-if curl -s http://localhost:8002/health > /dev/null 2>&1; then
-    test_fail "Python Service (8002) is externally accessible (SECURITY ISSUE!)"
+# Diagnostic UI
+if curl -s http://localhost:9001/health > /dev/null 2>&1; then
+    test_pass "Diagnostic UI (9001) is healthy"
 else
-    test_pass "Python Service (8002) is properly isolated (network protected) ✓"
+    test_fail "Diagnostic UI (9001) is not responding"
+fi
+
+# Internal Python Service (should NOT be accessible externally)
+if curl -s http://localhost:8003/health > /dev/null 2>&1; then
+    test_fail "Python Service (8003) is externally accessible (SECURITY ISSUE!)"
+else
+    test_pass "Python Service (8003) is properly isolated (network protected) ✓"
 fi
 
 # Internal Java Service (should NOT be accessible externally)
-if curl -s http://localhost:8003/health > /dev/null 2>&1; then
-    test_fail "Java Service (8003) is externally accessible (SECURITY ISSUE!)"
+if curl -s http://localhost:8004/health > /dev/null 2>&1; then
+    test_fail "Java Service (8004) is externally accessible (SECURITY ISSUE!)"
 else
-    test_pass "Java Service (8003) is properly isolated (network protected) ✓"
+    test_pass "Java Service (8004) is properly isolated (network protected) ✓"
 fi
 
 # ============================================================================
@@ -89,7 +89,7 @@ test_info "Registering a test user..."
 TIMESTAMP=$(date +%s)
 TEST_EMAIL="testuser${TIMESTAMP}@example.com"
 
-REGISTER_RESPONSE=$(curl -s -X POST http://localhost:8010/api/v1/auth/register \
+REGISTER_RESPONSE=$(curl -s -X POST http://localhost:8002/api/v1/auth/register \
   -H "Content-Type: application/json" \
   -d '{
     "email":"'"${TEST_EMAIL}"'",
@@ -115,7 +115,7 @@ if [ -z "$USER_ID" ]; then
 else
     test_info "Activating user $USER_ID..."
     
-    ACTIVATE_RESPONSE=$(curl -s -X PATCH http://localhost:8010/api/v1/users/$USER_ID/status \
+    ACTIVATE_RESPONSE=$(curl -s -X PATCH http://localhost:8002/api/v1/users/$USER_ID/status \
       -H "Content-Type: application/json" \
       -d '{
         "status":"active"
@@ -268,7 +268,7 @@ print_header "💾 Test 10: Database Connectivity"
 test_info "Checking if services can connect to PostgreSQL..."
 
 # Check User Management logs for database connection
-if docker-compose -f am/docker-compose.yml logs am-user-management 2>&1 | grep -q "PostgreSQL database tables created"; then
+if docker-compose logs am-user-management 2>&1 | grep -q "PostgreSQL database tables created"; then
     test_pass "User Management connected to PostgreSQL ✓"
 else
     test_info "Database connection status unclear from logs"

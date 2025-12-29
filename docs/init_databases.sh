@@ -171,8 +171,8 @@ if command -v alembic &> /dev/null; then
     echo "Running database migrations..."
     
     # Check for alembic.ini in user-management service
-    if [ -f "$SCRIPT_DIR/../am/am-user-management/alembic.ini" ]; then
-        cd "$SCRIPT_DIR/../am/am-user-management"
+    if [ -f "$SCRIPT_DIR/../am-user-management/alembic.ini" ]; then
+        cd "$SCRIPT_DIR/../am-user-management"
         
         # Set database URL
         export DATABASE_URL="postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST:$POSTGRES_PORT/$POSTGRES_DB"
@@ -182,7 +182,7 @@ if command -v alembic &> /dev/null; then
         cd - > /dev/null
     else
         echo "⚠ No alembic.ini found in am-user-management"
-        echo "  To use Alembic: cd am/am-user-management && alembic init alembic"
+        echo "  To use Alembic: cd am-user-management && alembic init alembic"
     fi
 else
     echo "⚠ alembic not found. Run: pip install alembic"

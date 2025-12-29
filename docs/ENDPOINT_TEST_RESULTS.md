@@ -175,7 +175,7 @@ Reads configuration from environment:
 ### API Gateway Repository
 
 #### ✅ MODIFIED: `document_processor.py`
-**Location:** `am/am-api-gateway/api/v1/endpoints/document_processor.py`
+**Location:** `am-api-gateway/api/v1/endpoints/document_processor.py`
 
 Added endpoints:
 - `GET /api/v1/documents/types` (proxy)
@@ -188,7 +188,7 @@ Each endpoint:
 3. Forwards to Document Processor
 
 #### ✅ MODIFIED: `config.py`
-**Location:** `am/am-api-gateway/core/config.py`
+**Location:** `am-api-gateway/core/config.py`
 
 Added configuration:
 ```python

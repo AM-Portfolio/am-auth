@@ -7,7 +7,7 @@ asyncpg.exceptions.InvalidPasswordError: password authentication failed for user
 
 ## The Problem
 
-Your **PostgreSQL server credentials don't match** the configuration in `am/config/database.env`.
+Your **PostgreSQL server credentials don't match** the configuration in `config/database.env`.
 
 ---
 
@@ -33,7 +33,7 @@ $env:PGPASSWORD="postgrid"; psql -U postgrid -h localhost -d postgres -c "SELECT
 
 ## Quick Fix - Option 2: Update Database Config
 
-Once you know the correct credentials, update `am/config/database.env`:
+Once you know the correct credentials, update `config/database.env`:
 
 ```bash
 # Example if credentials are postgres:mypassword
@@ -42,8 +42,8 @@ DATABASE_URL=postgresql://postgres:mypassword@host.docker.internal:5432/postgres
 
 Then restart:
 ```powershell
-docker-compose -f am/docker-compose.yml down
-docker-compose -f am/docker-compose.yml up -d --build
+docker-compose -f docker-compose.yml down
+docker-compose -f docker-compose.yml up -d --build
 ```
 
 ---
@@ -75,4 +75,4 @@ from sqlalchemy.exc import IntegrityError        # ✅ Correct
 
 **❌ The only issue is database credentials**
 
-Update `am/config/database.env` line 40-41 with your actual PostgreSQL username and password.
+Update `config/database.env` line 40-41 with your actual PostgreSQL username and password.

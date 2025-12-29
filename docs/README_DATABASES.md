@@ -295,7 +295,7 @@ Contains:
 
 ```bash
 # Generate migration (automatic from model changes)
-cd am/am-user-management
+cd am-user-management
 alembic revision --autogenerate -m "Add new column"
 
 # Apply migrations
@@ -364,7 +364,7 @@ pg_dump -U user -h host db > backup_$(date +%s).sql
 bash docs/init_databases.sh production
 
 # 4. Apply migrations
-cd am/am-user-management
+cd am-user-management
 alembic upgrade head
 
 # 5. Run health checks
@@ -531,7 +531,7 @@ db.collection.find().explain("executionStats")
 
 **Q: How do I add a new column to user_accounts?**
 ```bash
-cd am/am-user-management
+cd am-user-management
 alembic revision --autogenerate -m "Add new column"
 # Edit migration file, then:
 alembic upgrade head
