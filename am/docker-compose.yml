@@ -1,65 +1,14 @@
 services:
-  # API Gateway - Single Entry Point for All Client Requests
-  am-api-gateway:
-    build:
-      context: ./am-api-gateway
-      dockerfile: Dockerfile
-    ports:
-      - "8000:8000"
-    env_file:
-      - ./.env.docker
-      - ./config/app.env
-      - ./config/services.env
-      - ./config/database.env
-      - ./config/security.env
-      - ./config/logging.env
-      - ./config/build.env
-      - ./config/features.env
-    environment:
-      # Service URLs (internal Docker network)
-      - AUTH_SERVICE_URL=http://auth-tokens:8001
-      - USER_MANAGEMENT_URL=http://am-user-management:8000
-      - PYTHON_SERVICE_URL=http://am-python-internal-service:8002
-      - JAVA_SERVICE_URL=http://am-java-internal-service:8003
-      - TRADE_SERVICE_URL=http://host.docker.internal:8077
-      - PORTFOLIO_SERVICE_URL=http://host.docker.internal:8072
-      - DOCUMENT_PROCESSOR_URL=http://host.docker.internal:8070
-      - MARKET_DATA_SERVICE_URL=http://host.docker.internal:8092
-      # JWT Configuration
-      - JWT_SECRET=${JWT_SECRET}
-      - JWT_ALGORITHM=HS256
-      # Rate Limiting
-      - RATE_LIMIT_REQUESTS=100
-      - RATE_LIMIT_WINDOW=60
-      # Timeouts
-      - DEFAULT_TIMEOUT=30.0
-      - LONG_TIMEOUT=60.0
-    volumes:
-      - ./am-api-gateway:/app
-      - ./shared:/app/shared
-    networks:
-      - am-network
-    depends_on:
-      auth-tokens:
-        condition: service_healthy
-      am-user-management:
-        condition: service_healthy
-      am-python-internal-service:
-        condition: service_healthy
-    healthcheck:
-      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
+  # NOTE: API Gateway removed - Port 8000 is reserved for Traefik reverse proxy
+  # See GEMINI.md for global port allocation rules
 
-  # Real User Management Service
+  # User Management Service (Port 8002 per GEMINI.md)
   am-user-management:
     build:
       context: ./am-user-management
       dockerfile: Dockerfile
     ports:
-      - "8010:8000" # Map external port 8010 to internal port 8000
+      - "8002:8002" # Port 8002 for User Management (Auth & User Management block: 8001-8019)
     env_file:
       - ./.env.docker
       - ./config/app.env
@@ -84,11 +33,11 @@ services:
     volumes:
       - ./am-user-management:/app
       - ./shared:/app/shared # Mount shared logging infrastructure
-    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    command: uvicorn main:app --host 0.0.0.0 --port 8002 --reload
     networks:
       - am-network
     healthcheck:
-      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" ]
+      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8002/health')" ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -117,7 +66,7 @@ services:
       - AUTH_TOKENS_LOG_LEVEL=INFO
       - ENVIRONMENT=docker
       # User service connection
-      - USER_SERVICE_URL=http://am-user-management:8000
+      - USER_SERVICE_URL=http://am-user-management:8002
       # JWT Configuration
       - JWT_SECRET=${JWT_SECRET}
       - JWT_ALGORITHM=HS256
@@ -139,12 +88,13 @@ services:
       retries: 3
       start_period: 10s
 
-  # Python Internal Service (Document Processing)
+  # Python Internal Service (Port 8003 per GEMINI.md)
   am-python-internal-service:
     build:
       context: ./am-python-internal-service
       dockerfile: Dockerfile
-    # No external ports exposed - internal network only
+    ports:
+      - "8003:8003" # Port 8003 for Python Internal Service (Auth & User Management block: 8001-8019)
     env_file:
       - ./.env.docker
       - ./config/app.env
@@ -172,19 +122,21 @@ services:
     depends_on:
       am-user-management:
         condition: service_healthy
+    command: uvicorn main:app --host 0.0.0.0 --port 8003 --reload
     healthcheck:
-      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8002/health')" ]
+      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8003/health')" ]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 10s
 
-  # Java Internal Service (Reporting)
+  # Java Internal Service (Port 8004 per GEMINI.md)
   am-java-internal-service:
     build:
       context: ./am-java-internal-service
       dockerfile: Dockerfile
-    # No external ports exposed - internal network only
+    ports:
+      - "8004:8004" # Port 8004 for Java Internal Service (Auth & User Management block: 8001-8019)
     env_file:
       - ./.env.docker
       - ./config/app.env
@@ -205,22 +157,47 @@ services:
       - INTERNAL_JWT_SECRET=${INTERNAL_JWT_SECRET}
       - MONGODB_URL=${DOCUMENT_MONGODB_URL}
       - KAFKA_BOOTSTRAP_SERVERS=${DOCUMENT_KAFKA_SERVERS}
-      - SPRING_APPLICATION_NAME=am-document-processor
-      - SERVER_PORT=8070
+      - SPRING_APPLICATION_NAME=am-java-internal-service
+      - SERVER_PORT=8004
       - JWT_SECRET=${INTERNAL_JWT_SECRET}
       - SPRING_AUTOCONFIGURE_EXCLUDE=org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
-    # NO ports exposed - internal network only (security: network isolation)
     networks:
       - am-network
     depends_on:
-      am-api-gateway:
+      am-user-management:
         condition: service_healthy
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8070/actuator/health" ]
+      test: [ "CMD", "curl", "-f", "http://localhost:8004/actuator/health" ]
       interval: 15s
       timeout: 10s
       retries: 5
       start_period: 60s
+
+  # AM Diagnostic UI - Testing Dashboard (Port 9001)
+  am-diagnostic-ui:
+    build:
+      context: ./am_diagnostic_ui
+      dockerfile: Dockerfile
+    ports:
+      - "9001:80" # Port 9001 for diagnostic UI (following global port allocation rules)
+    environment:
+      # API URLs for Flutter app (accessed from browser via nginx proxy)
+      - API_GATEWAY_URL=http://localhost:9001/api
+      - AUTH_SERVICE_URL=http://localhost:9001/auth-api
+      - USER_SERVICE_URL=http://localhost:9001/user-api
+    networks:
+      - am-network
+    depends_on:
+      auth-tokens:
+        condition: service_healthy
+      am-user-management:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
 
 networks:
   am-network:

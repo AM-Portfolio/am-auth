@@ -171,3 +171,6 @@ uv.lock
 # Test reports
 test-results/
 .pytest_cache/
+
+# Flutter UI exceptions
+!am/am_diagnostic_ui/lib/
