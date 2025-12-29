@@ -1,3 +1,5 @@
+name: am-auth-ecosystem
+
 services:
   # NOTE: API Gateway removed - Port 8000 is reserved for Traefik reverse proxy
   # See GEMINI.md for global port allocation rules
@@ -90,6 +92,7 @@ services:
 
   # Python Internal Service (Port 8003 per GEMINI.md)
   am-python-internal-service:
+    profiles: [ "internal" ]
     build:
       context: ./am-python-internal-service
       dockerfile: Dockerfile
@@ -132,6 +135,7 @@ services:
 
   # Java Internal Service (Port 8004 per GEMINI.md)
   am-java-internal-service:
+    profiles: [ "internal" ]
     build:
       context: ./am-java-internal-service
       dockerfile: Dockerfile
