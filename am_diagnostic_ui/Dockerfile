@@ -13,7 +13,7 @@ RUN flutter pub get
 COPY . .
 
 # Build web app with release mode
-RUN flutter build web --release
+RUN flutter build web --release --base-href /diagnostic/
 
 # Stage 2: Serve with Nginx
 FROM nginx:alpine

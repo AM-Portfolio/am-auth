@@ -226,6 +226,52 @@ async def health_check(session: AsyncSession = Depends(get_db_session)):
         }
 
 
+@app.get("/api/v1/infra/health")
+async def infra_health_check():
+    """Check health of all infrastructure components"""
+    infra_checks = {
+        "postgresql": ("am_postgresql", 5432),
+        "mongodb": ("am_mongodb", 27017),
+        "redis": ("am_redis", 6379),
+        "influxdb": ("am_influxdb", 8086),
+        "kafka": ("am_kafka", 9092),
+        "zookeeper": ("am_zookeeper", 2181),
+    }
+    
+    results = {}
+    for name, (host, port) in infra_checks.items():
+        try:
+            # Use host.docker.internal for local dev if needed, 
+            # but in docker network we use service names
+            # Let's try service names first
+            conn = await asyncio.wait_for(
+                asyncio.open_connection(host, port),
+                timeout=2.0
+            )
+            _, writer = conn
+            writer.close()
+            await writer.wait_closed()
+            results[name] = {"status": "connected", "host": host, "port": port}
+        except Exception as e:
+            # Fallback to localhost check if running outside docker but targetting docker ports
+            try:
+                conn = await asyncio.wait_for(
+                    asyncio.open_connection("localhost", port),
+                    timeout=1.0
+                )
+                _, writer = conn
+                writer.close()
+                await writer.wait_closed()
+                results[name] = {"status": "connected (via localhost)", "host": "localhost", "port": port}
+            except:
+                results[name] = {"status": "disconnected", "error": str(e)}
+
+    return {
+        "status": "success" if all(r["status"].startswith("connected") for r in results.values()) else "partial_failure",
+        "infrastructure": results
+    }
+
+
 @app.get("/api/v1/auth/status")
 async def auth_status():
     return {

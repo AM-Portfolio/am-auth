@@ -7,14 +7,21 @@ __pycache__/
 *.so
 
 # Distribution / packaging
+# .Python is common for python, eggs etc
 .Python
-build/
+# build/ is common for many languages, but we want to keep am_diagnostic_ui/lib etc
+# So we ignore build/ at root but specifically NOT in submodules if they are not supposed to be ignored
+# Actually, build/ is usually safe to ignore globally except in specific cases.
+# But Flutter uses build/ a lot.
+# Let's be more specific.
+# build/
 develop-eggs/
 dist/
 downloads/
 eggs/
 .eggs/
-lib/
+# lib/ is a common name, we should only ignore it if it's a build/dep folder
+# lib/  <-- This was blocking am_diagnostic_ui/lib
 lib64/
 parts/
 sdist/
@@ -160,10 +167,11 @@ node_modules/
 npm-debug.log
 
 # Build outputs
-am/am-*/build/
-am/am-*/dist/
-am/am-*/*.egg-info/
-am/am-*/.eggs/
+am-*/build/
+am-*/dist/
+am-*/*.egg-info/
+am-*/.eggs/
+build/
 
 # uv lock file (local)
 uv.lock
@@ -173,4 +181,6 @@ test-results/
 .pytest_cache/
 
 # Flutter UI exceptions
-!am/am_diagnostic_ui/lib/
+!am_diagnostic_ui/lib/
+!am_diagnostic_ui/assets/
+!am_diagnostic_ui/pubspec.yaml

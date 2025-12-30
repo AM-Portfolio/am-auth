@@ -184,6 +184,13 @@ services:
       dockerfile: Dockerfile
     ports:
       - "9001:80" # Port 9001 for diagnostic UI (following global port allocation rules)
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.diagnostic-ui.rule=PathPrefix(`/diagnostic`)"
+      - "traefik.http.routers.diagnostic-ui.entrypoints=web"
+      - "traefik.http.services.diagnostic-ui.loadbalancer.server.port=80"
+      - "traefik.http.middlewares.diagnostic-strip.stripprefix.prefixes=/diagnostic"
+      - "traefik.http.routers.diagnostic-ui.middlewares=diagnostic-strip"
     environment:
       # API URLs for Flutter app (accessed from browser via nginx proxy)
       - API_GATEWAY_URL=http://localhost:9001/api
@@ -205,5 +212,5 @@ services:
 
 networks:
   am-network:
-    driver: bridge
-    name: am-network
+    external: true
+    name: am-infra_am-net
