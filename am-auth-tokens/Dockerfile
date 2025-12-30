@@ -12,17 +12,18 @@ ENV PYTHONPATH=/app
 # Install system dependencies
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-        gcc \
-        libc6-dev \
+    gcc \
+    libc6-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements and install Python dependencies
-COPY requirements.txt .
+COPY am-auth-tokens/requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip \
     && pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
-COPY . .
+COPY am-auth-tokens/ .
+COPY shared/ ./shared/
 
 # Create non-root user
 RUN useradd --create-home --shell /bin/bash app \

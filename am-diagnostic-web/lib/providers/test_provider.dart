@@ -64,7 +64,7 @@ class TestProvider extends ChangeNotifier {
           iD: 'a2', 
           group: 'Authentication', 
           name: 'Validate Token', 
-          url: '${AppConstants.authUrl}/api/v1/validate', 
+          url: '${AppConstants.authUrl}/auth/v1/validate', 
           method: 'POST',
         ),
       ],
@@ -92,7 +92,7 @@ class TestProvider extends ChangeNotifier {
     // 1. Setup specific test
     final loginTest = EndpointTest(
        iD: 'login_init', group: 'Init', name: 'Initial Login', 
-       url: '${AppConstants.authUrl}/api/v1/tokens', 
+       url: '${AppConstants.authUrl}/auth/v1/tokens', 
        method: 'POST',
        body: {'username': email, 'password': password}
     );

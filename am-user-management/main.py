@@ -173,12 +173,13 @@ from modules.account_management.api.public.user_stats_router import router as us
 # ... existing code ...
 
 # Include routers
-app.include_router(service_router)
-app.include_router(auth_router, prefix="/api/v1")
-app.include_router(google_auth_router, prefix="/api/v1")
-app.include_router(user_status_router, prefix="/api/v1")
-app.include_router(password_reset_router, prefix="/api/v1")
-app.include_router(user_stats_router, prefix="/api/v1")
+# Include routers with standardized prefixes (without 'am-' prefix in path)
+app.include_router(service_router) # Internal maintenance routes
+app.include_router(auth_router, prefix="/users/v1")  # e.g. /users/v1/auth/register
+app.include_router(google_auth_router, prefix="/users/v1") # e.g. /users/v1/auth/google
+app.include_router(user_status_router, prefix="/users/v1") # e.g. /users/v1/users/{id}/status
+app.include_router(password_reset_router, prefix="/users/v1") # e.g. /users/v1/request-reset
+app.include_router(user_stats_router, prefix="/users/v1") # e.g. /users/v1/users/stats
 
 
 # Pydantic models for API requests/responses
@@ -226,7 +227,7 @@ async def health_check(session: AsyncSession = Depends(get_db_session)):
         }
 
 
-@app.get("/api/v1/infra/health")
+@app.get("/users/v1/infra/health")
 async def infra_health_check():
     """Check health of all infrastructure components"""
     infra_checks = {
@@ -272,7 +273,7 @@ async def infra_health_check():
     }
 
 
-@app.get("/api/v1/auth/status")
+@app.get("/users/v1/auth/status")
 async def auth_status():
     return {
         "status":
@@ -286,7 +287,7 @@ async def auth_status():
 
 
 # Real authentication endpoints using our use cases
-@app.post("/api/v1/auth/register", response_model=CreateUserResponse)
+@app.post("/users/v1/auth/register", response_model=CreateUserResponse)
 async def register(request: RegisterRequest,
                    create_user_use_case: CreateUserUseCase = Depends(
                        get_create_user_use_case)):
@@ -295,7 +296,7 @@ async def register(request: RegisterRequest,
         logger.info("User registration attempt", extra={
             "email": request.email,
             "has_phone": bool(request.phone_number),
-            "endpoint": "/api/v1/auth/register"
+            "endpoint": "/users/v1/auth/register"
         })
         
         # Convert API request to use case request
@@ -335,7 +336,7 @@ async def register(request: RegisterRequest,
                             detail=f"Internal server error: {str(e)}")
 
 
-@app.post("/api/v1/auth/login")
+@app.post("/users/v1/auth/login")
 async def login(request: LoginRequestModel,
                 login_use_case: LoginUseCase = Depends(get_login_use_case)):
     """Authenticate user and return user data for token creation"""

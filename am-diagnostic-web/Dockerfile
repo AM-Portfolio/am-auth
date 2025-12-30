@@ -19,7 +19,8 @@ RUN flutter build web --release --base-href /diagnostic/
 FROM nginx:alpine
 
 # Copy built web app
-COPY --from=build /app/build/web /usr/share/nginx/html
+# Copy built web app to subdirectory matching base-href
+COPY --from=build /app/build/web /usr/share/nginx/html/diagnostic
 
 # Copy nginx configuration
 COPY nginx.conf /etc/nginx/conf.d/default.conf

@@ -122,37 +122,37 @@ USER MANAGEMENT       AUTH TOKENS            PROTECTED ENDPOINTS
 ### Health & Status Endpoints
 ```
 GET  /health                    → Service health check (all services)
-GET  /api/v1/info              → System information
+GET  /users/v1/info              → System information
 ```
 
-### User Management API (Port 8010)
+### User Management API (Port 8002)
 ```
-POST   /api/v1/auth/register            → Create new user account
-GET    /api/v1/users/{id}/status        → Get user status & details
-PATCH  /api/v1/users/{id}/status        → Update user status (activate/deactivate)
+POST   /users/v1/auth/register            → Create new user account
+GET    /users/v1/users/{id}/status        → Get user status & details
+PATCH  /users/v1/users/{id}/status        → Update user status (activate/deactivate)
 ```
 
 ### Authentication API (Port 8001)
 ```
-POST   /api/v1/auth/login                → Login with email/password → Returns JWT token
-POST   /api/v1/tokens                    → Create JWT token (username/password)
-POST   /api/v1/validate                  → Validate token (send token in body)
-POST   /api/v1/validate/bearer           → Validate token (bearer format alternative)
-GET    /api/v1/validate/me?token=...     → Validate token (query parameter)
+POST   /auth/v1/auth/login                → Login with email/password → Returns JWT token
+POST   /auth/v1/tokens                    → Create JWT token (username/password)
+POST   /auth/v1/validate                  → Validate token (send token in body)
+POST   /auth/v1/validate/bearer           → Validate token (bearer format alternative)
+GET    /auth/v1/validate/me?token=...     → Validate token (query parameter)
 ```
 
-### Password Reset API (Port 8010)
+### Password Reset API (Port 8002)
 ```
-POST   /api/v1/request-reset             → Request password reset token (24h expiry)
-POST   /api/v1/validate-reset-token      → Verify reset token validity
-POST   /api/v1/confirm-reset             → Complete password reset with new password
+POST   /users/v1/request-reset             → Request password reset token (24h expiry)
+POST   /users/v1/validate-reset-token      → Verify reset token validity
+POST   /users/v1/confirm-reset             → Complete password reset with new password
 ```
 
 ### Protected Endpoints (via API Gateway - Port 8000)
 ```
-GET    /api/v1/documents               → Get user's documents
-GET    /api/v1/reports                 → Get user's reports
-GET    /api/v1/portfolio               → Get user's portfolio
+GET    /users/v1/documents               → Get user's documents
+GET    /users/v1/reports                 → Get user's reports
+GET    /users/v1/portfolio               → Get user's portfolio
 ```
 
 ### All Requests Through API Gateway
@@ -167,29 +167,21 @@ GET    /api/v1/portfolio               → Get user's portfolio
 
 ### Example 1: User Registration
 ```bash
-curl -X POST http://localhost:8010/api/v1/users/register \
+curl -X POST http://localhost:8002/users/v1/auth/register \
   -H "Content-Type: application/json" \
   -d '{
     "email": "user@example.com",
     "password": "SecurePass123!",
     "full_name": "John Doe"
   }'
-
-# Response (201 Created):
-{
-  "user_id": "550e8400-e29b-41d4-a716-446655440000",
-  "email": "user@example.com",
-  "full_name": "John Doe",
-  "status": "inactive",
-  "created_at": "2025-11-18T10:30:00Z"
-}
 ```
 
 ### Example 2: Activate User
 ```bash
-curl -X PATCH http://localhost:8010/api/v1/users/550e8400-e29b-41d4-a716-446655440000/status \
+curl -X PATCH http://localhost:8002/users/v1/users/550e8400-e29b-41d4-a716-446655440000/status \
   -H "Content-Type: application/json" \
   -d '{"status": "active"}'
+
 
 # Response (200 OK):
 {
@@ -201,7 +193,7 @@ curl -X PATCH http://localhost:8010/api/v1/users/550e8400-e29b-41d4-a716-4466554
 
 ### Example 3: Login & Get JWT Token
 ```bash
-curl -X POST http://localhost:8001/api/v1/tokens \
+curl -X POST http://localhost:8001/auth/v1/tokens \
   -H "Content-Type: application/json" \
   -d '{
     "username": "user@example.com",
@@ -218,7 +210,7 @@ curl -X POST http://localhost:8001/api/v1/tokens \
 
 ### Example 4: Use JWT Token with API Gateway
 ```bash
-curl -X GET http://localhost:8000/api/v1/documents \
+curl -X GET http://localhost:8000/users/v1/documents \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 
 # Response (200 OK):
@@ -238,15 +230,15 @@ curl -X GET http://localhost:8000/api/v1/documents \
 ### Example 4b: Validate JWT Token
 ```bash
 # Method 1: POST with token in body (recommended)
-curl -X POST http://localhost:8001/api/v1/validate \
+curl -X POST http://localhost:8001/auth/v1/validate \
   -H "Content-Type: application/json" \
   -d '{"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."}'
 
 # Method 2: GET with token as query parameter
-curl -X GET "http://localhost:8001/api/v1/validate/me?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+curl -X GET "http://localhost:8001/auth/v1/validate/me?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 
 # Method 3: POST with bearer format
-curl -X POST http://localhost:8001/api/v1/validate/bearer \
+curl -X POST http://localhost:8001/auth/v1/validate/bearer \
   -H "Content-Type: application/json" \
   -d '{"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."}'
 
@@ -266,7 +258,7 @@ curl -X POST http://localhost:8001/api/v1/validate/bearer \
 ### Example 5: Password Reset Flow
 ```bash
 # Step 1: Request reset token - TOKEN RETURNED IN RESPONSE (development mode)
-curl -X POST http://localhost:8010/api/v1/request-reset \
+curl -X POST http://localhost:8002/users/v1/request-reset \
   -H "Content-Type: application/json" \
   -d '{"email": "user@example.com"}'
 
@@ -279,7 +271,7 @@ curl -X POST http://localhost:8010/api/v1/request-reset \
 }
 
 # Step 2: Validate reset token
-curl -X POST http://localhost:8010/api/v1/validate-reset-token \
+curl -X POST http://localhost:8002/users/v1/validate-reset-token \
   -H "Content-Type: application/json" \
   -d '{
     "email": "user@example.com",
@@ -290,7 +282,7 @@ curl -X POST http://localhost:8010/api/v1/validate-reset-token \
 {"valid": true, "message": "Token is valid"}
 
 # Step 3: Confirm reset with new password
-curl -X POST http://localhost:8010/api/v1/confirm-reset \
+curl -X POST http://localhost:8002/users/v1/confirm-reset \
   -H "Content-Type: application/json" \
   -d '{
     "email": "user@example.com",
@@ -371,28 +363,28 @@ Follow the examples above, or use the complete workflow:
 ```bash
 # 1. Register
 EMAIL="test$(date +%s)@example.com"
-USER_ID=$(curl -s -X POST http://localhost:8010/api/v1/users/register \
+USER_ID=$(curl -s -X POST http://localhost:8002/users/v1/auth/register \
   -H "Content-Type: application/json" \
   -d "{\"email\":\"$EMAIL\",\"password\":\"TestPass123!\",\"full_name\":\"Test User\"}" \
   | jq -r '.user_id')
 
 # 2. Activate
-curl -s -X PATCH http://localhost:8010/api/v1/users/$USER_ID/status \
+curl -s -X PATCH http://localhost:8002/users/v1/users/$USER_ID/status \
   -H "Content-Type: application/json" \
   -d '{"status":"active"}' | jq .
 
 # 3. Login
-TOKEN=$(curl -s -X POST http://localhost:8001/api/v1/tokens \
+TOKEN=$(curl -s -X POST http://localhost:8001/auth/v1/tokens \
   -H "Content-Type: application/json" \
   -d "{\"username\":\"$EMAIL\",\"password\":\"TestPass123!\"}" \
   | jq -r '.access_token')
 
 # 4. Test protected endpoint
-curl -s -X GET http://localhost:8000/api/v1/documents \
+curl -s -X GET http://localhost:8000/users/v1/documents \
   -H "Authorization: Bearer $TOKEN" | jq .
 
 # 5. Test password reset
-curl -s -X POST http://localhost:8010/api/v1/request-reset \
+curl -s -X POST http://localhost:8002/users/v1/request-reset \
   -H "Content-Type: application/json" \
   -d "{\"email\":\"$EMAIL\"}" | jq .
 ```
@@ -430,7 +422,7 @@ curl -s -X POST http://localhost:8010/api/v1/request-reset \
 
 ---
 
-### Complete Documentation Files
+### Complete Documentation FilesStrategy supra Ferrari
 
 | File | Purpose | Read Time |
 |------|---------|-----------|
@@ -468,26 +460,26 @@ curl -s -X POST http://localhost:8010/api/v1/request-reset \
 
 ### Task 3: Add New API Endpoint (1-2 hours)
 1. Read: `/.github/copilot-instructions.md` → "Adding New Endpoints"
-2. Create endpoint file in `am-api-gateway/api/v1/endpoints/`
+2. Create endpoint file in `am-api-gateway/users/v1/endpoints/`
 3. Register router in `main.py`
 4. Add tests to Postman collection
 5. Update documentation
 6. Run tests: `bash test_all.sh`
 
 ### Task 4: Reset Password (5 minutes)
-1. Request reset: `POST /api/v1/request-reset` with email
+1. Request reset: `POST /users/v1/request-reset` with email
 2. Get token from logs: `docker-compose logs am-user-management | grep "Reset token"`
-3. Validate token: `POST /api/v1/validate-reset-token`
-4. Confirm reset: `POST /api/v1/confirm-reset` with new password
+3. Validate token: `POST /users/v1/validate-reset-token`
+4. Confirm reset: `POST /users/v1/confirm-reset` with new password
 5. Verify: Login with new password
 
 ### Task 5: Debug a 401 Error (5 minutes)
 ```bash
 # 1. Check if user exists and is activated
-curl http://localhost:8010/api/v1/users/{user_id}
+curl http://localhost:8002/users/v1/users/{user_id}
 
 # 2. Check if token is valid
-curl -X POST http://localhost:8001/api/v1/validate \
+curl -X POST http://localhost:8001/auth/v1/validate \
   -H "Content-Type: application/json" \
   -d '{"token": "YOUR_TOKEN"}'
 
@@ -620,7 +612,7 @@ RATE_LIMIT_WINDOW=60
 EMAIL="user$(date +%s)@example.com"
 
 # 2. Register user
-USER_RESPONSE=$(curl -s -X POST http://localhost:8010/api/v1/users/register \
+USER_RESPONSE=$(curl -s -X POST http://localhost:8002/users/v1/auth/register \
   -H "Content-Type: application/json" \
   -d "{
     \"email\": \"$EMAIL\",
@@ -632,12 +624,12 @@ USER_ID=$(echo $USER_RESPONSE | jq -r '.user_id')
 echo "Registered user: $USER_ID"
 
 # 3. Activate user
-curl -s -X PATCH http://localhost:8010/api/v1/users/$USER_ID/status \
+curl -s -X PATCH http://localhost:8002/users/v1/users/$USER_ID/status \
   -H "Content-Type: application/json" \
   -d '{"status": "active"}' | jq .
 
 # 4. Login (get JWT token)
-LOGIN_RESPONSE=$(curl -s -X POST http://localhost:8001/api/v1/tokens \
+LOGIN_RESPONSE=$(curl -s -X POST http://localhost:8001/auth/v1/tokens \
   -H "Content-Type: application/json" \
   -d "{
     \"username\": \"$EMAIL\",
@@ -648,7 +640,7 @@ TOKEN=$(echo $LOGIN_RESPONSE | jq -r '.access_token')
 echo "Got token: ${TOKEN:0:20}..."
 
 # 5. Access protected endpoint
-curl -s -X GET http://localhost:8000/api/v1/documents \
+curl -s -X GET http://localhost:8000/users/v1/documents \
   -H "Authorization: Bearer $TOKEN" | jq .
 
 echo "✅ Workflow complete!"
@@ -658,7 +650,7 @@ echo "✅ Workflow complete!"
 ```bash
 # 1. Request password reset
 EMAIL="user@example.com"
-curl -s -X POST http://localhost:8010/api/v1/request-reset \
+curl -s -X POST http://localhost:8002/users/v1/request-reset \
   -H "Content-Type: application/json" \
   -d "{\"email\": \"$EMAIL\"}" | jq .
 
@@ -667,7 +659,7 @@ RESET_TOKEN=$(docker-compose logs am-user-management | grep "Reset token" | tail
 echo "Reset token: $RESET_TOKEN"
 
 # 3. Validate token
-curl -s -X POST http://localhost:8010/api/v1/validate-reset-token \
+curl -s -X POST http://localhost:8002/users/v1/validate-reset-token \
   -H "Content-Type: application/json" \
   -d "{
     \"email\": \"$EMAIL\",
@@ -675,7 +667,7 @@ curl -s -X POST http://localhost:8010/api/v1/validate-reset-token \
   }" | jq .
 
 # 4. Confirm password reset
-curl -s -X POST http://localhost:8010/api/v1/confirm-reset \
+curl -s -X POST http://localhost:8002/users/v1/confirm-reset \
   -H "Content-Type: application/json" \
   -d "{
     \"email\": \"$EMAIL\",
@@ -684,7 +676,7 @@ curl -s -X POST http://localhost:8010/api/v1/confirm-reset \
   }" | jq .
 
 # 5. Verify new password works
-curl -s -X POST http://localhost:8001/api/v1/tokens \
+curl -s -X POST http://localhost:8001/auth/v1/tokens \
   -H "Content-Type: application/json" \
   -d "{
     \"username\": \"$EMAIL\",
@@ -912,17 +904,14 @@ Service will be available at `http://localhost:5000`
 ## 📡 API Endpoints
 
 ### Auth Tokens Service (Port 5000)
-- `POST /api/v1/tokens` - Create JWT access token with credentials
-- `POST /api/v1/tokens/oauth` - OAuth2-compatible token endpoint
-- `POST /api/v1/validate` - Validate JWT token
-- `GET /health` - Health check
-- `GET /api/v1/docs` - API documentation (when DEBUG=true)
-
-### User Management Service (Port 8000)
-- `POST /api/v1/auth/register` - Register new user
-- `POST /api/v1/auth/login` - Validate credentials and return user data
-- `GET /api/v1/auth/verify-email` - Verify email address
-- `POST /api/v1/auth/resend-verification` - Resend verification email
+- `POST /auth/v1/tokens` - Create JWT access token with credentials
+- `POST /auth/v1/tokens/oauth` - OAuth2-compatible token endpoint
+- `POST /auth/v1/validate` - Validate JWT token
+- `GET /users/v1/docs` - API documentation (when DEBUG=true)
+- `POST /users/v1/auth/register` - Register new user
+- `POST /users/v1/auth/login` - Validate credentials and return user data
+- `GET /users/v1/auth/verify-email` - Verify email address
+- `POST /users/v1/auth/resend-verification` - Resend verification email
 - `GET /health` - Health check
 - `GET /docs` - API documentation
 
@@ -936,12 +925,10 @@ Here's how the services work together for a complete authentication flow:
 
 2. **Email Verification**
    - User clicks verification link
-   - Client → User Management Service: `GET /api/v1/auth/verify-email?token=...`
-   - User status updated to "ACTIVE"
-
-3. **Token Creation (Login)**
-   - Client → Auth Tokens Service: `POST /api/v1/tokens` (username + password)
-   - Auth Tokens → User Management: `POST /api/v1/auth/login` (validate credentials)
+   - Client → User Management Service: `POST /users/v1/auth/register`
+   - Client → User Management Service: `GET /users/v1/auth/verify-email?token=...`
+   - Client → Auth Tokens Service: `POST /auth/v1/tokens` (username + password)
+   - Auth Tokens → User Management: `POST /users/v1/auth/login` (validate credentials)
    - User Management validates and returns user data including status
    - Auth Tokens checks status == "ACTIVE"
    - If active, JWT token is created and returned to client
@@ -1017,7 +1004,8 @@ pytest
 
 **Register a user:**
 ```bash
-curl -X POST "http://localhost:8000/api/v1/auth/register" \
+curl -X POST "http://localhost:8002/users/v1/auth/register" \
+
   -H "Content-Type: application/json" \
   -d '{
     "email": "test@example.com",
@@ -1029,7 +1017,8 @@ curl -X POST "http://localhost:8000/api/v1/auth/register" \
 
 **Create token (after email verification):**
 ```bash
-curl -X POST "http://localhost:5000/api/v1/tokens" \
+curl -X POST "http://localhost:8001/auth/v1/tokens" \
+
   -H "Content-Type: application/json" \
   -d '{
     "username": "test@example.com",

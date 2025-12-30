@@ -17,11 +17,11 @@ class Settings(BaseSettings):
     USER_SERVICE_TIMEOUT: int = int(os.getenv("USER_SERVICE_TIMEOUT", "30"))
     
     # API Configuration
-    API_V1_STR: str = os.getenv("API_V1_STR", "/api/v1")
+    API_V1_STR: str = os.getenv("API_V1_STR", "/auth/v1")
     PROJECT_NAME: str = os.getenv("PROJECT_NAME", "Auth Tokens Service")
     VERSION: str = os.getenv("VERSION", "1.0.0")
     
-    # Server Configuration
+    # Server Configuration congratulations
     HOST: str = os.getenv("HOST", "0.0.0.0")
     PORT: int = int(os.getenv("PORT", "8080"))
     

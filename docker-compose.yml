@@ -1,216 +1,64 @@
-name: am-auth-ecosystem
+version: '3.8'
 
 services:
-  # NOTE: API Gateway removed - Port 8000 is reserved for Traefik reverse proxy
-  # See GEMINI.md for global port allocation rules
-
-  # User Management Service (Port 8002 per GEMINI.md)
+  # --- User Management Service (Python/FastAPI) ---
   am-user-management:
+    container_name: am-user-management
     build:
-      context: ./am-user-management
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: am-user-management/Dockerfile
     ports:
-      - "8002:8002" # Port 8002 for User Management (Auth & User Management block: 8001-8019)
-    env_file:
-      - ./.env.docker
-      - ./config/app.env
-      - ./config/services.env
-      - ./config/database.env
-      - ./config/security.env
-      - ./config/logging.env
-      - ./config/build.env
-      - ./config/features.env
+      - "8002:8002"
     environment:
-      # Centralized logging configuration
-      - LOG_FORMAT=json
-      - LOG_CONSOLE=true
-      - USER_MGMT_LOG_LEVEL=INFO
-      - ENVIRONMENT=docker
-      # Auth service connection
+      - DATABASE_URL=postgresql://postgres:password123@am_postgresql:5432/portfolio
       - AUTH_SERVICE_URL=http://auth-tokens:8001
-      # JWT Configuration
       - JWT_SECRET=${JWT_SECRET}
-      # Email verification - disabled for testing
-      - ENABLE_EMAIL_VERIFICATION=false
-    volumes:
-      - ./am-user-management:/app
-      - ./shared:/app/shared # Mount shared logging infrastructure
-    command: uvicorn main:app --host 0.0.0.0 --port 8002 --reload
+      - LOG_LEVEL=INFO
     networks:
       - am-network
+    restart: unless-stopped
     healthcheck:
       test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8002/health')" ]
       interval: 30s
-      timeout: 10s
+      timeout: 1Mahalakshmi0s
       retries: 3
-      start_period: 10s
 
-  # Auth Tokens Service
+  # --- Auth Tokens Service (Python/FastAPI) ---
   auth-tokens:
+    container_name: auth-tokens
     build:
-      context: ./am-auth-tokens
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: am-auth-tokens/Dockerfile
     ports:
       - "8001:8001"
-    env_file:
-      - ./.env.docker
-      - ./config/app.env
-      - ./config/services.env
-      - ./config/database.env
-      - ./config/security.env
-      - ./config/logging.env
-      - ./config/build.env
-      - ./config/features.env
     environment:
-      # Centralized logging configuration
-      - LOG_FORMAT=json
-      - LOG_CONSOLE=true
-      - AUTH_TOKENS_LOG_LEVEL=INFO
-      - ENVIRONMENT=docker
-      # User service connection
+      - DATABASE_URL=postgresql://postgres:password123@am_postgresql:5432/portfolio
       - USER_SERVICE_URL=http://am-user-management:8002
-      # JWT Configuration
       - JWT_SECRET=${JWT_SECRET}
-      - JWT_ALGORITHM=HS256
-      # Database connection (uses shared PostgreSQL container)
-      - DATABASE_URL=postgresql://postgres:password123@am-market-data-postgres-1:5432/postgres
-    volumes:
-      - ./am-auth-tokens:/app
-      - ./shared:/app/shared # Mount shared logging infrastructure
+      - JWT_ALGORITHM=${JWT_ALGORITHM}
+      - LOG_LEVEL=INFO
     networks:
       - am-network
     depends_on:
       am-user-management:
         condition: service_healthy
-    command: sh -c "pip install pydantic[email] && python -m uvicorn main:app --host 0.0.0.0 --port 8001 --reload"
-    healthcheck:
-      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
+    restart: unless-stopped
 
-  # Python Internal Service (Port 8003 per GEMINI.md)
-  am-python-internal-service:
-    profiles: [ "internal" ]
+  # --- Diagnostic Web (Flutter) ---
+  am-diagnostic-web:
+    container_name: am-diagnostic-web
     build:
-      context: ./am-python-internal-service
+      context: ./am-diagnostic-web
       dockerfile: Dockerfile
     ports:
-      - "8003:8003" # Port 8003 for Python Internal Service (Auth & User Management block: 8001-8019)
-    env_file:
-      - ./.env.docker
-      - ./config/app.env
-      - ./config/services.env
-      - ./config/database.env
-      - ./config/security.env
-      - ./config/logging.env
-      - ./config/build.env
-      - ./config/features.env
+      - "9001:80"
     environment:
-      # Centralized logging configuration
-      - LOG_FORMAT=json
-      - LOG_CONSOLE=true
-      - INTERNAL_SERVICE_LOG_LEVEL=INFO
-      - ENVIRONMENT=docker
-      # JWT Configuration
-      - JWT_SECRET=${JWT_SECRET}
-      - JWT_ALGORITHM=HS256
-      - INTERNAL_JWT_SECRET=${INTERNAL_JWT_SECRET}
-    volumes:
-      - ./am-python-internal-service:/app
-      - ./shared:/app/shared # Mount shared logging infrastructure
-    networks:
-      - am-network
-    depends_on:
-      am-user-management:
-        condition: service_healthy
-    command: uvicorn main:app --host 0.0.0.0 --port 8003 --reload
-    healthcheck:
-      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8003/health')" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
-
-  # Java Internal Service (Port 8004 per GEMINI.md)
-  am-java-internal-service:
-    profiles: [ "internal" ]
-    build:
-      context: ./am-java-internal-service
-      dockerfile: Dockerfile
-    ports:
-      - "8004:8004" # Port 8004 for Java Internal Service (Auth & User Management block: 8001-8019)
-    env_file:
-      - ./.env.docker
-      - ./config/app.env
-      - ./config/services.env
-      - ./config/database.env
-      - ./config/security.env
-      - ./config/logging.env
-      - ./config/build.env
-      - ./config/features.env
-    environment:
-      # Centralized logging configuration
-      - LOG_FORMAT=json
-      - LOG_CONSOLE=true
-      - INTERNAL_SERVICE_LOG_LEVEL=INFO
-      - ENVIRONMENT=docker
-      # JWT Configuration
-      - JWT_SECRET=${JWT_SECRET}
-      - INTERNAL_JWT_SECRET=${INTERNAL_JWT_SECRET}
-      - MONGODB_URL=${DOCUMENT_MONGODB_URL}
-      - KAFKA_BOOTSTRAP_SERVERS=${DOCUMENT_KAFKA_SERVERS}
-      - SPRING_APPLICATION_NAME=am-java-internal-service
-      - SERVER_PORT=8004
-      - JWT_SECRET=${INTERNAL_JWT_SECRET}
-      - SPRING_AUTOCONFIGURE_EXCLUDE=org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
-    networks:
-      - am-network
-    depends_on:
-      am-user-management:
-        condition: service_healthy
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8004/actuator/health" ]
-      interval: 15s
-      timeout: 10s
-      retries: 5
-      start_period: 60s
-
-  # AM Diagnostic UI - Testing Dashboard (Port 9001)
-  am-diagnostic-ui:
-    build:
-      context: ./am_diagnostic_ui
-      dockerfile: Dockerfile
-    ports:
-      - "9001:80" # Port 9001 for diagnostic UI (following global port allocation rules)
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.diagnostic-ui.rule=PathPrefix(`/diagnostic`)"
-      - "traefik.http.routers.diagnostic-ui.entrypoints=web"
-      - "traefik.http.services.diagnostic-ui.loadbalancer.server.port=80"
-      - "traefik.http.middlewares.diagnostic-strip.stripprefix.prefixes=/diagnostic"
-      - "traefik.http.routers.diagnostic-ui.middlewares=diagnostic-strip"
-    environment:
-      # API URLs for Flutter app (accessed from browser via nginx proxy)
       - API_GATEWAY_URL=http://localhost:9001/api
-      - AUTH_SERVICE_URL=http://localhost:9001/auth-api
-      - USER_SERVICE_URL=http://localhost:9001/user-api
     networks:
       - am-network
-    depends_on:
-      auth-tokens:
-        condition: service_healthy
-      am-user-management:
-        condition: service_healthy
-    healthcheck:
-      test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/health" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
+    restart: unless-stopped
 
 networks:
   am-network:
-    external: true
     name: am-infra_am-net
+    external: true
