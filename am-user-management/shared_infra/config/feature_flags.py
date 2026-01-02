@@ -62,13 +62,16 @@ class FeatureFlags(BaseSettings):
 feature_flags = FeatureFlags()
 
 
+from functools import wraps
+
 def require_feature(feature_name: str):
     """Decorator to require a feature flag to be enabled"""
     def decorator(func):
-        def wrapper(*args, **kwargs):
+        @wraps(func)
+        async def wrapper(*args, **kwargs):
             if not getattr(feature_flags, feature_name, False):
                 raise RuntimeError(f"Feature '{feature_name}' is not enabled")
-            return func(*args, **kwargs)
+            return await func(*args, **kwargs)
         return wrapper
     return decorator
 
@@ -76,9 +79,10 @@ def require_feature(feature_name: str):
 def require_module(module_name: str):
     """Decorator to require a module to be enabled"""
     def decorator(func):
-        def wrapper(*args, **kwargs):
+        @wraps(func)
+        async def wrapper(*args, **kwargs):
             if not feature_flags.is_module_enabled(module_name):
                 raise RuntimeError(f"Module '{module_name}' is not enabled")
-            return func(*args, **kwargs)
+            return await func(*args, **kwargs)
         return wrapper
     return decorator

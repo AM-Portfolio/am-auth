@@ -134,7 +134,7 @@ class LoginUseCase:
         try:
             async with httpx.AsyncClient() as client:
                 response = await client.post(
-                    f"{auth_service_url}/api/v1/tokens/by-user-id",
+                    f"{auth_service_url}/auth/token/v1/tokens/by-user-id",
                     json={"user_id": user_id},
                     timeout=10.0
                 )

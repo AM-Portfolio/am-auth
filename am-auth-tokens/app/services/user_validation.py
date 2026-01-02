@@ -49,7 +49,7 @@ class UserValidationService:
             UserValidationResponse with validation result and user data
         """
         start_time = time.time()
-        url = f"{self.base_url}/api/v1/auth/login"
+        url = f"{self.base_url}/users/account/v1/login"
         
         logger.info(f"🔗 Calling user management service for validation", extra={
             "service": "user-management",

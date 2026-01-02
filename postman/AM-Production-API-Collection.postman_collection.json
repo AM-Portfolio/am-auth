@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "auth-system-complete-collection",
     "name": "AM Authentication System - Production API Collection",
-    "description": "Complete testing collection for all microservices\n\n**Base URLs:**\n- API Gateway: https://api.munish.org\n- User Management: https://api.munish.org\n- Auth Tokens: https://api.munish.org\n- Document Processor (Internal): http://am-document-processor:8070\n- Portfolio Service (Internal): http://am-portfolio:8080\n\n**Environment Variables:**\n- base_url: https://api.munish.org\n- user_url: https://api.munish.org\n- auth_url: https://api.munish.org\n- access_token: (set after login)\n- user_id: (set after registration)\n- process_id: (set after document upload)\n\n**✨ Latest Updates:**\n- Section 15: Trade Service endpoints\n- Section 11: Portfolio Service endpoints (market indices, portfolios, holdings, analytics)\n- Section 10: Document Processor endpoints\n- All internal services: Network isolated, port not exposed\n- Generic proxy pattern: 1 function per service in API Gateway\n- Two-tier JWT: User JWT + Service JWT for internal communication",
+    "description": "Complete testing collection for all microservices\n\n**Base URLs:**\n- API Gateway: https://am.munish.org\n- User Management: https://am.munish.org/users/account/v1\n- Auth Tokens: https://am.munish.org/auth/token/v1\n- Document Processor (Internal): http://am-document-processor:8070\n- Portfolio Service (Internal): http://am-portfolio:8080\n\n**Environment Variables:**\n- base_url: https://am.munish.org\n- user_url: https://am.munish.org/users/account/v1\n- auth_url: https://am.munish.org/auth/token/v1\n- access_token: (set after login)\n- user_id: (set after registration)\n- process_id: (set after document upload)\n\n**\u2728 Latest Updates:**\n- Section 15: Trade Service endpoints\n- Section 11: Portfolio Service endpoints (market indices, portfolios, holdings, analytics)\n- Section 10: Document Processor endpoints\n- All internal services: Network isolated, port not exposed\n- Generic proxy pattern: 1 function per service in API Gateway\n- Two-tier JWT: User JWT + Service JWT for internal communication",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -117,14 +117,11 @@
               "raw": "{\n  \"email\": \"testuser{{$timestamp}}@example.com\",\n  \"password\": \"SecurePassword123!\",\n  \"full_name\": \"Test User\"\n}"
             },
             "url": {
-              "raw": "{{user_url}}/api/v1/auth/register",
+              "raw": "{{user_url}}/register",
               "host": [
                 "{{user_url}}"
               ],
               "path": [
-                "api",
-                "v1",
-                "auth",
                 "register"
               ]
             },
@@ -147,13 +144,11 @@
               "raw": "{\n  \"status\": \"active\"\n}"
             },
             "url": {
-              "raw": "{{user_url}}/api/v1/users/{{user_id}}/status",
+              "raw": "{{user_url}}/users/{{user_id}}/status",
               "host": [
                 "{{user_url}}"
               ],
               "path": [
-                "api",
-                "v1",
                 "users",
                 "{{user_id}}",
                 "status"
@@ -169,13 +164,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{user_url}}/api/v1/users/{{user_id}}/status",
+              "raw": "{{user_url}}/users/{{user_id}}/status",
               "host": [
                 "{{user_url}}"
               ],
               "path": [
-                "api",
-                "v1",
                 "users",
                 "{{user_id}}",
                 "status"
@@ -225,13 +218,11 @@
               "raw": "{\n  \"username\": \"testuser@example.com\",\n  \"password\": \"SecurePassword123!\"\n}"
             },
             "url": {
-              "raw": "{{auth_url}}/api/v1/tokens",
+              "raw": "{{auth_url}}/tokens",
               "host": [
                 "{{auth_url}}"
               ],
               "path": [
-                "api",
-                "v1",
                 "tokens"
               ]
             },
@@ -254,13 +245,11 @@
               "raw": "{\"token\": \"{{access_token}}\"}"
             },
             "url": {
-              "raw": "{{auth_url}}/api/v1/validate",
+              "raw": "{{auth_url}}/validate",
               "host": [
                 "{{auth_url}}"
               ],
               "path": [
-                "api",
-                "v1",
                 "validate"
               ]
             },
@@ -303,13 +292,11 @@
               "raw": "{\n  \"refresh_token\": \"{{refresh_token}}\"\n}"
             },
             "url": {
-              "raw": "{{auth_url}}/api/v1/auth/refresh",
+              "raw": "{{auth_url}}/auth/refresh",
               "host": [
                 "{{auth_url}}"
               ],
               "path": [
-                "api",
-                "v1",
                 "auth",
                 "refresh"
               ]
@@ -333,13 +320,11 @@
               "raw": "{\n  \"refresh_token\": \"{{refresh_token}}\"\n}"
             },
             "url": {
-              "raw": "{{auth_url}}/api/v1/auth/logout",
+              "raw": "{{auth_url}}/auth/logout",
               "host": [
                 "{{auth_url}}"
               ],
               "path": [
-                "api",
-                "v1",
                 "auth",
                 "logout"
               ]
@@ -434,13 +419,11 @@
               "raw": "{\n  \"id_token\": \"{{google_id_token}}\"\n}"
             },
             "url": {
-              "raw": "{{auth_url}}/api/v1/auth/google/token",
+              "raw": "{{auth_url}}/auth/google/token",
               "host": [
                 "{{auth_url}}"
               ],
               "path": [
-                "api",
-                "v1",
                 "auth",
                 "google",
                 "token"
@@ -485,13 +468,11 @@
               "raw": "{\n  \"id_token\": \"PASTE_YOUR_REAL_GOOGLE_ID_TOKEN_HERE\"\n}"
             },
             "url": {
-              "raw": "{{auth_url}}/api/v1/auth/google/token",
+              "raw": "{{auth_url}}/auth/google/token",
               "host": [
                 "{{auth_url}}"
               ],
               "path": [
-                "api",
-                "v1",
                 "auth",
                 "google",
                 "token"
@@ -535,17 +516,15 @@
               "raw": "{\n  \"email\": \"testuser@example.com\"\n}"
             },
             "url": {
-              "raw": "{{user_url}}/api/v1/request-reset",
+              "raw": "{{user_url}}/request-reset",
               "host": [
                 "{{user_url}}"
               ],
               "path": [
-                "api",
-                "v1",
                 "request-reset"
               ]
             },
-            "description": "Request a password reset for a user. Returns success message regardless of whether email exists (security feature).\n\n✅ Development Mode: Token is returned in `reset_token` field - copy and use it directly!\n❌ Production Mode: Token is only sent via email, `reset_token` will be null.\n\n**Response includes:**\n- success: true/false\n- message: Status message\n- reset_token: The token to use (development only, null in production)"
+            "description": "Request a password reset for a user. Returns success message regardless of whether email exists (security feature).\n\n\u2705 Development Mode: Token is returned in `reset_token` field - copy and use it directly!\n\u274c Production Mode: Token is only sent via email, `reset_token` will be null.\n\n**Response includes:**\n- success: true/false\n- message: Status message\n- reset_token: The token to use (development only, null in production)"
           },
           "response": []
         },
@@ -564,13 +543,11 @@
               "raw": "{\n  \"email\": \"testuser@example.com\",\n  \"token\": \"PASTE_TOKEN_FROM_LOGS_HERE\"\n}"
             },
             "url": {
-              "raw": "{{user_url}}/api/v1/validate-reset-token",
+              "raw": "{{user_url}}/validate-reset-token",
               "host": [
                 "{{user_url}}"
               ],
               "path": [
-                "api",
-                "v1",
                 "validate-reset-token"
               ]
             },
@@ -593,17 +570,15 @@
               "raw": "{\n  \"email\": \"testuser@example.com\",\n  \"token\": \"PASTE_TOKEN_FROM_LOGS_HERE\",\n  \"new_password\": \"NewPassword123!\"\n}"
             },
             "url": {
-              "raw": "{{user_url}}/api/v1/confirm-reset",
+              "raw": "{{user_url}}/confirm-reset",
               "host": [
                 "{{user_url}}"
               ],
               "path": [
-                "api",
-                "v1",
                 "confirm-reset"
               ]
             },
-            "description": "Complete the password reset with the new password.\n\nPassword requirements:\n- Minimum 8 characters\n- Contains uppercase letter (A-Z)\n- Contains lowercase letter (a-z)\n- Contains digit (0-9)\n\n⚠️ After successful reset:\n- Old password will no longer work\n- New password can be used to login\n- Token will be marked as used (cannot be reused)"
+            "description": "Complete the password reset with the new password.\n\nPassword requirements:\n- Minimum 8 characters\n- Contains uppercase letter (A-Z)\n- Contains lowercase letter (a-z)\n- Contains digit (0-9)\n\n\u26a0\ufe0f After successful reset:\n- Old password will no longer work\n- New password can be used to login\n- Token will be marked as used (cannot be reused)"
           },
           "response": []
         }
@@ -829,7 +804,7 @@
                 "documents"
               ]
             },
-            "description": "⚠️ BULK TEST - Run this request 101 times in sequence\n\nExpected behavior:\n- First 100 requests: 200 OK (with X-RateLimit-Remaining header)\n- Request 101+: 429 Too Many Requests\n\n✅ To run:\n1. Save request\n2. Click \"Runner\" button in Postman\n3. Select this request\n4. Set \"Iterations\" to 101\n5. Run"
+            "description": "\u26a0\ufe0f BULK TEST - Run this request 101 times in sequence\n\nExpected behavior:\n- First 100 requests: 200 OK (with X-RateLimit-Remaining header)\n- Request 101+: 429 Too Many Requests\n\n\u2705 To run:\n1. Save request\n2. Click \"Runner\" button in Postman\n3. Select this request\n4. Set \"Iterations\" to 101\n5. Run"
           },
           "response": []
         }
@@ -853,14 +828,11 @@
               "raw": "{\n  \"email\": \"invalid-email\",\n  \"password\": \"SecurePassword123!\",\n  \"full_name\": \"Test User\"\n}"
             },
             "url": {
-              "raw": "{{user_url}}/api/v1/auth/register",
+              "raw": "{{user_url}}/register",
               "host": [
                 "{{user_url}}"
               ],
               "path": [
-                "api",
-                "v1",
-                "auth",
                 "register"
               ]
             },
@@ -883,14 +855,11 @@
               "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"weak\",\n  \"full_name\": \"Test User\"\n}"
             },
             "url": {
-              "raw": "{{user_url}}/api/v1/auth/register",
+              "raw": "{{user_url}}/register",
               "host": [
                 "{{user_url}}"
               ],
               "path": [
-                "api",
-                "v1",
-                "auth",
                 "register"
               ]
             },
@@ -913,13 +882,11 @@
               "raw": "{\n  \"username\": \"testuser@example.com\",\n  \"password\": \"WrongPassword123!\"\n}"
             },
             "url": {
-              "raw": "{{auth_url}}/api/v1/tokens",
+              "raw": "{{auth_url}}/tokens",
               "host": [
                 "{{auth_url}}"
               ],
               "path": [
-                "api",
-                "v1",
                 "tokens"
               ]
             },
@@ -942,13 +909,11 @@
               "raw": "{\n  \"email\": \"testuser@example.com\",\n  \"token\": \"PASTE_TOKEN_HERE\",\n  \"new_password\": \"weak\"\n}"
             },
             "url": {
-              "raw": "{{user_url}}/api/v1/confirm-reset",
+              "raw": "{{user_url}}/confirm-reset",
               "host": [
                 "{{user_url}}"
               ],
               "path": [
-                "api",
-                "v1",
                 "confirm-reset"
               ]
             },
@@ -962,7 +927,7 @@
       "name": "9. Security Verification Tests",
       "item": [
         {
-          "name": "✅ Port 8000 (API Gateway) - Should Work",
+          "name": "\u2705 Port 8000 (API Gateway) - Should Work",
           "event": [
             {
               "listen": "test",
@@ -979,7 +944,7 @@
                   "    pm.expect(jsonData).to.include('BROKER_PORTFOLIO');",
                   "});",
                   "",
-                  "pm.test(\"✅ Security Working: API Gateway is accessible\", function() {",
+                  "pm.test(\"\u2705 Security Working: API Gateway is accessible\", function() {",
                   "    pm.expect(pm.response.code).to.equal(200);",
                   "});"
                 ]
@@ -1008,12 +973,12 @@
                 "types"
               ]
             },
-            "description": "🔐 SECURITY TEST 1: API Gateway Access\n\n✅ Expected Result: 200 OK\n\nProves that:\n• Legitimate authenticated access works\n• API Gateway is accessible\n• User JWT is validated\n• Service JWT generated internally\n• Document Processor accessible via Gateway\n\nThis is the CORRECT and RECOMMENDED way to access Document Processor."
+            "description": "\ud83d\udd10 SECURITY TEST 1: API Gateway Access\n\n\u2705 Expected Result: 200 OK\n\nProves that:\n\u2022 Legitimate authenticated access works\n\u2022 API Gateway is accessible\n\u2022 User JWT is validated\n\u2022 Service JWT generated internally\n\u2022 Document Processor accessible via Gateway\n\nThis is the CORRECT and RECOMMENDED way to access Document Processor."
           },
           "response": []
         },
         {
-          "name": "❌ Port 8070 (Direct) - Should Fail",
+          "name": "\u274c Port 8070 (Direct) - Should Fail",
           "event": [
             {
               "listen": "test",
@@ -1025,7 +990,7 @@
                   "    pm.expect(pm.response.code).to.be.oneOf([0, 'ECONNREFUSED']);",
                   "});",
                   "",
-                  "pm.test(\"✅ Security Working: Port 8070 is hidden\", function() {",
+                  "pm.test(\"\u2705 Security Working: Port 8070 is hidden\", function() {",
                   "    // If we get here, security is working correctly",
                   "    // because the request was blocked",
                   "    pm.expect(true).to.be.true;",
@@ -1043,22 +1008,21 @@
               }
             ],
             "url": {
-              "raw": "https://api.munish.org:8070/api/v1/documents/types",
+              "raw": "https://am.munish.org:8070/api/v1/documents/types",
               "protocol": "http",
               "host": [
                 "localhost"
               ],
               "port": "8070",
               "path": [
-                "am",
-                "document",
+                ":8070",
                 "api",
                 "v1",
                 "documents",
                 "types"
               ]
             },
-            "description": "🔐 SECURITY TEST 2: Direct Port 8070 Access\n\n❌ Expected Result: Connection Refused (Cannot Connect)\n\nProves that:\n• Port 8070 is NOT exposed to host machine\n• Direct access is blocked\n• Only API Gateway (8000) is accessible\n• Security architecture is working\n\n⚠️ This request will fail - that's the point!\nPort 8070 should NOT be accessible from the host.\n\nThis proves protection is working correctly."
+            "description": "\ud83d\udd10 SECURITY TEST 2: Direct Port 8070 Access\n\n\u274c Expected Result: Connection Refused (Cannot Connect)\n\nProves that:\n\u2022 Port 8070 is NOT exposed to host machine\n\u2022 Direct access is blocked\n\u2022 Only API Gateway (8000) is accessible\n\u2022 Security architecture is working\n\n\u26a0\ufe0f This request will fail - that's the point!\nPort 8070 should NOT be accessible from the host.\n\nThis proves protection is working correctly."
           },
           "response": []
         }
@@ -1091,7 +1055,7 @@
                 "types"
               ]
             },
-            "description": "Get supported document types from Document Processor service via API Gateway.\n\n✅ Requires: Valid user JWT token\n✅ Gateway validates user token\n✅ Gateway generates service token for internal communication\n✅ Returns: List of supported document types\n\n**Expected Response:**\n```json\n[\n  \"BROKER_PORTFOLIO\",\n  \"MUTUAL_FUND\",\n  \"NPS_STATEMENT\",\n  \"COMPANY_FINANCIAL_REPORT\",\n  \"STOCK_PORTFOLIO\",\n  \"NSE_INDICES\"\n]\n```"
+            "description": "Get supported document types from Document Processor service via API Gateway.\n\n\u2705 Requires: Valid user JWT token\n\u2705 Gateway validates user token\n\u2705 Gateway generates service token for internal communication\n\u2705 Returns: List of supported document types\n\n**Expected Response:**\n```json\n[\n  \"BROKER_PORTFOLIO\",\n  \"MUTUAL_FUND\",\n  \"NPS_STATEMENT\",\n  \"COMPANY_FINANCIAL_REPORT\",\n  \"STOCK_PORTFOLIO\",\n  \"NSE_INDICES\"\n]\n```"
           },
           "response": []
         },
@@ -1139,7 +1103,7 @@
                 "process"
               ]
             },
-            "description": "Upload and process a document via API Gateway.\n\n✅ Requires: Valid user JWT token\n✅ Gateway validates user token\n✅ Gateway generates service token\n✅ Document Processor validates service token\n✅ Processes document and returns result\n\n**Form Data:**\n- file: Document file to upload\n- documentType: One of the supported types\n- portfolioId: (Optional) Portfolio identifier"
+            "description": "Upload and process a document via API Gateway.\n\n\u2705 Requires: Valid user JWT token\n\u2705 Gateway validates user token\n\u2705 Gateway generates service token\n\u2705 Document Processor validates service token\n\u2705 Processes document and returns result\n\n**Form Data:**\n- file: Document file to upload\n- documentType: One of the supported types\n- portfolioId: (Optional) Portfolio identifier"
           },
           "response": []
         },
@@ -1168,7 +1132,7 @@
                 "{{process_id}}"
               ]
             },
-            "description": "Get processing status for a document.\n\n✅ Requires: Valid user JWT token\n✅ Replace {{process_id}} with actual process ID from upload response"
+            "description": "Get processing status for a document.\n\n\u2705 Requires: Valid user JWT token\n\u2705 Replace {{process_id}} with actual process ID from upload response"
           },
           "response": []
         }
@@ -1178,7 +1142,7 @@
       "name": "12. Document Processor (Internal/Testing Only)",
       "item": [
         {
-          "name": "⚠️ SECURITY ARCHITECTURE - READ THIS FIRST",
+          "name": "\u26a0\ufe0f SECURITY ARCHITECTURE - READ THIS FIRST",
           "request": {
             "method": "GET",
             "header": [],
@@ -1191,7 +1155,7 @@
                 "health"
               ]
             },
-            "description": "🔐 SECURITY ARCHITECTURE - Document Processor Access\n\n**KEY PRINCIPLE: Port 8070 is NOT exposed to the host machine**\n\n✅ CORRECT ACCESS (Recommended):\n   • Use API Gateway (port 8000)\n   • Send user JWT token\n   • Gateway validates user token\n   • Gateway generates service JWT\n   • Gateway proxies to internal Document Processor\n   • See Section 9 for examples\n\n❌ DIRECT ACCESS (NOT from host):\n   • Port 8070 is internal-only (no port mapping in docker-compose.yml)\n   • NOT accessible from localhost:8070 ❌\n   • Only accessible from within Docker network\n   • Only for internal service-to-service communication\n   • Only for testing from other containers\n\n🧪 TESTING INTERNAL ACCESS (For debugging):\n   If you need to test from within Docker network:\n   \n   ```bash\n   # From API Gateway container\n   docker exec am-am-api-gateway-1 python3 -c \\\n     \"import urllib.request; print(urllib.request.urlopen('http://am-document-processor:8070/api/v1/documents/types').read().decode())\"\n   ```\n\n**SECURITY BENEFITS:**\n✅ Client must authenticate with user JWT first\n✅ Service tokens never leave internal network\n✅ API Gateway controls all access to internal services\n✅ Prevents direct unauthorized access\n✅ Audit trail through API Gateway\n\n**ENDPOINTS:**\n   Public (no auth):\n   - GET /api/v1/documents/types\n   - GET /actuator/health\n   - GET /swagger-ui/**\n   \n   Protected (service JWT):\n   - POST /api/v1/documents/process\n   - POST /api/v1/documents/batch-process\n   - GET /api/v1/documents/status/{id}"
+            "description": "\ud83d\udd10 SECURITY ARCHITECTURE - Document Processor Access\n\n**KEY PRINCIPLE: Port 8070 is NOT exposed to the host machine**\n\n\u2705 CORRECT ACCESS (Recommended):\n   \u2022 Use API Gateway (port 8000)\n   \u2022 Send user JWT token\n   \u2022 Gateway validates user token\n   \u2022 Gateway generates service JWT\n   \u2022 Gateway proxies to internal Document Processor\n   \u2022 See Section 9 for examples\n\n\u274c DIRECT ACCESS (NOT from host):\n   \u2022 Port 8070 is internal-only (no port mapping in docker-compose.yml)\n   \u2022 NOT accessible from localhost:8070 \u274c\n   \u2022 Only accessible from within Docker network\n   \u2022 Only for internal service-to-service communication\n   \u2022 Only for testing from other containers\n\n\ud83e\uddea TESTING INTERNAL ACCESS (For debugging):\n   If you need to test from within Docker network:\n   \n   ```bash\n   # From API Gateway container\n   docker exec am-am-api-gateway-1 python3 -c \\\n     \"import urllib.request; print(urllib.request.urlopen('http://am-document-processor:8070/api/v1/documents/types').read().decode())\"\n   ```\n\n**SECURITY BENEFITS:**\n\u2705 Client must authenticate with user JWT first\n\u2705 Service tokens never leave internal network\n\u2705 API Gateway controls all access to internal services\n\u2705 Prevents direct unauthorized access\n\u2705 Audit trail through API Gateway\n\n**ENDPOINTS:**\n   Public (no auth):\n   - GET /api/v1/documents/types\n   - GET /actuator/health\n   - GET /swagger-ui/**\n   \n   Protected (service JWT):\n   - POST /api/v1/documents/process\n   - POST /api/v1/documents/batch-process\n   - GET /api/v1/documents/status/{id}"
           },
           "response": []
         }
@@ -1225,7 +1189,7 @@
                 "all"
               ]
             },
-            "description": "Get all market indices from Portfolio Service via API Gateway.\n\n✅ Requires: Valid user JWT token\n✅ Gateway validates user token\n✅ Gateway generates service token for internal communication\n✅ Returns: List of market indices\n\n**Architecture:**\n- API Gateway: https://api.munish.org (exposed)\n- Portfolio Service: http://am-portfolio:8080 (internal only)\n- Port 8080 NOT exposed to host (network isolation)\n\n**Security Flow:**\n1. Client → API Gateway with user JWT\n2. Gateway validates user JWT\n3. Gateway generates service JWT\n4. Gateway → Portfolio Service with service JWT\n5. Portfolio Service validates service JWT\n6. Returns data to client"
+            "description": "Get all market indices from Portfolio Service via API Gateway.\n\n\u2705 Requires: Valid user JWT token\n\u2705 Gateway validates user token\n\u2705 Gateway generates service token for internal communication\n\u2705 Returns: List of market indices\n\n**Architecture:**\n- API Gateway: https://api.munish.org (exposed)\n- Portfolio Service: http://am-portfolio:8080 (internal only)\n- Port 8080 NOT exposed to host (network isolation)\n\n**Security Flow:**\n1. Client \u2192 API Gateway with user JWT\n2. Gateway validates user JWT\n3. Gateway generates service JWT\n4. Gateway \u2192 Portfolio Service with service JWT\n5. Portfolio Service validates service JWT\n6. Returns data to client"
           },
           "response": []
         },
@@ -1259,7 +1223,7 @@
                 }
               ]
             },
-            "description": "Get all portfolios for a specific user.\n\n✅ Requires: Valid user JWT token\n✅ Query parameter: userId (automatically set from environment)\n✅ Returns: List of user's portfolios"
+            "description": "Get all portfolios for a specific user.\n\n\u2705 Requires: Valid user JWT token\n\u2705 Query parameter: userId (automatically set from environment)\n\u2705 Returns: List of user's portfolios"
           },
           "response": []
         },
@@ -1294,7 +1258,7 @@
                 }
               ]
             },
-            "description": "Get detailed portfolio information by ID.\n\n✅ Requires: Valid user JWT token\n✅ Replace :portfolioId with actual portfolio UUID\n✅ Returns: Complete portfolio details"
+            "description": "Get detailed portfolio information by ID.\n\n\u2705 Requires: Valid user JWT token\n\u2705 Replace :portfolioId with actual portfolio UUID\n\u2705 Returns: Complete portfolio details"
           },
           "response": []
         },
@@ -1340,7 +1304,7 @@
                 }
               ]
             },
-            "description": "Get portfolio summary with performance metrics.\n\n✅ Requires: Valid user JWT token\n✅ Query parameters:\n   - userId: User ID\n   - interval: Time period (1D, 1W, 1M, 3M, 6M, 1Y)\n   - portfolioId: (Optional) Specific portfolio ID\n✅ Returns: Portfolio summary with performance data"
+            "description": "Get portfolio summary with performance metrics.\n\n\u2705 Requires: Valid user JWT token\n\u2705 Query parameters:\n   - userId: User ID\n   - interval: Time period (1D, 1W, 1M, 3M, 6M, 1Y)\n   - portfolioId: (Optional) Specific portfolio ID\n\u2705 Returns: Portfolio summary with performance data"
           },
           "response": []
         },
@@ -1386,7 +1350,7 @@
                 }
               ]
             },
-            "description": "Get all holdings across portfolios for a user.\n\n✅ Requires: Valid user JWT token\n✅ Query parameters:\n   - userId: User ID\n   - interval: Time period\n   - portfolioId: (Optional) Filter by portfolio\n✅ Returns: Holdings with current values"
+            "description": "Get all holdings across portfolios for a user.\n\n\u2705 Requires: Valid user JWT token\n\u2705 Query parameters:\n   - userId: User ID\n   - interval: Time period\n   - portfolioId: (Optional) Filter by portfolio\n\u2705 Returns: Holdings with current values"
           },
           "response": []
         },
@@ -1421,25 +1385,24 @@
                 }
               ]
             },
-            "description": "Get lightweight list of portfolio IDs and names.\n\n✅ Requires: Valid user JWT token\n✅ Query parameter: userId\n✅ Returns: Array of {id, name} objects"
+            "description": "Get lightweight list of portfolio IDs and names.\n\n\u2705 Requires: Valid user JWT token\n\u2705 Query parameter: userId\n\u2705 Returns: Array of {id, name} objects"
           },
           "response": []
         },
         {
-          "name": "⚠️ Test Direct Access (Should FAIL)",
+          "name": "\u26a0\ufe0f Test Direct Access (Should FAIL)",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "https://api.munish.org:8080/api/v1/portfolio/market-index/all",
+              "raw": "https://am.munish.org:8080/api/v1/portfolio/market-index/all",
               "protocol": "http",
               "host": [
                 "localhost"
               ],
               "port": "8080",
               "path": [
-                "am",
-                "portfolio",
+                ":8080",
                 "api",
                 "v1",
                 "portfolio",
@@ -1447,7 +1410,7 @@
                 "all"
               ]
             },
-            "description": "🔐 SECURITY TEST - This should FAIL\n\n**Expected Result:** Connection refused ❌\n\n**Why?**\n- Port 8080 is NOT exposed in docker-compose.yml\n- Portfolio Service is internal-only\n- Network isolation enforced\n- Must go through API Gateway\n\n**Security Benefits:**\n✅ Prevents direct unauthorized access\n✅ Forces authentication through Gateway\n✅ Service tokens never exposed externally\n✅ Audit trail through Gateway\n\n**Correct Access:**\nUse API Gateway endpoints above (Section 11) with Bearer token."
+            "description": "\ud83d\udd10 SECURITY TEST - This should FAIL\n\n**Expected Result:** Connection refused \u274c\n\n**Why?**\n- Port 8080 is NOT exposed in docker-compose.yml\n- Portfolio Service is internal-only\n- Network isolation enforced\n- Must go through API Gateway\n\n**Security Benefits:**\n\u2705 Prevents direct unauthorized access\n\u2705 Forces authentication through Gateway\n\u2705 Service tokens never exposed externally\n\u2705 Audit trail through Gateway\n\n**Correct Access:**\nUse API Gateway endpoints above (Section 11) with Bearer token."
           },
           "response": []
         }
@@ -1506,7 +1469,7 @@
                 }
               ]
             },
-            "description": "Calculate brokerage and breakeven via API Gateway.\n\n✅ Requires: Valid user JWT token\n✅ Gateway proxies to Market Data Service\n✅ Returns: Brokerage calculation details"
+            "description": "Calculate brokerage and breakeven via API Gateway.\n\n\u2705 Requires: Valid user JWT token\n\u2705 Gateway proxies to Market Data Service\n\u2705 Returns: Brokerage calculation details"
           },
           "response": []
         },
@@ -1521,15 +1484,14 @@
               }
             ],
             "url": {
-              "raw": "https://api.munish.org:8092/api/v1/brokerage/breakeven?symbol=RELIANCE&price=2500&quantity=10&exchange=NSE&tradeType=DELIVERY&brokerType=DISCOUNT",
+              "raw": "https://am.munish.org:8092/api/v1/brokerage/breakeven?symbol=RELIANCE&price=2500&quantity=10&exchange=NSE&tradeType=DELIVERY&brokerType=DISCOUNT",
               "protocol": "http",
               "host": [
                 "localhost"
               ],
               "port": "8092",
               "path": [
-                "am",
-                "market-data",
+                ":8092",
                 "api",
                 "v1",
                 "brokerage",
@@ -1562,7 +1524,7 @@
                 }
               ]
             },
-            "description": "🔐 SECURITY TEST - This should FAIL\n\n**Expected Result:** Connection refused ❌\n\n**Why?**\n- Port 8092 is NOT exposed in docker-compose.yml\n- Market Data Service is internal-only\n- Network isolation enforced"
+            "description": "\ud83d\udd10 SECURITY TEST - This should FAIL\n\n**Expected Result:** Connection refused \u274c\n\n**Why?**\n- Port 8092 is NOT exposed in docker-compose.yml\n- Market Data Service is internal-only\n- Network isolation enforced"
           },
           "response": []
         }
@@ -1572,7 +1534,7 @@
       "name": "14. Documentation & Reference",
       "item": [
         {
-          "name": "🔗 API Gateway - Swagger UI",
+          "name": "\ud83d\udd17 API Gateway - Swagger UI",
           "request": {
             "method": "GET",
             "header": [],
@@ -1590,7 +1552,7 @@
           "response": []
         },
         {
-          "name": "🔗 API Gateway - ReDoc",
+          "name": "\ud83d\udd17 API Gateway - ReDoc",
           "request": {
             "method": "GET",
             "header": [],
@@ -1608,7 +1570,7 @@
           "response": []
         },
         {
-          "name": "🔗 User Management - Swagger UI",
+          "name": "\ud83d\udd17 User Management - Swagger UI",
           "request": {
             "method": "GET",
             "header": [],
@@ -1626,7 +1588,7 @@
           "response": []
         },
         {
-          "name": "🔗 Auth Tokens - Swagger UI",
+          "name": "\ud83d\udd17 Auth Tokens - Swagger UI",
           "request": {
             "method": "GET",
             "header": [],
@@ -1671,7 +1633,7 @@
                 "trades"
               ]
             },
-            "description": "Get all trades for the authenticated user.\n\n✅ Requires: Valid user JWT token\n✅ Gateway proxies to Trade Service"
+            "description": "Get all trades for the authenticated user.\n\n\u2705 Requires: Valid user JWT token\n\u2705 Gateway proxies to Trade Service"
           },
           "response": []
         },
@@ -1705,7 +1667,7 @@
                 }
               ]
             },
-            "description": "Get details of a specific trade.\n\n✅ Requires: Valid user JWT token"
+            "description": "Get details of a specific trade.\n\n\u2705 Requires: Valid user JWT token"
           },
           "response": []
         },
@@ -1740,7 +1702,7 @@
                 "trades"
               ]
             },
-            "description": "Create a new trade.\n\n✅ Requires: Valid user JWT token"
+            "description": "Create a new trade.\n\n\u2705 Requires: Valid user JWT token"
           },
           "response": []
         }

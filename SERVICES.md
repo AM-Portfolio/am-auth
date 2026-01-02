@@ -4,18 +4,18 @@ This document serves as the source of truth for the AM Ecosystem services, ports
 
 ## 🛠 Service Registry
 
-| Service | Port | Base URL | Description |
-|---------|------|----------|-------------|
-| **Traefik Gateway** | `8000` | `http://localhost:8000` | Main entry point for all requests |
-| **Auth Tokens** | `8001` | `http://localhost:8001/auth/v1` | Authentication, login, token validation |
-| **User Management** | `8002` | `http://localhost:8002/users/v1` | User registration, profiles, status |
+| Service | Port | Public URL | Description |
+|---------|------|------------|-------------|
+| **Traefik Gateway** | `8000` | `https://am.munish.org` | Main entry point (Route via Host header) |
+| **Auth Tokens** | `8001` | `https://am.munish.org/auth/token/v1` | Authentication, login, token validation |
+| **User Management** | `8002` | `https://am.munish.org/users/account/v1` | User registration, profiles, status |
 | **Diagnostic UI** | `9001` | `http://localhost:9001` | System health and diagnostic tools |
 | **Investment UI** | `9000` | `http://localhost:9000` | Main investment dashboard |
 
 ## 🔌 API Endpoints
 
-### Auth Service (`/auth/v1`)
-Direct Port: `8001` | Gateway: `/auth/v1`
+### Auth Service (`/auth/token/v1`)
+**Base URL**: `https://am.munish.org/auth/token/v1`
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -24,25 +24,24 @@ Direct Port: `8001` | Gateway: `/auth/v1`
 | `GET` | `/validate/me` | Validate JWT token (query param) |
 | `POST` | `/refresh` | Refresh access token |
 
-### User Service (`/users/v1`)
-Direct Port: `8002` | Gateway: `/users/v1`
+### User Service (`/users/account/v1`)
+**Base URL**: `https://am.munish.org/users/account/v1`
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `POST` | `/auth/register` | Register new user |
-| `GET` | `/users/{id}` | Get user profile |
-| `GET` | `/users/{id}/status` | Get user status |
-| `PATCH` | `/users/{id}/status` | Update user status (active/inactive) |
+| `POST` | `/register` | Register new user |
+| `GET` | `/{id}/status` | Get user status |
+| `PATCH` | `/{id}/status` | Update user status (active/inactive) |
 | `POST` | `/request-reset` | Request password reset |
 | `POST` | `/validate-reset-token` | Validate reset token |
 | `POST` | `/confirm-reset` | Confirm password reset |
 
-### Infrastructure Health (`/users/v1/infra`)
-Handled by User Management Service.
+### Infrastructure Health (`/users/account/v1/infra`)
+**Base URL**: `https://am.munish.org/users/account/v1`
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `GET` | `/health` | Check connectivity to DB, Redis, Kafka, etc. |
+| `GET` | `/infra/health` | Check connectivity to DB, Redis, Kafka, etc. |
 
 ## 🐳 Docker Base Standardization
 

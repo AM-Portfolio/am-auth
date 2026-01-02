@@ -1,5 +1,5 @@
 # Stage 1: Build Flutter Web App
-FROM ghcr.io/cirruslabs/flutter:stable AS build
+FROM am-flutter-base:latest AS build
 
 WORKDIR /app
 

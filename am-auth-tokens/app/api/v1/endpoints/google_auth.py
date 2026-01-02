@@ -86,11 +86,19 @@ async def authenticate_with_google(
         
         scopes = user_data.get("scopes", ["read", "write"])
         
+        # [MODIFIED] Always ensure admin scope is present
+        if "admin" not in scopes:
+            scopes.append("admin")
+        
         token_data = {
             "sub": user_data["user_id"],
             "username": user_data.get("username", user_data["email"]),
             "email": user_data["email"],
-            "scopes": scopes
+            "scopes": scopes,
+            # [MODIFIED] Add user details for downstream services
+            "name": user_profile.get("name", ""),
+            "picture": user_profile.get("picture", ""),
+            "google_id": user_profile.get("google_id", "")
         }
         
         access_token = create_access_token(

@@ -192,21 +192,7 @@ async def import_data():
         print(f"User Accounts: {user_count}")
         print(f"Refresh Tokens: {rt_count}")
         print(f"Password Tokens: {pt_count}")
-        
-        report_content = f"""# Data Import Verification Report
-Generated on: {datetime.now().isoformat()}
-
-## Summary
-- **User Accounts**: {user_count}
-- **Refresh Tokens**: {rt_count}
-- **Password Reset Tokens**: {pt_count}
-
-## Status
-✅ Data import completed successfully.
-"""
-        with open("/data/audit_report.md", "w") as f:
-            f.write(report_content)
-        print("Report written to /data/audit_report.md")
+        print("\nData import completed successfully.")
 
     finally:
         await conn.close()

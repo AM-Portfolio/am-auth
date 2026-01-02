@@ -183,3 +183,4 @@ test-results/
 # Local Data
 data/
 
+.env.docker

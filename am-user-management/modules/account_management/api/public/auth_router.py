@@ -17,6 +17,13 @@ from ...domain.exceptions.user_already_exists import EmailAlreadyExistsError
 from ...domain.exceptions.invalid_credentials import InvalidCredentialsError
 from ...domain.exceptions.email_not_verified import EmailNotVerifiedError
 
+# Import dependency providers
+from ..dependencies import (
+    get_create_user_use_case,
+    get_login_use_case,
+    get_reset_password_use_case
+)
+
 
 router = APIRouter()
 
@@ -31,7 +38,7 @@ router = APIRouter()
 @require_module("account_management")
 async def register_user(
     request: CreateUserRequest,
-    create_user_use_case: Annotated[CreateUserUseCase, Depends()]
+    create_user_use_case: Annotated[CreateUserUseCase, Depends(get_create_user_use_case)]
 ) -> CreateUserResponse:
     """Register a new user"""
     try:
@@ -66,7 +73,7 @@ async def register_user(
 @require_module("account_management")
 async def login_user(
     request: LoginRequest,
-    login_use_case: Annotated[LoginUseCase, Depends()]
+    login_use_case: Annotated[LoginUseCase, Depends(get_login_use_case)]
 ) -> LoginResponse:
     """Authenticate user login"""
     try:
@@ -104,7 +111,7 @@ async def login_user(
 @require_module("account_management")
 async def request_password_reset(
     request: PasswordResetRequest,
-    reset_password_use_case: Annotated[ResetPasswordUseCase, Depends()]
+    reset_password_use_case: Annotated[ResetPasswordUseCase, Depends(get_reset_password_use_case)]
 ) -> PasswordResetResponse:
     """Request password reset"""
     try:

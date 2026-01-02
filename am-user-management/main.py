@@ -7,9 +7,21 @@ from contextlib import asynccontextmanager
 from typing import AsyncGenerator, Optional
 
 # Add shared logging to path
-shared_path = Path(__file__).parent.parent.parent / "shared"
-if str(shared_path) not in sys.path:
-    sys.path.insert(0, str(shared_path))
+# Add shared logging to path
+# Robustly find 'shared' directory
+current_dir = Path(__file__).resolve().parent
+shared_found = False
+# Search up to 3 levels up
+for _ in range(3):
+    if (current_dir / "shared").exists():
+        if str(current_dir) not in sys.path:
+            sys.path.insert(0, str(current_dir))
+        shared_found = True
+        break
+    current_dir = current_dir.parent
+
+if not shared_found:
+    print("WARNING: 'shared' directory not found in parent path")
 
 # Initialize centralized logging
 from shared.logging import initialize_user_management_logging, get_logger
@@ -32,60 +44,26 @@ from modules.account_management.infrastructure.services.mock_email_service impor
 from modules.account_management.application.use_cases.create_user import CreateUserUseCase, CreateUserRequest, CreateUserResponse
 from modules.account_management.application.use_cases.login import LoginUseCase, LoginRequest, LoginResponse
 
+# Import dependency providers
+from modules.account_management.api.dependencies import (
+    get_db_session,
+    get_user_repository,
+    get_create_user_use_case,
+    get_login_use_case,
+    get_reset_password_use_case
+)
+from modules.account_management.application.use_cases.reset_password import ResetPasswordUseCase
+
 # Import service registration router
 from modules.account_management.api.service_registration import router as service_router
 from modules.account_management.api.public.auth_router import router as auth_router
 from modules.account_management.api.public.google_auth_router import router as google_auth_router
 from modules.account_management.api.public.user_status_router import router as user_status_router
 from modules.account_management.api.public.password_reset_router import router as password_reset_router
+from modules.account_management.api.public.user_stats_router import router as user_stats_router
 
 
 # Dependency injection setup
-async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
-    """Get database session dependency"""
-    async for session in db_config.get_session():
-        yield session
-
-
-async def get_user_repository(session: AsyncSession = Depends(
-    get_db_session)) -> SQLAlchemyUserRepository:
-    """Get user repository dependency"""
-    return SQLAlchemyUserRepository(session)
-
-
-def get_password_hasher() -> BcryptPasswordHasher:
-    """Get password hasher dependency"""
-    return BcryptPasswordHasher()
-
-
-def get_email_service() -> MockEmailService:
-    """Get email service dependency"""
-    return MockEmailService()
-
-
-def get_event_bus() -> MockEventBus:
-    """Get event bus dependency"""
-    return MockEventBus()
-
-
-async def get_create_user_use_case(
-        user_repository: SQLAlchemyUserRepository = Depends(
-            get_user_repository),
-        password_hasher: BcryptPasswordHasher = Depends(get_password_hasher),
-        email_service: MockEmailService = Depends(get_email_service),
-        event_bus: MockEventBus = Depends(get_event_bus)) -> CreateUserUseCase:
-    """Get create user use case dependency"""
-    return CreateUserUseCase(user_repository, password_hasher, email_service,
-                             event_bus)
-
-
-async def get_login_use_case(
-        user_repository: SQLAlchemyUserRepository = Depends(
-            get_user_repository),
-        password_hasher: BcryptPasswordHasher = Depends(get_password_hasher),
-        event_bus: MockEventBus = Depends(get_event_bus)) -> LoginUseCase:
-    """Get login use case dependency"""
-    return LoginUseCase(user_repository, password_hasher, event_bus)
 
 
 # Lifecycle management
@@ -163,23 +141,17 @@ app.add_middleware(
 logger.info("Added CORS middleware", extra={"middleware": "cors"})
 
 # Include routers
-app.include_router(service_router)
-app.include_router(auth_router, prefix="/api/v1")
-app.include_router(google_auth_router, prefix="/api/v1")
-from modules.account_management.api.public.user_status_router import router as user_status_router
-from modules.account_management.api.public.password_reset_router import router as password_reset_router
-from modules.account_management.api.public.user_stats_router import router as user_stats_router
 
 # ... existing code ...
 
 # Include routers
 # Include routers with standardized prefixes (without 'am-' prefix in path)
 app.include_router(service_router) # Internal maintenance routes
-app.include_router(auth_router, prefix="/users/v1")  # e.g. /users/v1/auth/register
-app.include_router(google_auth_router, prefix="/users/v1") # e.g. /users/v1/auth/google
-app.include_router(user_status_router, prefix="/users/v1") # e.g. /users/v1/users/{id}/status
-app.include_router(password_reset_router, prefix="/users/v1") # e.g. /users/v1/request-reset
-app.include_router(user_stats_router, prefix="/users/v1") # e.g. /users/v1/users/stats
+app.include_router(auth_router, prefix="/users/account/v1")  # e.g. /users/account/v1/register
+app.include_router(google_auth_router, prefix="/users/account/v1") # e.g. /users/account/v1/auth/google
+app.include_router(user_status_router, prefix="/users/account/v1") # e.g. /users/account/v1/{id}/status
+app.include_router(password_reset_router, prefix="/users/account/v1") # e.g. /users/account/v1/request-reset
+app.include_router(user_stats_router, prefix="/users/account/v1") # e.g. /users/account/v1/stats
 
 
 # Pydantic models for API requests/responses
@@ -227,7 +199,7 @@ async def health_check(session: AsyncSession = Depends(get_db_session)):
         }
 
 
-@app.get("/users/v1/infra/health")
+@app.get("/users/account/v1/infra/health")
 async def infra_health_check():
     """Check health of all infrastructure components"""
     infra_checks = {
@@ -273,7 +245,7 @@ async def infra_health_check():
     }
 
 
-@app.get("/users/v1/auth/status")
+@app.get("/users/account/v1/auth/status")
 async def auth_status():
     return {
         "status":
@@ -286,8 +258,12 @@ async def auth_status():
     }
 
 
+
+# Add overrides for other use cases as needed, or define their providers
+# app.dependency_overrides[ResetPasswordUseCase] = ... (need to define get_reset_password_use_case)
+
 # Real authentication endpoints using our use cases
-@app.post("/users/v1/auth/register", response_model=CreateUserResponse)
+@app.post("/users/account/v1/auth/register", response_model=CreateUserResponse)
 async def register(request: RegisterRequest,
                    create_user_use_case: CreateUserUseCase = Depends(
                        get_create_user_use_case)):
@@ -336,7 +312,7 @@ async def register(request: RegisterRequest,
                             detail=f"Internal server error: {str(e)}")
 
 
-@app.post("/users/v1/auth/login")
+@app.post("/users/account/v1/auth/login")
 async def login(request: LoginRequestModel,
                 login_use_case: LoginUseCase = Depends(get_login_use_case)):
     """Authenticate user and return user data for token creation"""

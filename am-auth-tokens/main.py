@@ -84,8 +84,8 @@ app.add_middleware(
 logger.info("Added CORS middleware", extra={"middleware": "cors"})
 
 # Include API routes
-app.include_router(api_router, prefix=settings.API_V1_STR)
-app.include_router(test_router)  # Test routes for Google OAuth testing
+app.include_router(api_router, prefix="/auth/token/v1")
+app.include_router(test_router, prefix="/auth/token/v1")  # Test routes for Google OAuth testing
 
 
 @app.get("/")
@@ -100,20 +100,6 @@ async def root():
         "version": settings.VERSION,
         "status": "running",
         "environment": settings.ENVIRONMENT
-    }
-
-
-@app.get("/health")
-async def health():
-    """Health check endpoint."""
-    logger.debug("Health check", extra={
-        "endpoint": "/health",
-        "status": "healthy"
-    })
-    return {
-        "status": "healthy",
-        "service": settings.PROJECT_NAME,
-        "version": settings.VERSION
     }
 
 

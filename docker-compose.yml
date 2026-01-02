@@ -9,10 +9,10 @@ services:
       dockerfile: am-user-management/Dockerfile
     ports:
       - "8002:8002"
+    env_file:
+      - .env
+      - .env.docker
     environment:
-      - DATABASE_URL=postgresql://postgres:password123@am_postgresql:5432/portfolio
-      - AUTH_SERVICE_URL=http://auth-tokens:8001
-      - JWT_SECRET=${JWT_SECRET}
       - LOG_LEVEL=INFO
     networks:
       - am-network
@@ -20,8 +20,11 @@ services:
     healthcheck:
       test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8002/health')" ]
       interval: 30s
-      timeout: 1Mahalakshmi0s
+      timeout: 10s
       retries: 3
+    volumes:
+      - ./am-user-management:/app
+      - ./shared:/app/shared
 
   # --- Auth Tokens Service (Python/FastAPI) ---
   auth-tokens:
@@ -31,11 +34,10 @@ services:
       dockerfile: am-auth-tokens/Dockerfile
     ports:
       - "8001:8001"
+    env_file:
+      - .env
+      - .env.docker
     environment:
-      - DATABASE_URL=postgresql://postgres:password123@am_postgresql:5432/portfolio
-      - USER_SERVICE_URL=http://am-user-management:8002
-      - JWT_SECRET=${JWT_SECRET}
-      - JWT_ALGORITHM=${JWT_ALGORITHM}
       - LOG_LEVEL=INFO
     networks:
       - am-network
@@ -43,6 +45,9 @@ services:
       am-user-management:
         condition: service_healthy
     restart: unless-stopped
+    volumes:
+      - ./am-auth-tokens:/app
+      - ./shared:/app/shared
 
   # --- Diagnostic Web (Flutter) ---
   am-diagnostic-web:
@@ -54,6 +59,23 @@ services:
       - "9001:80"
     environment:
       - API_GATEWAY_URL=http://localhost:9001/api
+    networks:
+      - am-network
+    restart: unless-stopped
+    
+  # --- API Gateway (Python/FastAPI) ---
+  am-api-gateway:
+    container_name: am_api_gateway
+    build:
+      context: ./am-api-gateway
+      dockerfile: Dockerfile
+    ports:
+      - "8010:8000"
+    env_file:
+      - .env
+      - .env.docker
+    environment:
+      - LOG_LEVEL=INFO
     networks:
       - am-network
     restart: unless-stopped
