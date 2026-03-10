@@ -179,49 +179,6 @@ services:
       retries: 3
       start_period: 10s
 
-  # Java Internal Service (Reporting)
-  am-java-internal-service:
-    build:
-      context: ./am-java-internal-service
-      dockerfile: Dockerfile
-    # No external ports exposed - internal network only
-    env_file:
-      - ./.env.docker
-      - ./config/app.env
-      - ./config/services.env
-      - ./config/database.env
-      - ./config/security.env
-      - ./config/logging.env
-      - ./config/build.env
-      - ./config/features.env
-    environment:
-      # Centralized logging configuration
-      - LOG_FORMAT=json
-      - LOG_CONSOLE=true
-      - INTERNAL_SERVICE_LOG_LEVEL=INFO
-      - ENVIRONMENT=docker
-      # JWT Configuration
-      - JWT_SECRET=${JWT_SECRET}
-      - INTERNAL_JWT_SECRET=${INTERNAL_JWT_SECRET}
-      - MONGODB_URL=${DOCUMENT_MONGODB_URL}
-      - KAFKA_BOOTSTRAP_SERVERS=${DOCUMENT_KAFKA_SERVERS}
-      - SPRING_APPLICATION_NAME=am-document-processor
-      - SERVER_PORT=8070
-      - JWT_SECRET=${INTERNAL_JWT_SECRET}
-      - SPRING_AUTOCONFIGURE_EXCLUDE=org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
-    # NO ports exposed - internal network only (security: network isolation)
-    networks:
-      - am-network
-    depends_on:
-      am-api-gateway:
-        condition: service_healthy
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8070/actuator/health" ]
-      interval: 15s
-      timeout: 10s
-      retries: 5
-      start_period: 60s
-
 networks:
   am-network:
     driver: bridge
