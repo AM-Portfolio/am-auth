@@ -1,0 +1,19 @@
+{{- if .Values.authTokens.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: am-auth-tokens
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "am-auth.labels" . | nindent 4 }}
+    app.kubernetes.io/name: am-auth-tokens
+spec:
+  type: {{ .Values.authTokens.service.type }}
+  selector:
+    app: am-auth-tokens
+  ports:
+    - name: http
+      port: {{ .Values.authTokens.service.port }}
+      targetPort: {{ .Values.authTokens.port }}
+      protocol: TCP
+{{- end }}

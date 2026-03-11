@@ -1,0 +1,100 @@
+# ==============================================================================
+# am-auth Helm Chart — Base Values
+#
+# DESIGN PRINCIPLE:
+#   ALL runtime config (hostnames, ports, URLs, passwords, keys) comes from
+#   HashiCorp Vault. This file contains ONLY:
+#     - Vault connection details (address, role, secret paths)
+#     - Deployment config (replicas, resources, image)
+#     - Feature flags (non-sensitive booleans)
+#   Nothing else.
+# ==============================================================================
+
+environment: local
+namespace: am-apps
+
+global:
+  image:
+    registry: ghcr.io/ssd2658
+    pullPolicy: IfNotPresent
+    tag: "latest"
+
+  vault:
+    address: "http://vault.vault.svc.cluster.local:8200"
+    role: "am-auth"
+    authPath: "auth/kubernetes"
+    # Every key below is a Vault KV v2 path.
+    # Each path should contain ALL env vars the respective services need.
+    # Example layout in Vault:
+    #   secret/data/am-auth/local/database  → DATABASE_URL, DB_HOST, DB_PORT, DB_NAME ...
+    #   secret/data/am-auth/local/redis     → REDIS_URL, REDIS_HOSTNAME, REDIS_PORT ...
+    #   secret/data/am-auth/local/kafka     → KAFKA_BOOTSTRAP_SERVERS, KAFKA_USERNAME, KAFKA_PASSWORD ...
+    #   secret/data/am-auth/local/jwt       → JWT_SECRET, JWT_ALGORITHM, JWT_EXPIRE_MINUTES ...
+    #   secret/data/am-auth/local/internal-jwt → INTERNAL_JWT_SECRET ...
+    secrets:
+      jwt:          "secret/data/am-auth/local/jwt"
+      internalJwt:  "secret/data/am-auth/local/internal-jwt"
+      database:     "secret/data/am-auth/local/database"
+      redis:        "secret/data/am-auth/local/redis"
+      kafka:        "secret/data/am-auth/local/kafka"
+
+# ── API Gateway ────────────────────────────────────────────────────────────────
+apiGateway:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: am-api-gateway
+  port: 8000
+  service:
+    type: ClusterIP
+    port: 8000
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "300m"
+
+# ── User Management ────────────────────────────────────────────────────────────
+userManagement:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: am-user-management
+  port: 8000
+  service:
+    type: ClusterIP
+    port: 8000
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "300m"
+  features:
+    enableEmailVerification: false
+    allowRegistration: true
+    maxLoginAttempts: 5
+    accountLockoutMinutes: 15
+
+# ── Auth Tokens ────────────────────────────────────────────────────────────────
+authTokens:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: am-auth-tokens
+  port: 8001
+  service:
+    type: ClusterIP
+    port: 8001
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "300m"
+
+

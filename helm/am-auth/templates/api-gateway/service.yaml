@@ -1,0 +1,19 @@
+{{- if .Values.apiGateway.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: am-api-gateway
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "am-auth.labels" . | nindent 4 }}
+    app.kubernetes.io/name: am-api-gateway
+spec:
+  type: {{ .Values.apiGateway.service.type }}
+  selector:
+    app: am-api-gateway
+  ports:
+    - name: http
+      port: {{ .Values.apiGateway.service.port }}
+      targetPort: {{ .Values.apiGateway.port }}
+      protocol: TCP
+{{- end }}

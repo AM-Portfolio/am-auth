@@ -21,8 +21,9 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip \
     && pip install --no-cache-dir -r requirements.txt
 
-# Copy application code
+# Copy application code and shared library
 COPY . .
+COPY shared ./shared
 
 # Create non-root user
 RUN useradd --create-home --shell /bin/bash app \

@@ -1,0 +1,19 @@
+{{- if .Values.userManagement.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: am-user-management
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "am-auth.labels" . | nindent 4 }}
+    app.kubernetes.io/name: am-user-management
+spec:
+  type: {{ .Values.userManagement.service.type }}
+  selector:
+    app: am-user-management
+  ports:
+    - name: http
+      port: {{ .Values.userManagement.service.port }}
+      targetPort: {{ .Values.userManagement.port }}
+      protocol: TCP
+{{- end }}

@@ -1,0 +1,56 @@
+# ==============================================================================
+# am-auth — Production Values
+#
+# Deploy:
+#   helm upgrade --install am-auth ./helm/am-auth \
+#     -f helm/am-auth/values-prod.yaml \
+#     --namespace am-apps-prod --create-namespace
+#
+# ALL runtime config (URLs, hostnames, passwords, keys) is in Vault.
+# Only Vault paths and deployment config live here.
+# ==============================================================================
+
+environment: prod
+namespace: am-apps-prod
+
+global:
+  image:
+    registry: ghcr.io/ssd2658
+    tag: "1.0.0"           # Always pin an explicit semver tag in prod
+    pullPolicy: IfNotPresent
+
+  vault:
+    address: "http://vault.vault.svc.cluster.local:8200"
+    role: "am-auth-prod"
+    authPath: "auth/kubernetes"
+    secrets:
+      jwt:          "secret/data/am-auth/prod/jwt"
+      internalJwt:  "secret/data/am-auth/prod/internal-jwt"
+      database:     "secret/data/am-auth/prod/database"
+      redis:        "secret/data/am-auth/prod/redis"
+      kafka:        "secret/data/am-auth/prod/kafka"
+
+apiGateway:
+  replicaCount: 2           # HA in prod
+  resources:
+    requests: { memory: "256Mi", cpu: "200m" }
+    limits:   { memory: "512Mi", cpu: "500m" }
+
+userManagement:
+  replicaCount: 2           # HA in prod
+  resources:
+    requests: { memory: "256Mi", cpu: "200m" }
+    limits:   { memory: "512Mi", cpu: "500m" }
+  features:
+    enableEmailVerification: true
+    allowRegistration: true
+    maxLoginAttempts: 5
+    accountLockoutMinutes: 15
+
+authTokens:
+  replicaCount: 2           # HA in prod
+  resources:
+    requests: { memory: "256Mi", cpu: "200m" }
+    limits:   { memory: "512Mi", cpu: "500m" }
+
+

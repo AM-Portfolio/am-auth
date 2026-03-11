@@ -171,3 +171,6 @@ uv.lock
 # Test reports
 test-results/
 .pytest_cache/
+
+# Shared module copies for Docker build
+am/am-*/shared/

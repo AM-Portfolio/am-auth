@@ -1,0 +1,14 @@
+apiVersion: v2
+name: am-auth
+description: AM Auth Services — API Gateway, User Management, Auth Tokens, Python Internal Service
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - am-auth
+  - api-gateway
+  - user-management
+  - auth-tokens
+maintainers:
+  - name: ssd2658
+    email: ssd2658@gmail.com

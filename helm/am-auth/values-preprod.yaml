@@ -1,0 +1,56 @@
+# ==============================================================================
+# am-auth — Pre-Production Values
+#
+# Deploy:
+#   helm upgrade --install am-auth ./helm/am-auth \
+#     -f helm/am-auth/values-preprod.yaml \
+#     --namespace am-apps-preprod --create-namespace
+#
+# ALL runtime config (URLs, hostnames, passwords, keys) is in Vault.
+# Only Vault paths and deployment config live here.
+# ==============================================================================
+
+environment: preprod
+namespace: am-apps-preprod
+
+global:
+  image:
+    registry: ghcr.io/ssd2658
+    tag: "preprod-latest"
+    pullPolicy: IfNotPresent
+
+  vault:
+    address: "http://vault.vault.svc.cluster.local:8200"
+    role: "am-auth-preprod"
+    authPath: "auth/kubernetes"
+    secrets:
+      jwt:          "secret/data/am-auth/preprod/jwt"
+      internalJwt:  "secret/data/am-auth/preprod/internal-jwt"
+      database:     "secret/data/am-auth/preprod/database"
+      redis:        "secret/data/am-auth/preprod/redis"
+      kafka:        "secret/data/am-auth/preprod/kafka"
+
+apiGateway:
+  replicaCount: 1
+  resources:
+    requests: { memory: "128Mi", cpu: "100m" }
+    limits:   { memory: "256Mi", cpu: "300m" }
+
+userManagement:
+  replicaCount: 1
+  resources:
+    requests: { memory: "128Mi", cpu: "100m" }
+    limits:   { memory: "256Mi", cpu: "300m" }
+  features:
+    enableEmailVerification: false
+    allowRegistration: true
+    maxLoginAttempts: 5
+    accountLockoutMinutes: 15
+
+authTokens:
+  replicaCount: 1
+  resources:
+    requests: { memory: "128Mi", cpu: "100m" }
+    limits:   { memory: "256Mi", cpu: "300m" }
+
+

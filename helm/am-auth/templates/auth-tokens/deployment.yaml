@@ -1,0 +1,78 @@
+{{- if .Values.authTokens.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: am-auth-tokens
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "am-auth.labels" . | nindent 4 }}
+    app.kubernetes.io/name: am-auth-tokens
+spec:
+  replicas: {{ .Values.authTokens.replicaCount }}
+  selector:
+    matchLabels:
+      app: am-auth-tokens
+  template:
+    metadata:
+      labels:
+        app: am-auth-tokens
+        {{- include "am-auth.labels" . | nindent 8 }}
+      annotations:
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/role: {{ .Values.global.vault.role | quote }}
+        vault.hashicorp.com/auth-path: {{ .Values.global.vault.authPath | quote }}
+        vault.hashicorp.com/agent-pre-populate-only: "false"
+        vault.hashicorp.com/agent-inject-secret-jwt: {{ .Values.global.vault.secrets.jwt | quote }}
+        vault.hashicorp.com/agent-inject-template-jwt: |
+          {{`{{`}}- with secret {{ .Values.global.vault.secrets.jwt | quote }} {{`}}`}}
+          {{`{{`}}- range $k, $v := .Data.data {{`}}`}}
+          export {{`{{`}} $k {{`}}`}}="{{`{{`}} $v {{`}}`}}"
+          {{`{{`}} end {{`}}`}}
+          {{`{{`}} end {{`}}`}}
+        vault.hashicorp.com/agent-inject-secret-database: {{ .Values.global.vault.secrets.database | quote }}
+        vault.hashicorp.com/agent-inject-template-database: |
+          {{`{{`}}- with secret {{ .Values.global.vault.secrets.database | quote }} {{`}}`}}
+          {{`{{`}}- range $k, $v := .Data.data {{`}}`}}
+          export {{`{{`}} $k {{`}}`}}="{{`{{`}} $v {{`}}`}}"
+          {{`{{`}} end {{`}}`}}
+          {{`{{`}} end {{`}}`}}
+    spec:
+      serviceAccountName: am-auth-vault-sa
+      containers:
+        - name: am-auth-tokens
+          image: "{{ .Values.global.image.registry }}/{{ .Values.authTokens.image.repository }}:{{ .Values.global.image.tag }}"
+          imagePullPolicy: {{ .Values.global.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.authTokens.port }}
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              . /vault/secrets/jwt 2>/dev/null || true
+              . /vault/secrets/database 2>/dev/null || true
+              exec uvicorn main:app --host 0.0.0.0 --port {{ .Values.authTokens.port }}
+          env:
+            - name: ENVIRONMENT
+              value: {{ .Values.environment | quote }}
+            - name: LOG_FORMAT
+              value: "json"
+            - name: LOG_LEVEL
+              value: "INFO"
+          resources:
+            {{- toYaml .Values.authTokens.resources | nindent 12 }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.authTokens.port }}
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.authTokens.port }}
+            initialDelaySeconds: 20
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
+{{- end }}

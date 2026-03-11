@@ -1,0 +1,94 @@
+{{- if .Values.userManagement.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: am-user-management
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "am-auth.labels" . | nindent 4 }}
+    app.kubernetes.io/name: am-user-management
+spec:
+  replicas: {{ .Values.userManagement.replicaCount }}
+  selector:
+    matchLabels:
+      app: am-user-management
+  template:
+    metadata:
+      labels:
+        app: am-user-management
+        {{- include "am-auth.labels" . | nindent 8 }}
+      annotations:
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/role: {{ .Values.global.vault.role | quote }}
+        vault.hashicorp.com/auth-path: {{ .Values.global.vault.authPath | quote }}
+        vault.hashicorp.com/agent-pre-populate-only: "false"
+        vault.hashicorp.com/agent-inject-secret-jwt: {{ .Values.global.vault.secrets.jwt | quote }}
+        vault.hashicorp.com/agent-inject-template-jwt: |
+          {{`{{`}}- with secret {{ .Values.global.vault.secrets.jwt | quote }} {{`}}`}}
+          {{`{{`}}- range $k, $v := .Data.data {{`}}`}}
+          export {{`{{`}} $k {{`}}`}}="{{`{{`}} $v {{`}}`}}"
+          {{`{{`}} end {{`}}`}}
+          {{`{{`}} end {{`}}`}}
+        vault.hashicorp.com/agent-inject-secret-database: {{ .Values.global.vault.secrets.database | quote }}
+        vault.hashicorp.com/agent-inject-template-database: |
+          {{`{{`}}- with secret {{ .Values.global.vault.secrets.database | quote }} {{`}}`}}
+          {{`{{`}}- range $k, $v := .Data.data {{`}}`}}
+          export {{`{{`}} $k {{`}}`}}="{{`{{`}} $v {{`}}`}}"
+          {{`{{`}} end {{`}}`}}
+          {{`{{`}} end {{`}}`}}
+        vault.hashicorp.com/agent-inject-secret-redis: {{ .Values.global.vault.secrets.redis | quote }}
+        vault.hashicorp.com/agent-inject-template-redis: |
+          {{`{{`}}- with secret {{ .Values.global.vault.secrets.redis | quote }} {{`}}`}}
+          {{`{{`}}- range $k, $v := .Data.data {{`}}`}}
+          export {{`{{`}} $k {{`}}`}}="{{`{{`}} $v {{`}}`}}"
+          {{`{{`}} end {{`}}`}}
+          {{`{{`}} end {{`}}`}}
+    spec:
+      serviceAccountName: am-auth-vault-sa
+      containers:
+        - name: am-user-management
+          image: "{{ .Values.global.image.registry }}/{{ .Values.userManagement.image.repository }}:{{ .Values.global.image.tag }}"
+          imagePullPolicy: {{ .Values.global.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.userManagement.port }}
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              . /vault/secrets/jwt 2>/dev/null || true
+              . /vault/secrets/database 2>/dev/null || true
+              . /vault/secrets/redis 2>/dev/null || true
+              exec uvicorn main:app --host 0.0.0.0 --port {{ .Values.userManagement.port }}
+          env:
+            - name: ENVIRONMENT
+              value: {{ .Values.environment | quote }}
+            - name: ENABLE_EMAIL_VERIFICATION
+              value: {{ .Values.userManagement.features.enableEmailVerification | quote }}
+            - name: ALLOW_REGISTRATION
+              value: {{ .Values.userManagement.features.allowRegistration | quote }}
+            - name: MAX_LOGIN_ATTEMPTS
+              value: {{ .Values.userManagement.features.maxLoginAttempts | quote }}
+            - name: ACCOUNT_LOCKOUT_MINUTES
+              value: {{ .Values.userManagement.features.accountLockoutMinutes | quote }}
+            - name: LOG_FORMAT
+              value: "json"
+            - name: LOG_LEVEL
+              value: "INFO"
+          resources:
+            {{- toYaml .Values.userManagement.resources | nindent 12 }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.userManagement.port }}
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.userManagement.port }}
+            initialDelaySeconds: 20
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
+{{- end }}
