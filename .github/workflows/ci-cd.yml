@@ -1,8 +1,9 @@
 name: CI/CD Pipeline
+run-name: "Run ${{ github.run_id }} | Workflow: ${{ github.workflow_id }} | Actor: ${{ github.actor }}"
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   workflow_dispatch:
 
 env:
@@ -52,6 +53,7 @@ jobs:
           tags: |
             type=sha
             type=ref,event=branch
+            type=raw,value=run-${{ github.run_id }}
             latest
 
       - name: Build and push Docker image
@@ -82,4 +84,4 @@ jobs:
           helm upgrade --install am-auth ./helm/am-auth `
             --namespace am-apps-preprod `
             --set global.image.registry="${{ env.REGISTRY }}/${{ env.OWNER }}" `
-            --set global.image.tag="sha-${{ steps.vars.outputs.sha_short }}"
+            --set global.image.tag="run-${{ github.run_id }}"
