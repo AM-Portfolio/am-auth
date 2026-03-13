@@ -15,7 +15,7 @@ namespace: am-apps
 
 global:
   image:
-    registry: ghcr.io/ssd2658
+    registry: ghcr.io/am-portfolio
     pullPolicy: IfNotPresent
     tag: "latest"
 
