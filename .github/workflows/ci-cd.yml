@@ -84,3 +84,44 @@ jobs:
             --namespace am-apps-preprod `
             --set global.image.registry="${{ env.REGISTRY }}/${{ env.OWNER }}" `
             --set global.image.tag="${{ github.run_id }}"
+
+      - name: Verify Rollout
+        shell: powershell
+        run: |
+          $ns = "am-apps-preprod"
+          $deployments = @("am-api-gateway", "am-auth-tokens", "am-user-management")
+          $timeout = "10m"
+          $failed = $false
+
+          foreach ($dep in $deployments) {
+            Write-Host "⏳ Waiting for rollout: $dep ..."
+            kubectl rollout status deployment/$dep -n $ns --timeout=$timeout
+            if ($LASTEXITCODE -ne 0) {
+              Write-Host "❌ Rollout FAILED for $dep"
+              $failed = $true
+            } else {
+              Write-Host "✅ $dep is healthy"
+            }
+          }
+
+          if ($failed) {
+            Write-Host ""
+            Write-Host "=== Pod Status ==="
+            kubectl get pods -n $ns
+            Write-Host "" I
+            Write-Host "=== Recent Events ==="
+            kubectl get events -n $ns --sort-by='.lastTimestamp' | Select-Object -Last 20
+            exit 1
+          }
+
+      - name: Rollout Summary (on failure)
+        if: failure()
+        shell: powershell
+        run: |
+          Write-Host "🔍 Deployment failed. Full pod diagnostics:"
+          kubectl get pods -n am-apps-preprod -o wide
+          Write-Host ""
+          foreach ($dep in @("am-api-gateway", "am-auth-tokens", "am-user-management")) {
+            Write-Host "--- Describe: $dep ---"
+            kubectl describe deployment/$dep -n am-apps-preprod 2>&1 | Select-Object -Last 30
+          }
