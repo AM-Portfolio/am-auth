@@ -71,13 +71,15 @@ jobs:
 
       - name: Set short SHA
         id: vars
-        shell: bash
-        run: echo "sha_short=$(echo ${GITHUB_SHA} | cut -c1-7)" >> $GITHUB_OUTPUT
+        shell: powershell
+        run: |
+          $sha = $env:GITHUB_SHA.Substring(0,7)
+          echo "sha_short=$sha" >> $env:GITHUB_OUTPUT
 
       - name: Deploy to K8s
-        shell: bash
+        shell: powershell
         run: |
-          helm upgrade --install am-auth ./helm/am-auth \
-            --namespace am-apps \
-            --set global.image.registry=${{ env.REGISTRY }}/${{ env.OWNER }} \
-            --set global.image.tag=sha-${{ steps.vars.outputs.sha_short }}
+          helm upgrade --install am-auth ./helm/am-auth `
+            --namespace am-apps `
+            --set global.image.registry="${{ env.REGISTRY }}/${{ env.OWNER }}" `
+            --set global.image.tag="sha-${{ steps.vars.outputs.sha_short }}"
