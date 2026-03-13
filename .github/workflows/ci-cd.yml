@@ -32,6 +32,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Copy shared library to service
+        run: |
+          mkdir -p ${{ matrix.context }}/shared
+          cp -r am/shared/* ${{ matrix.context }}/shared/
+
       - name: Log in to the Container registry
         uses: docker/login-action@v3
         with:
