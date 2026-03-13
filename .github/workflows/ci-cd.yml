@@ -71,9 +71,11 @@ jobs:
 
       - name: Set short SHA
         id: vars
+        shell: bash
         run: echo "sha_short=$(echo ${GITHUB_SHA} | cut -c1-7)" >> $GITHUB_OUTPUT
 
       - name: Deploy to K8s
+        shell: bash
         run: |
           helm upgrade --install am-auth ./helm/am-auth \
             --namespace am-apps \
