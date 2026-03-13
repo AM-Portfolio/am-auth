@@ -83,4 +83,4 @@ jobs:
           helm upgrade --install am-auth ./helm/am-auth `
             --namespace am-apps-preprod `
             --set global.image.registry="${{ env.REGISTRY }}/${{ env.OWNER }}" `
-            --set global.image.tag="${{ github.run_id }}-v"
+            --set global.image.tag="${{ github.run_id }}"
