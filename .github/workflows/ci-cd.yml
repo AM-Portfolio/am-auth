@@ -64,7 +64,7 @@ jobs:
 
   deploy:
     needs: build-and-push
-    runs-on: [self-hosted, k8s-local]
+    runs-on: self-hosted
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
