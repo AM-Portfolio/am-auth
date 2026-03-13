@@ -53,7 +53,7 @@ jobs:
           tags: |
             type=sha
             type=ref,event=branch
-            type=raw,value=run-${{ github.run_id }}
+            type=raw,value=${{ github.run_id }}
             latest
 
       - name: Build and push Docker image
@@ -84,4 +84,4 @@ jobs:
           helm upgrade --install am-auth ./helm/am-auth `
             --namespace am-apps-preprod `
             --set global.image.registry="${{ env.REGISTRY }}/${{ env.OWNER }}" `
-            --set global.image.tag="run-${{ github.run_id }}"
+            --set global.image.tag="${{ github.run_id }}-v"
