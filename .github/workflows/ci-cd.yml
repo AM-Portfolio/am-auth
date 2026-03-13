@@ -51,7 +51,6 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.OWNER }}/${{ matrix.service }}
           tags: |
-            type=sha
             type=ref,event=branch
             type=raw,value=${{ github.run_id }}
             latest
