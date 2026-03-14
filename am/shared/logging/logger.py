@@ -67,6 +67,7 @@ class LogConfig:
     enable_sampling: bool = False
     sampling_rate: float = 1.0
     environment: str = "development"
+    persist_to_db: bool = False
     structured_keys: List[str] = None
 
     def __post_init__(self):

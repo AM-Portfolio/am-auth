@@ -1,6 +1,21 @@
 [project]
-name = "repl-nix-workspace"
+name = "am-auth"
 version = "0.1.0"
-description = "Add your description here"
+description = "AM Portfoilo Authentication Services"
+authors = [{ name = "Antigravity Agent", email = "agent@google.com" }]
 requires-python = ">=3.11"
 dependencies = []
+
+[tool.poetry]
+packages = [
+    { include = "am" },
+    { include = "shared" },
+    { include = "scripts" }
+]
+
+[project.scripts]
+setup = "scripts.setup:main"
+deploy-local = "scripts.deploy_local:main"
+test-logging = "scripts.test_logging_integration:main"
+db-test = "scripts.test_db_connection:main"
+test-all = "scripts.run_all_tests:main"

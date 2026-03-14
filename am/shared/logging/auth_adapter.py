@@ -15,9 +15,9 @@ from .am_logging_sdk import AMLoggingClient, LoggerMixin
 class AMAuthLogger(LoggerMixin):
     """Specialized logger for AM Auth services with fire-and-forget capability"""
     
-    def __init__(self, service_name: str = "am-auth", base_url: str = "http://am-logging-svc/v1"):
+    def __init__(self, service_name: str = "am-auth", base_url: str = "http://am-logging-svc/v1", persist_to_db: Optional[bool] = None):
         super().__init__()
-        self._log_client = AMLoggingClient(base_url=base_url)
+        self._log_client = AMLoggingClient(base_url=base_url, persist_to_db=persist_to_db)
         self._service_name = service_name
         self._context_stack = []
     

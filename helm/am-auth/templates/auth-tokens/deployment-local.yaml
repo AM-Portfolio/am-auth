@@ -1,4 +1,4 @@
-{{- if and .Values.authTokens.enabled (not .Values.global.isLocal) }}
+{{- if and .Values.authTokens.enabled .Values.global.isLocal }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -17,36 +17,7 @@ spec:
       labels:
         app: am-auth-tokens
         {{- include "am-auth.labels" . | nindent 8 }}
-      annotations:
-        {{- if .Values.global.vault.enabled }}
-        vault.hashicorp.com/agent-inject: "true"
-        vault.hashicorp.com/role: {{ .Values.global.vault.role | quote }}
-        vault.hashicorp.com/auth-path: {{ .Values.global.vault.authPath | quote }}
-        vault.hashicorp.com/agent-pre-populate-only: "false"
-        vault.hashicorp.com/agent-inject-secret-jwt: {{ .Values.global.vault.secrets.jwt | quote }}
-        vault.hashicorp.com/agent-inject-template-jwt: |
-          {{`{{`}}- with secret {{ .Values.global.vault.secrets.jwt | quote }} {{`}}`}}
-          {{`{{`}}- range $k, $v := .Data.data {{`}}`}}
-          export {{`{{`}} $k {{`}}`}}="{{`{{`}} $v {{`}}`}}"
-          {{`{{`}} end {{`}}`}}
-          {{`{{`}} end {{`}}`}}
-        vault.hashicorp.com/agent-inject-secret-database: {{ .Values.global.vault.secrets.database | quote }}
-        vault.hashicorp.com/agent-inject-template-database: |
-          {{`{{`}}- with secret {{ .Values.global.vault.secrets.database | quote }} {{`}}`}}
-          {{`{{`}}- range $k, $v := .Data.data {{`}}`}}
-          export {{`{{`}} $k {{`}}`}}="{{`{{`}} $v {{`}}`}}"
-          {{`{{`}} end {{`}}`}}
-          {{`{{`}} end {{`}}`}}
-        vault.hashicorp.com/agent-inject-secret-redis: {{ .Values.global.vault.secrets.redis | quote }}
-        vault.hashicorp.com/agent-inject-template-redis: |
-          {{`{{`}}- with secret {{ .Values.global.vault.secrets.redis | quote }} {{`}}`}}
-          {{`{{`}}- range $k, $v := .Data.data {{`}}`}}
-          export {{`{{`}} $k {{`}}`}}="{{`{{`}} $v {{`}}`}}"
-          {{`{{`}} end {{`}}`}}
-          {{`{{`}} end {{`}}`}}
-        {{- end }}
     spec:
-      serviceAccountName: am-auth-vault-sa
       containers:
         - name: am-auth-tokens
           image: "{{ .Values.global.image.registry }}/{{ .Values.authTokens.image.repository }}:{{ .Values.global.image.tag }}"
@@ -56,10 +27,6 @@ spec:
           command: ["/bin/sh", "-c"]
           args:
             - |
-              {{- if .Values.global.vault.enabled }}
-              . /vault/secrets/jwt 2>/dev/null || true
-              . /vault/secrets/database 2>/dev/null || true
-              {{- end }}
               exec uvicorn main:app --host 0.0.0.0 --port {{ .Values.authTokens.port }}
           env:
             - name: ENVIRONMENT

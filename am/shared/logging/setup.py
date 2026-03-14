@@ -38,6 +38,17 @@ def initialize_logging(service_name: str, config: Optional[LogConfig] = None) ->
     # Setup logging
     logger_instance = setup_logging(config)
     
+    # Initialize the auth adapter if possible
+    try:
+        from .auth_adapter import AMAuthLogger
+        from . import auth_adapter as auth_adapter_mod
+        auth_adapter_mod.auth_logger = AMAuthLogger(
+            service_name=service_name,
+            persist_to_db=config.persist_to_db
+        )
+    except Exception:
+        pass
+    
     # Log initialization message
     logger = get_logger(service_name)
     logger.info(

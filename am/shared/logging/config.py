@@ -39,7 +39,8 @@ class LogConfigManager:
             custom_settings={
                 "enable_oauth_debug": os.getenv("AUTH_TOKENS_OAUTH_DEBUG", "false").lower() == "true",
                 "enable_jwt_debug": os.getenv("AUTH_TOKENS_JWT_DEBUG", "false").lower() == "true",
-                "log_token_events": os.getenv("AUTH_TOKENS_LOG_EVENTS", "true").lower() == "true"
+                "log_token_events": os.getenv("AUTH_TOKENS_LOG_EVENTS", "true").lower() == "true",
+                "persist_to_db": os.getenv("AUTH_TOKENS_PERSIST_TO_DB", "false").lower() == "true"
             }
         )
         
@@ -52,7 +53,8 @@ class LogConfigManager:
             custom_settings={
                 "enable_db_query_logging": os.getenv("USER_MGMT_DB_DEBUG", "false").lower() == "true",
                 "log_user_events": os.getenv("USER_MGMT_LOG_EVENTS", "true").lower() == "true",
-                "enable_email_debug": os.getenv("USER_MGMT_EMAIL_DEBUG", "false").lower() == "true"
+                "enable_email_debug": os.getenv("USER_MGMT_EMAIL_DEBUG", "false").lower() == "true",
+                "persist_to_db": os.getenv("USER_MGMT_PERSIST_TO_DB", "true").lower() == "true"
             }
         )
         
@@ -85,7 +87,8 @@ class LogConfigManager:
             enable_performance=os.getenv("LOG_ENABLE_PERFORMANCE", "true").lower() == "true",
             enable_sampling=os.getenv("LOG_ENABLE_SAMPLING", "false").lower() == "true",
             sampling_rate=float(os.getenv("LOG_SAMPLING_RATE", "1.0")),
-            environment=os.getenv("ENVIRONMENT", "development")
+            environment=os.getenv("ENVIRONMENT", "development"),
+            persist_to_db=service_config.custom_settings.get("persist_to_db", os.getenv("LOG_PERSIST_TO_DB", "false").lower() == "true")
         )
     
     def register_service(self, config: ServiceLogConfig) -> None:

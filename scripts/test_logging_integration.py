@@ -9,12 +9,8 @@ import os
 from pathlib import Path
 
 # Add the shared logging path
-shared_path = Path(__file__).parent / "am" / "shared"
+shared_path = Path(__file__).parent.parent
 sys.path.insert(0, str(shared_path))
-
-# Add the am path to the Python path
-am_path = Path(__file__).parent / "am"
-sys.path.insert(0, str(am_path))
 
 try:
     from am.shared.logging.am_logging_sdk import AMLoggingClient, LoggerMixin
@@ -23,7 +19,15 @@ try:
     print("✅ Successfully imported AM Logging SDK components")
 except ImportError as e:
     print(f"❌ Failed to import AM Logging SDK: {e}")
-    sys.exit(1)
+    sys.path.append(str(Path(__file__).parent.parent))
+    try:
+        from am.shared.logging.am_logging_sdk import AMLoggingClient, LoggerMixin
+        from am.shared.logging.auth_adapter import AMAuthLogger, get_auth_logger
+        from am.shared.logging.fire_and_forget import get_fire_and_forget_handler, log_fire_and_forget
+        print("✅ Successfully imported AM Logging SDK components (fallback)")
+    except ImportError:
+        print(f"❌ Still failed to import AM Logging SDK. PYTHONPATH: {sys.path}")
+        sys.exit(1)
 
 
 class TestAuthService(LoggerMixin):

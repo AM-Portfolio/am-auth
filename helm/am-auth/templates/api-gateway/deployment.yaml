@@ -1,4 +1,4 @@
-{{- if .Values.apiGateway.enabled }}
+{{- if and .Values.apiGateway.enabled (not .Values.global.isLocal) }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -18,17 +18,14 @@ spec:
         app: am-api-gateway
         {{- include "am-auth.labels" . | nindent 8 }}
       annotations:
+        {{- if .Values.global.vault.enabled }}
         # ─────────────────────────────────────────────────────────────────────
         # Vault Agent Sidecar Injector
-        # Fetches secrets from Vault KV paths defined in values.yaml
-        # and writes them as sourceable shell files under /vault/secrets/
-        # The container sources those files before starting the app.
         # ─────────────────────────────────────────────────────────────────────
         vault.hashicorp.com/agent-inject: "true"
         vault.hashicorp.com/role: {{ .Values.global.vault.role | quote }}
         vault.hashicorp.com/auth-path: {{ .Values.global.vault.authPath | quote }}
         vault.hashicorp.com/agent-pre-populate-only: "false"
-        # /vault/secrets/jwt  → JWT_SECRET, JWT_ALGORITHM, JWT_EXPIRE_MINUTES
         vault.hashicorp.com/agent-inject-secret-jwt: {{ .Values.global.vault.secrets.jwt | quote }}
         vault.hashicorp.com/agent-inject-template-jwt: |
           {{`{{`}}- with secret {{ .Values.global.vault.secrets.jwt | quote }} {{`}}`}}
@@ -36,7 +33,6 @@ spec:
           export {{`{{`}} $k {{`}}`}}="{{`{{`}} $v {{`}}`}}"
           {{`{{`}} end {{`}}`}}
           {{`{{`}} end {{`}}`}}
-        # /vault/secrets/database → DATABASE_URL, DB_HOST, DB_PORT, DB_NAME ...
         vault.hashicorp.com/agent-inject-secret-database: {{ .Values.global.vault.secrets.database | quote }}
         vault.hashicorp.com/agent-inject-template-database: |
           {{`{{`}}- with secret {{ .Values.global.vault.secrets.database | quote }} {{`}}`}}
@@ -44,6 +40,7 @@ spec:
           export {{`{{`}} $k {{`}}`}}="{{`{{`}} $v {{`}}`}}"
           {{`{{`}} end {{`}}`}}
           {{`{{`}} end {{`}}`}}
+        {{- end }}
     spec:
       serviceAccountName: am-auth-vault-sa
       containers:
@@ -52,12 +49,13 @@ spec:
           imagePullPolicy: {{ .Values.global.image.pullPolicy }}
           ports:
             - containerPort: {{ .Values.apiGateway.port }}
-          # Source ALL config from Vault-injected files before starting
           command: ["/bin/sh", "-c"]
           args:
             - |
+              {{- if .Values.global.vault.enabled }}
               . /vault/secrets/jwt 2>/dev/null || true
               . /vault/secrets/database 2>/dev/null || true
+              {{- end }}
               exec uvicorn main:app --host 0.0.0.0 --port {{ .Values.apiGateway.port }}
           env:
             - name: ENVIRONMENT
@@ -66,6 +64,12 @@ spec:
               value: "json"
             - name: LOG_LEVEL
               value: "INFO"
+            {{- if .Values.apiGateway.env }}
+            {{- range $k, $v := .Values.apiGateway.env }}
+            - name: {{ $k | quote }}
+              value: {{ $v | quote }}
+            {{- end }}
+            {{- end }}
           resources:
             {{- toYaml .Values.apiGateway.resources | nindent 12 }}
           livenessProbe:
