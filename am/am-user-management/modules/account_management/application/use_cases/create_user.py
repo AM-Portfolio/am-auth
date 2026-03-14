@@ -6,6 +6,7 @@ from core.value_objects.email import Email
 from core.value_objects.phone_number import PhoneNumber
 from core.interfaces.repository import UserRepository
 from core.interfaces.event_bus import EventBus
+from shared.logging.adapter import audit_logger
 from ..services.password_hasher import PasswordHasherInterface
 from ..services.email_service import EmailServiceInterface
 from ...domain.models.user_account import UserAccount
@@ -44,6 +45,7 @@ class CreateUserUseCase:
         self._email_service = email_service
         self._event_bus = event_bus
     
+    @audit_logger
     async def execute(self, request: CreateUserRequest) -> CreateUserResponse:
         """Execute create user use case"""
         # Validate input

@@ -16,37 +16,66 @@ from app.database.config import db_config
 
 # Import centralized logging
 from shared.logging import initialize_auth_tokens_logging, get_logger
+from shared.logging.auth_adapter import AMAuthLogger, get_auth_logger, log_user_login, log_user_logout
+from shared.logging.fire_and_forget import get_fire_and_forget_handler, shutdown_global_logging, log_fire_and_forget
 
 # Initialize logging at startup
 logger_instance = initialize_auth_tokens_logging()
 logger = get_logger("am-auth-tokens.main")
+auth_logger = get_auth_logger()
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Manage application lifecycle"""
     logger.info("🚀 Starting Auth Tokens API...", extra={"event": "startup"})
+    auth_logger.log_info("Auth Tokens service starting up", event="startup")
+    
+    # Initialize fire-and-forget logging
+    ff_handler = get_fire_and_forget_handler()
     
     try:
-        await db_config.create_tables()
-        logger.info("✅ PostgreSQL database tables created successfully", extra={
-            "event": "database_setup", 
-            "status": "success"
-        })
+        async with auth_logger.trace_context("database_initialization"):
+            await db_config.create_tables()
+            logger.info("✅ PostgreSQL database tables created successfully", extra={
+                "event": "database_setup", 
+                "status": "success"
+            })
+            auth_logger.log_info("Database tables created successfully", 
+                                event="database_setup", status="success")
+            # Fire-and-forget log
+            await ff_handler.send_log_async({
+                "trace_id": "startup",
+                "span_id": "db-init",
+                "service": "am-auth-tokens",
+                "timestamp": "2024-01-01T00:00:00Z",
+                "log_type": "TECHNICAL",
+                "level": "INFO",
+                "payload": {"message": "Database initialization completed"},
+                "context": {"event": "database_setup", "status": "success"}
+            })
     except Exception as e:
         logger.error(f"⚠️ Failed to create database tables: {e}", extra={
             "event": "database_setup",
             "status": "failed",
             "error": str(e)
         }, exc_info=True)
+        auth_logger.log_error(f"Database setup failed: {e}", 
+                             event="database_setup", status="failed", error=str(e))
         logger.warning("💡 Service will continue but OAuth 2.0 features may not work", extra={
             "event": "database_setup",
             "status": "degraded"
         })
+        auth_logger.log_warn("Service continuing in degraded mode", 
+                            event="database_setup", status="degraded")
     
     yield
     
     logger.info("🛑 Shutting down Auth Tokens API...", extra={"event": "shutdown"})
+    auth_logger.log_info("Auth Tokens service shutting down", event="shutdown")
+    
+    # Shutdown fire-and-forget logging gracefully
+    await shutdown_global_logging()
     await db_config.close()
 
 

@@ -8,6 +8,7 @@ import os
 
 from core.value_objects.email import Email
 from core.interfaces.repository import UserRepository
+from shared.logging.adapter import audit_logger
 from ..services.password_hasher import PasswordHasherInterface
 from ...domain.models.user_account import UserAccount
 from ...domain.exceptions.invalid_credentials import (
@@ -51,6 +52,7 @@ class LoginUseCase:
         self._event_bus = event_bus
         self._require_email_verification = require_email_verification
     
+    @audit_logger
     async def execute(self, request: LoginRequest) -> LoginResponse:
         """Execute login use case"""
         try:
