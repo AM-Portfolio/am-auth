@@ -40,7 +40,8 @@ from logging.handlers import RotatingFileHandler, TimedRotatingFileHandler
 from pathlib import Path
 import threading
 from dataclasses import dataclass, asdict
-
+import httpx
+import asyncio
 
 # Context variables for request tracking
 correlation_id: ContextVar[Optional[str]] = ContextVar('correlation_id', default=None)
@@ -68,6 +69,7 @@ class LogConfig:
     sampling_rate: float = 1.0
     environment: str = "development"
     persist_to_db: bool = False
+    cls_url: Optional[str] = None # URL for Centralized Logging Service
     structured_keys: List[str] = None
 
     def __post_init__(self):
@@ -77,6 +79,85 @@ class LogConfig:
                 'correlation_id', 'request_id', 'user_id', 'duration_ms',
                 'module', 'function', 'line'
             ]
+        # Default CLS URL if not provided but can be overridden by env var in setup
+        if not self.cls_url:
+            self.cls_url = os.getenv("CLS_URL", "http://am-logging-svc/v1")
+
+
+class CLSHandler(logging.Handler):
+    """
+    Custom logging handler to forward logs to AM Logging Service (CLS)
+    """
+    def __init__(self, service_name: str, cls_url: str, persist_to_db: bool = False):
+        super().__init__()
+        self.service_name = service_name
+        self.cls_url = cls_url.rstrip("/")
+        self.persist_to_db = persist_to_db
+        # Use a separate thread for sending logs to avoid blocking main execution?
+        # For now, we'll use asyncio.create_task if there is a running loop, 
+        # or fire-and-forget logic.
+        
+    def emit(self, record: logging.LogRecord):
+        try:
+            # We only want to forward logs that are likely "important" or if explicitly configured
+            # But let's forward everything that passes the logger's level filter
+            
+            # Avoid recursion if logging from within this handler's dependencies
+            if getattr(record, "_cls_forwarding", False):
+                return
+
+            log_entry = self._prepare_log_entry(record)
+            
+            # Send asynchronously
+            try:
+                loop = asyncio.get_running_loop()
+                if loop.is_running():
+                    loop.create_task(self._send_log(log_entry))
+                else:
+                    # If no loop (e.g. startup/shutdown), we might lose logs or need sync send
+                    # For safety in this environment, just print a warning or skip
+                    pass 
+            except RuntimeError:
+                # No running loop
+                pass
+                
+        except Exception:
+            self.handleError(record)
+
+    def _prepare_log_entry(self, record: logging.LogRecord) -> Dict[str, Any]:
+        # Extract context
+        c_id = correlation_id.get() or str(uuid.uuid4())
+        
+        # Format message
+        msg = self.format(record)
+        
+        return {
+            "trace_id": c_id,
+            "span_id": request_id.get() or "root",
+            "service": self.service_name,
+            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "log_type": "TECHNICAL", # Standard logs are technical
+            "level": record.levelname,
+            "payload": {"message": record.getMessage(), "logger": record.name},
+            "context": {
+                "module": record.module,
+                "function": record.funcName,
+                "line": record.lineno,
+                "filename": record.filename
+            },
+            "metadata": {
+                "persist_to_db": str(self.persist_to_db).lower(),
+                "environment": os.getenv("ENVIRONMENT", "development")
+            }
+        }
+
+    async def _send_log(self, log_entry: Dict[str, Any]):
+        try:
+            async with httpx.AsyncClient(timeout=1.0) as client:
+                await client.post(f"{self.cls_url}/logs", json=log_entry)
+        except Exception:
+            # Silent fail for fire-and-forget
+            pass
 
 
 class EnhancedJSONFormatter(logging.Formatter):
