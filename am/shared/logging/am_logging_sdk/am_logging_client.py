@@ -93,8 +93,14 @@ class LoggerMixin:
         span_id = kwargs.get('span_id', str(uuid.uuid4()))
         
         frame = inspect.currentframe().f_back
+        # Walk back one more frame if we are inside log_info/etc helper methods
+        if frame.f_code.co_name in ['log_info', 'log_error', 'log_debug', 'log_warn', 'log_critical']:
+            frame = frame.f_back
+            
         class_name = frame.f_locals.get('self', None).__class__.__name__ if 'self' in frame.f_locals else "Global"
         method_name = frame.f_code.co_name
+        filename = frame.f_code.co_filename
+        line_number = frame.f_lineno
         
         log_entry = self._log_client.create_log_entry(
             trace_id=trace_id,
@@ -102,7 +108,12 @@ class LoggerMixin:
             service=self._service_name,
             level=level,
             payload={"message": message},
-            context={"class": class_name, "method": method_name},
+            context={
+                "class": class_name, 
+                "method": method_name,
+                "filename": filename,
+                "line_number": line_number
+            },
             metadata=kwargs.get('metadata'),
             persist_to_db=kwargs.get('persist_to_db')
         )

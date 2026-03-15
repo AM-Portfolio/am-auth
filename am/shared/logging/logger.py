@@ -100,6 +100,8 @@ class EnhancedJSONFormatter(logging.Formatter):
             "module": getattr(record, 'module', ''),
             "function": getattr(record, 'funcName', ''),
             "line": getattr(record, 'lineno', ''),
+            "filename": getattr(record, 'filename', ''),
+            "path": getattr(record, 'pathname', ''),
             "thread": getattr(record, 'thread', ''),
             "process": getattr(record, 'process', ''),
         }
@@ -309,9 +311,11 @@ class AMLogger:
         root_logger.addHandler(file_handler)
     
     def _configure_third_party_loggers(self) -> None:
-        """Configure log levels for third-party libraries"""
+        """Configure log levels and handlers for third-party libraries"""
         third_party_configs = {
             "uvicorn": logging.INFO,
+            "uvicorn.access": logging.INFO,
+            "uvicorn.error": logging.INFO,
             "fastapi": logging.INFO,
             "sqlalchemy.engine": logging.WARNING,
             "sqlalchemy.dialects": logging.WARNING,
@@ -322,8 +326,24 @@ class AMLogger:
             "urllib3": logging.WARNING,
         }
         
+        # Get handlers from root logger to reuse
+        root_logger = logging.getLogger()
+        handlers = root_logger.handlers
+        
         for logger_name, level in third_party_configs.items():
-            logging.getLogger(logger_name).setLevel(level)
+            logger = logging.getLogger(logger_name)
+            logger.setLevel(level)
+            
+            # For Uvicorn, we want to override handlers to use our formatter
+            if logger_name.startswith("uvicorn"):
+                logger.handlers = []
+                # Don't propagate if we attach handlers directly, but here we reuse root handlers
+                # If we propagate, it goes to root. 
+                # Uvicorn often sets up its own handlers, so we clear them.
+                # We can either set propagate=True (and rely on root) or attach handlers.
+                logger.propagate = True
+                for handler in handlers:
+                    logger.addHandler(handler)
     
     def get_logger(self, name: Optional[str] = None) -> logging.Logger:
         """Get or create a logger instance"""

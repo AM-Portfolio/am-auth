@@ -4,22 +4,28 @@ Acts as a single entry point for all client requests
 Proxies to internal microservices with security, rate limiting, and monitoring
 """
 
+import sys
+from pathlib import Path
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-import logging
 import time
+
+# Add shared logging to path
+shared_path = Path(__file__).parent.parent / "shared"
+if str(shared_path) not in sys.path:
+    sys.path.insert(0, str(shared_path))
+
+from shared.logging import initialize_logging, get_logger, LogConfig
+from shared.logging.middleware import setup_fastapi_logging
+
+# Initialize logging
+# We use a default config here, but it will pick up env vars like LOG_LEVEL
+initialize_logging("am-api-gateway", LogConfig(service_name="am-api-gateway"))
+logger = get_logger("am-api-gateway.main")
 
 from api.v1.endpoints import trades, market_data, document_processor, portfolio_service, diagnostics
 from middleware.rate_limiter import RateLimiterMiddleware
-from middleware.logging_middleware import LoggingMiddleware
-
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
 
 # Create FastAPI app
 app = FastAPI(
@@ -29,6 +35,9 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc"
 )
+
+# Setup shared logging middleware
+setup_fastapi_logging(app, service_name="am-api-gateway")
 
 # CORS middleware
 app.add_middleware(
@@ -41,7 +50,6 @@ app.add_middleware(
 
 # Custom middleware
 app.add_middleware(RateLimiterMiddleware)
-app.add_middleware(LoggingMiddleware)
 
 # Health check
 @app.get("/health")
@@ -58,6 +66,7 @@ async def health_check():
 @app.get("/")
 async def root():
     """Root endpoint with API information"""
+    logger.info("Root endpoint accessed")
     return {
         "service": "AM API Gateway",
         "version": "1.0.0",
@@ -88,7 +97,10 @@ app.include_router(diagnostics.router, prefix="/api/v1", tags=["System Diagnosti
 # Global exception handler
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
-    logger.error(f"Global exception: {exc}", exc_info=True)
+    logger.error(f"Global exception: {exc}", exc_info=True, extra={
+        "path": str(request.url),
+        "error_type": type(exc).__name__
+    })
     return JSONResponse(
         status_code=500,
         content={
@@ -100,4 +112,5 @@ async def global_exception_handler(request: Request, exc: Exception):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
+    # log_config=None is important to let our logger handle formatting
+    uvicorn.run(app, host="0.0.0.0", port=8000, reload=True, log_config=None)

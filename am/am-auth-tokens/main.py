@@ -187,5 +187,6 @@ if __name__ == "__main__":
         host=settings.HOST,
         port=settings.PORT,
         reload=settings.DEBUG,
-        log_level=settings.LOG_LEVEL if not settings.DEBUG else "debug"
+        log_level=settings.LOG_LEVEL.lower() if not settings.DEBUG else "debug",
+        log_config=None
     )
