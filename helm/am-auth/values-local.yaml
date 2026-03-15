@@ -18,9 +18,10 @@ global:
 
 apiGateway:
   replicaCount: 1
-  env:
-    JWT_SECRET: "jwt-super-secret-signing-key-change-in-production-must-be-32chars-minimum-xyz"
-    DATABASE_URL: "postgresql://postgres:wX8MVFdifFs4ZhnJ5pFZCbQ9@host.docker.internal:5432/postgres"
+  env: {}
+    # Injected by deploy_local.py from .env:
+    # JWT_SECRET
+    # DATABASE_URL
   resources:
     requests:
       memory: "64Mi"
@@ -28,12 +29,14 @@ apiGateway:
 
 userManagement:
   replicaCount: 1
-  env:
-    DATABASE_URL: "postgresql://postgres:wX8MVFdifFs4ZhnJ5pFZCbQ9@host.docker.internal:5432/postgres"
-    SECRET_KEY: "am-user-management-super-secret-key-change-in-production-32chars-minimum-abcdef"
-    JWT_SECRET_KEY: "jwt-super-secret-signing-key-change-in-production-must-be-32chars-minimum-xyz"
-    REDIS_URL: "redis://:RedisPassword123!@host.docker.internal:6379/0"
-    USER_MGMT_PERSIST_TO_DB: "true"
+  env: {}
+    # Injected by deploy_local.py from .env:
+    # DATABASE_URL
+    # SECRET_KEY
+    # JWT_SECRET_KEY
+    # REDIS_URL
+    # USER_MGMT_PERSIST_TO_DB
+    # CLS_URL
   resources:
     requests:
       memory: "64Mi"
@@ -41,11 +44,13 @@ userManagement:
 
 authTokens:
   replicaCount: 1
-  env:
-    DATABASE_URL: "postgresql://postgres:wX8MVFdifFs4ZhnJ5pFZCbQ9@host.docker.internal:5432/postgres"
-    JWT_SECRET: "jwt-super-secret-signing-key-change-in-production-must-be-32chars-minimum-xyz"
-    INTERNAL_JWT_SECRET: "internal-service-super-secret-key-32chars-minimum-change-in-prod"
-    AUTH_TOKENS_PERSIST_TO_DB: "false"
+  env: {}
+    # Injected by deploy_local.py from .env:
+    # DATABASE_URL
+    # JWT_SECRET
+    # INTERNAL_JWT_SECRET
+    # AUTH_TOKENS_PERSIST_TO_DB
+    # CLS_URL
   resources:
     requests:
       memory: "64Mi"

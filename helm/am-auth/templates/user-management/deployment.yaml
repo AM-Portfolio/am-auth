@@ -1,4 +1,4 @@
-{{- if and .Values.userManagement.enabled (not .Values.global.isLocal) }}
+{{- if .Values.userManagement.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -46,7 +46,9 @@ spec:
           {{`{{`}} end {{`}}`}}
         {{- end }}
     spec:
+      {{- if .Values.global.vault.enabled }}
       serviceAccountName: am-auth-vault-sa
+      {{- end }}
       containers:
         - name: am-user-management
           image: "{{ .Values.global.image.registry }}/{{ .Values.userManagement.image.repository }}:{{ .Values.global.image.tag }}"

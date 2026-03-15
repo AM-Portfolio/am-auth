@@ -7,6 +7,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 import httpx
 import os
 import time
+import sys
+from pathlib import Path
+
 from app.core.security import create_access_token, Token
 from app.services.user_validation import (
     UserValidationService, 
@@ -18,15 +21,14 @@ from shared_infra.config.settings import settings
 from app.database.config import db_config
 from app.services.refresh_token_service import refresh_token_service
 
-# Import logging
-import sys
-from pathlib import Path
+# Add shared logging to path if not present
 shared_path = Path(__file__).parent.parent.parent.parent.parent.parent / "shared"
 if str(shared_path) not in sys.path:
     sys.path.insert(0, str(shared_path))
-from shared.logging import get_logger
 
-logger = get_logger("am-auth-tokens.token")
+from shared.logging.auth_adapter import get_auth_logger, log_user_login
+
+logger = get_auth_logger()
 
 router = APIRouter()
 
@@ -90,17 +92,14 @@ async def create_token(
         HTTPException: If credentials are invalid
     """
     start_time = time.time()
-    logger.info(f"🔐 Token creation request received", extra={
-        "username": token_request.username,
-        "endpoint": "/tokens",
-        "method": "POST"
-    })
+    logger.log_info(f"Token creation request received for user: {token_request.username}", 
+                   event="login_attempt", 
+                   username=token_request.username)
     
     # Validate user credentials
-    logger.debug(f"Validating credentials for user: {token_request.username}", extra={
-        "username": token_request.username,
-        "step": "credential_validation"
-    })
+    logger.log_debug(f"Validating credentials for user: {token_request.username}", 
+                    event="login_step", 
+                    step="credential_validation")
     
     credentials = UserCredentials(
         username=token_request.username,
@@ -111,19 +110,11 @@ async def create_token(
     validation_result = await user_service.validate_user_credentials(credentials)
     validation_duration = (time.time() - validation_start) * 1000
     
-    logger.info(f"User validation completed", extra={
-        "username": token_request.username,
-        "valid": validation_result.valid,
-        "duration_ms": round(validation_duration, 2),
-        "step": "validation_complete"
-    })
-    
     if not validation_result.valid:
-        logger.warning(f"❌ Authentication failed for user: {token_request.username}", extra={
-            "username": token_request.username,
-            "reason": validation_result.message,
-            "status_code": 401
-        })
+        logger.log_warn(f"Authentication failed for user: {token_request.username}", 
+                       event="login_failed",
+                       username=token_request.username,
+                       reason=validation_result.message)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=validation_result.message or "Invalid credentials",
@@ -134,12 +125,11 @@ async def create_token(
     # Treat missing status as security failure - reject if status is absent or not ACTIVE
     if not validation_result.status or validation_result.status.upper() != "ACTIVE":
         status_msg = validation_result.status if validation_result.status else "unknown"
-        logger.warning(f"⛔ User account not active: {token_request.username}", extra={
-            "username": token_request.username,
-            "user_id": validation_result.user_id,
-            "status": status_msg,
-            "status_code": 403
-        })
+        logger.log_warn(f"User account not active: {token_request.username}", 
+                       event="login_failed",
+                       username=token_request.username,
+                       user_id=validation_result.user_id,
+                       account_status=status_msg)
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail=f"User account is not active: {status_msg}",
@@ -147,14 +137,6 @@ async def create_token(
         )
     
     # Create token with user data
-    logger.debug(f"Creating JWT token for user: {validation_result.username}", extra={
-        "user_id": validation_result.user_id,
-        "username": validation_result.username,
-        "email": validation_result.email,
-        "scopes": validation_result.scopes,
-        "step": "token_creation"
-    })
-    
     user_data = {
         "username": validation_result.username,
         "email": validation_result.email,
@@ -171,15 +153,20 @@ async def create_token(
     token_duration = (time.time() - token_start) * 1000
     
     total_duration = (time.time() - start_time) * 1000
-    logger.info(f"✅ Token created successfully for user: {validation_result.username}", extra={
-        "user_id": validation_result.user_id,
-        "username": validation_result.username,
-        "email": validation_result.email,
-        "expires_in_minutes": settings.JWT_EXPIRE_MINUTES,
-        "token_creation_ms": round(token_duration, 2),
-        "total_duration_ms": round(total_duration, 2),
-        "status_code": 200
-    })
+    
+    # Log successful login using the specialized helper
+    await log_user_login(
+        user_id=validation_result.user_id,
+        username=validation_result.username,
+        login_method="password",
+        status="success",
+        ip_address="unknown" # Can be extracted from request if available
+    )
+    
+    logger.log_info(f"Token created successfully for user: {validation_result.username}", 
+                   event="login_success",
+                   user_id=validation_result.user_id,
+                   duration_ms=round(total_duration, 2))
     
     # Create refresh token
     refresh_token = await refresh_token_service.create_refresh_token(

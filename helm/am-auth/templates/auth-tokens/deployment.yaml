@@ -1,4 +1,4 @@
-{{- if and .Values.authTokens.enabled (not .Values.global.isLocal) }}
+{{- if .Values.authTokens.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -46,7 +46,9 @@ spec:
           {{`{{`}} end {{`}}`}}
         {{- end }}
     spec:
+      {{- if .Values.global.vault.enabled }}
       serviceAccountName: am-auth-vault-sa
+      {{- end }}
       containers:
         - name: am-auth-tokens
           image: "{{ .Values.global.image.registry }}/{{ .Values.authTokens.image.repository }}:{{ .Values.global.image.tag }}"

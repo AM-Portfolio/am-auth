@@ -1,4 +1,4 @@
-{{- if and .Values.apiGateway.enabled (not .Values.global.isLocal) }}
+{{- if .Values.apiGateway.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -42,7 +42,9 @@ spec:
           {{`{{`}} end {{`}}`}}
         {{- end }}
     spec:
+      {{- if .Values.global.vault.enabled }}
       serviceAccountName: am-auth-vault-sa
+      {{- end }}
       containers:
         - name: am-api-gateway
           image: "{{ .Values.global.image.registry }}/{{ .Values.apiGateway.image.repository }}:{{ .Values.global.image.tag }}"
