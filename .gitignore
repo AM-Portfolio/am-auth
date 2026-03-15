@@ -99,6 +99,7 @@ celerybeat.pid
 .env
 .env.local
 .env.*.local
+.env.deploy
 .venv
 env/
 venv/
@@ -167,6 +168,12 @@ am/am-*/.eggs/
 
 # uv lock file (local)
 uv.lock
+
+# Deployment config
+deploy_config.json
+
+# Backup files
+*.bak
 
 # Test reports
 test-results/
