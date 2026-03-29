@@ -25,7 +25,7 @@ class DatabaseConfig:
         print(f'DB_NAME: {os.getenv("DB_NAME")}')
         print(f'DB_USER: {os.getenv("DB_USER")}')
         print(f'DB_PASSWORD: {os.getenv("DB_PASSWORD")}')
-                # Get database URL from environment - prefer PostgreSQL
+        # Get database URL from environment - prefer PostgreSQL
         database_url = os.getenv('DATABASE_URL')
         
         if not database_url:

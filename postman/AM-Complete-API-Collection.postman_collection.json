@@ -500,6 +500,65 @@
             "description": "Exchange a REAL Google ID token for App Access Token (JWT).\n\n**Instructions:**\n1. Get a token from Google OAuth Playground or your Frontend.\n2. Paste it into the `id_token` field in the Body.\n3. Send request.\n4. The `access_token` environment variable will be updated automatically."
           },
           "response": []
+        },
+        {
+          "name": "4. Manage Google User (User Management)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"google_id\": \"1234567890\",\n  \"email\": \"googleuser@example.com\",\n  \"name\": \"Google User\"\n}"
+            },
+            "url": {
+              "raw": "{{user_url}}/api/v1/auth/google",
+              "host": [
+                "{{user_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "google"
+              ]
+            },
+            "description": "Create or update user from Google OAuth authentication"
+          },
+          "response": []
+        },
+        {
+          "name": "5. Get User by Google ID (User Management)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{user_url}}/api/v1/auth/google/user/:google_id",
+              "host": [
+                "{{user_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "google",
+                "user",
+                ":google_id"
+              ],
+              "variable": [
+                {
+                  "key": "google_id",
+                  "value": "1234567890"
+                }
+              ]
+            },
+            "description": "Get user details by Google ID"
+          },
+          "response": []
         }
       ]
     },
@@ -1691,6 +1750,171 @@
               ]
             },
             "description": "Create a new trade.\n\n✅ Requires: Valid user JWT token"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "16. System Diagnostics (Via API Gateway)",
+      "item": [
+        {
+          "name": "Full Health Check",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/system/health",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "system",
+                "health"
+              ]
+            },
+            "description": "Comprehensive system diagnostics report"
+          },
+          "response": []
+        },
+        {
+          "name": "Services Status",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/system/services/status",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "system",
+                "services",
+                "status"
+              ]
+            },
+            "description": "Quick services status check"
+          },
+          "response": []
+        },
+        {
+          "name": "Database Status",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/system/database/status",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "system",
+                "database",
+                "status"
+              ]
+            },
+            "description": "Database connectivity status"
+          },
+          "response": []
+        },
+        {
+          "name": "Python Scripts Status",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/system/python-scripts/status",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "system",
+                "python-scripts",
+                "status"
+              ]
+            },
+            "description": "Python test scripts availability"
+          },
+          "response": []
+        },
+        {
+          "name": "Run Full Diagnostics",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/system/diagnostics/run",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "system",
+                "diagnostics",
+                "run"
+              ]
+            },
+            "description": "Run full system diagnostics"
+          },
+          "response": []
+        },
+        {
+          "name": "System Info",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/system/info",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "system",
+                "info"
+              ]
+            },
+            "description": "System information"
           },
           "response": []
         }

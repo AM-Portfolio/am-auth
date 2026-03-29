@@ -5,7 +5,7 @@ services:
       context: ./am-api-gateway
       dockerfile: Dockerfile
     ports:
-      - "8000:8000"
+      - "${PORT_AM_API_GATEWAY:-8000}:8000"
     env_file:
       - ./.env.docker
       - ./config/app.env
@@ -26,7 +26,6 @@ services:
       - DOCUMENT_PROCESSOR_URL=http://host.docker.internal:8070
       - MARKET_DATA_SERVICE_URL=http://host.docker.internal:8092
       # JWT Configuration
-      - JWT_SECRET=${JWT_SECRET}
       - JWT_ALGORITHM=HS256
       # Rate Limiting
       - RATE_LIMIT_REQUESTS=100
@@ -44,8 +43,8 @@ services:
         condition: service_healthy
       am-user-management:
         condition: service_healthy
-      am-python-internal-service:
-        condition: service_healthy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     healthcheck:
       test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" ]
       interval: 30s
@@ -59,7 +58,7 @@ services:
       context: ./am-user-management
       dockerfile: Dockerfile
     ports:
-      - "8010:8000" # Map external port 8010 to internal port 8000
+      - "${PORT_AM_USER_MANAGEMENT:-8010}:8000" # Map external port 8010 to internal port 8000
     env_file:
       - ./.env.docker
       - ./config/app.env
@@ -77,8 +76,6 @@ services:
       - ENVIRONMENT=docker
       # Auth service connection
       - AUTH_SERVICE_URL=http://auth-tokens:8001
-      # JWT Configuration
-      - JWT_SECRET=${JWT_SECRET}
       # Email verification - disabled for testing
       - ENABLE_EMAIL_VERIFICATION=false
     volumes:
@@ -87,6 +84,8 @@ services:
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     networks:
       - am-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     healthcheck:
       test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" ]
       interval: 30s
@@ -100,7 +99,7 @@ services:
       context: ./am-auth-tokens
       dockerfile: Dockerfile
     ports:
-      - "8001:8001"
+      - "${PORT_AM_AUTH_TOKENS:-8001}:8001"
     env_file:
       - ./.env.docker
       - ./config/app.env
@@ -119,7 +118,6 @@ services:
       # User service connection
       - USER_SERVICE_URL=http://am-user-management:8000
       # JWT Configuration
-      - JWT_SECRET=${JWT_SECRET}
       - JWT_ALGORITHM=HS256
       # Database connection (uses shared PostgreSQL container)
       - DATABASE_URL=postgresql://postgres:postgres@am-market-data-postgres-1:5432/postgres
@@ -132,6 +130,8 @@ services:
       am-user-management:
         condition: service_healthy
     command: sh -c "pip install pydantic[email] && python -m uvicorn main:app --host 0.0.0.0 --port 8001 --reload"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     healthcheck:
       test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')" ]
       interval: 30s
@@ -139,45 +139,45 @@ services:
       retries: 3
       start_period: 10s
 
-  # Python Internal Service (Document Processing)
-  am-python-internal-service:
-    build:
-      context: ./am-python-internal-service
-      dockerfile: Dockerfile
-    # No external ports exposed - internal network only
-    env_file:
-      - ./.env.docker
-      - ./config/app.env
-      - ./config/services.env
-      - ./config/database.env
-      - ./config/security.env
-      - ./config/logging.env
-      - ./config/build.env
-      - ./config/features.env
-    environment:
-      # Centralized logging configuration
-      - LOG_FORMAT=json
-      - LOG_CONSOLE=true
-      - INTERNAL_SERVICE_LOG_LEVEL=INFO
-      - ENVIRONMENT=docker
-      # JWT Configuration
-      - JWT_SECRET=${JWT_SECRET}
-      - JWT_ALGORITHM=HS256
-      - INTERNAL_JWT_SECRET=${INTERNAL_JWT_SECRET}
-    volumes:
-      - ./am-python-internal-service:/app
-      - ./shared:/app/shared # Mount shared logging infrastructure
-    networks:
-      - am-network
-    depends_on:
-      am-user-management:
-        condition: service_healthy
-    healthcheck:
-      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8002/health')" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
+  # Python Internal Service (Document Processing) - DISABLED (Path not found)
+  # am-python-internal-service:
+  #   build:
+  #     context: ./am-python-internal-service
+  #     dockerfile: Dockerfile
+  #   # No external ports exposed - internal network only
+  #   env_file:
+  #     - ./.env.docker
+  #     - ./config/app.env
+  #     - ./config/services.env
+  #     - ./config/database.env
+  #     - ./config/security.env
+  #     - ./config/logging.env
+  #     - ./config/build.env
+  #     - ./config/features.env
+  #   environment:
+  #     # Centralized logging configuration
+  #     - LOG_FORMAT=json
+  #     - LOG_CONSOLE=true
+  #     - INTERNAL_SERVICE_LOG_LEVEL=INFO
+  #     - ENVIRONMENT=docker
+  #     # JWT Configuration
+  #     - JWT_SECRET=${JWT_SECRET}
+  #     - JWT_ALGORITHM=HS256
+  #     - INTERNAL_JWT_SECRET=${INTERNAL_JWT_SECRET}
+  #   volumes:
+  #     - ./am-python-internal-service:/app
+  #     - ./shared:/app/shared # Mount shared logging infrastructure
+  #   networks:
+  #     - am-network
+  #   depends_on:
+  #     am-user-management:
+  #       condition: service_healthy
+  #   healthcheck:
+  #     test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8002/health')" ]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 10s
 
 networks:
   am-network:

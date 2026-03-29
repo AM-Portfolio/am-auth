@@ -155,7 +155,7 @@ async def create_token(
     total_duration = (time.time() - start_time) * 1000
     
     # Log successful login using the specialized helper
-    await log_user_login(
+    log_user_login(
         user_id=validation_result.user_id,
         username=validation_result.username,
         login_method="password",

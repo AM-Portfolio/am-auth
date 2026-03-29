@@ -19,16 +19,24 @@ This directory contains comprehensive documentation and the Postman collection f
 ### Collection File
 **`AM-Complete-API-Collection.postman_collection.json`** (21 KB)
 
-27 API requests organized in 9 test groups:
-- ✅ Service Health & Info (4 requests)
-- ✅ User Registration & Activation (3 requests)
-- ✅ Authentication & Login (2 requests)
-- ✅ Password Reset Feature (3 requests)
-- ✅ API Gateway Protected Endpoints (3 requests)
-- ✅ Security Testing (3 requests)
-- ✅ Rate Limiting Testing (2 requests)
-- ✅ Error Scenarios (4 requests)
-- ✅ Documentation & Reference (4 links)
+API requests organized in 16 test groups:
+- ✅ 1. Service Health & Info
+- ✅ 2. User Registration & Activation
+- ✅ 3. Authentication & Login
+- ✅ Google Authentication (Mock & Real)
+- ✅ 4. Password Reset Feature
+- ✅ 5. API Gateway Protected Endpoints
+- ✅ 6. Security Testing
+- ✅ 7. Rate Limiting Testing
+- ✅ 8. Error Scenarios
+- ✅ 9. Security Verification Tests
+- ✅ 10. Document Processor (Via Gateway)
+- ✅ 11. Portfolio Service (Via Gateway)
+- ✅ 12. Document Processor (Internal Testing)
+- ✅ 13. Market Data Service (Via Gateway)
+- ✅ 14. Documentation & Reference (Links)
+- ✅ 15. Trade Service (Via Gateway)
+- ✅ 16. System Diagnostics (Via Gateway)
 
 **Features:**
 - Auto-saving environment variables (user_id, access_token)

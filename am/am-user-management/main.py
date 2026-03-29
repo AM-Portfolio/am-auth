@@ -304,6 +304,10 @@ async def login(request: LoginRequestModel,
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail=str(e))
     except Exception as e:
+        logger.error("Login unexpected error", extra={
+            "error": str(e),
+            "error_type": type(e).__name__
+        }, exc_info=True)
         if "invalid" in str(e).lower() or "not found" in str(e).lower():
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                                 detail="Invalid email or password")
