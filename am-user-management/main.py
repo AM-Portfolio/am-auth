@@ -32,7 +32,9 @@ logger = get_logger("am-user-management.main")
 
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.exc import SQLAlchemyError
 from pydantic import BaseModel
 
 # Import our infrastructure components
@@ -100,7 +102,10 @@ async def lifespan(app: FastAPI):
             "event": "database_setup", 
             "troubleshooting": "database_not_exists"
         })
-        raise e  # Don't fall back to SQLite, we want PostgreSQL
+        logger.warning("⚠️ Application is starting WITHOUT database connection. DB-dependent endpoints will fail.", extra={
+            "event": "database_setup"
+        })
+        # Not raising the exception allows the app to start independently of the database
 
     yield
 
@@ -139,6 +144,38 @@ app.add_middleware(
     allow_headers=["*"],
 )
 logger.info("Added CORS middleware", extra={"middleware": "cors"})
+
+# Global Database Error Handler for "Simple English" terminal messages
+@app.exception_handler(SQLAlchemyError)
+async def sqlalchemy_exception_handler(request, exc):
+    """Catch database errors and print simple messages to the terminal"""
+    error_msg = str(exc)
+    
+    # Translate technical errors to Simple English
+    if "Name or service not known" in error_msg or "Connection refused" in error_msg:
+        simple_cause = "DATABASE UNREACHABLE: Is PostgreSQL running? Check the network connection."
+    elif "password authentication failed" in error_msg:
+        simple_cause = "AUTH FAILED: Database login failed. Check your DB_USER and DB_PASSWORD."
+    elif "does not exist" in error_msg:
+        simple_cause = "DATABASE MISSING: The database exists, but the table or specific DB might be missing."
+    else:
+        simple_cause = f"DATABASE ERROR: {error_msg.split(']')[0] if ']' in error_msg else error_msg[:50]}"
+
+    # PRINT TO TERMINAL (Clear for teammates)
+    print(f"\n" + "="*80)
+    print(f"🚨 [!] PROBLEM IDENTIFIED: {simple_cause}")
+    print(f"👉 LOCATION: {request.url.path}")
+    print(f"📋 DETAILS: {error_msg[:100]}...")
+    print("="*80 + "\n")
+    
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={
+            "detail": "Internal database error occurred",
+            "cause": simple_cause,
+            "troubleshooting": "Check the server terminal/logs for details"
+        },
+    )
 
 # Include routers
 
@@ -298,6 +335,9 @@ async def register(request: RegisterRequest,
         })
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail=str(e))
+    except SQLAlchemyError:
+        # Let the global exception handler handle database errors to avoid duplicate terminal noise
+        raise
     except Exception as e:
         logger.error("User registration failed", extra={
             "email": request.email,
@@ -334,13 +374,23 @@ async def login(request: LoginRequestModel,
             "access_token": auth_response.access_token
         }
 
-    except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail=str(e))
+    except SQLAlchemyError:
+        # Let the global exception handler handle database errors
+        raise
     except Exception as e:
-        if "invalid" in str(e).lower() or "not found" in str(e).lower():
+        logger.error(f"Login failed: {str(e)}", exc_info=True)
+        # Import exceptions here to avoid circular imports if any
+        from modules.account_management.domain.exceptions.invalid_credentials import InvalidCredentialsError
+        from modules.account_management.domain.exceptions.email_not_verified import EmailNotVerifiedError
+        
+        if isinstance(e, InvalidCredentialsError) or "invalid" in str(e).lower() or "not found" in str(e).lower():
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                                 detail="Invalid email or password")
+        
+        if isinstance(e, EmailNotVerifiedError) or "verification" in str(e).lower():
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                                detail="Email not verified")
+            
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                             detail="Internal server error occurred")
 
@@ -371,7 +421,7 @@ async def get_user_internal(
         # Return user details for JWT token creation
         status_value = str(
             user.status.value).upper()  # Ensure uppercase comparison
-        is_active = status_value == "ACTIVE"
+        is_active = status_value in ["ACTIVE", "PENDING_VERIFICATION"]
 
         # Determine user scopes based on email (admin users get admin scope)
         scopes = ["read", "write"]

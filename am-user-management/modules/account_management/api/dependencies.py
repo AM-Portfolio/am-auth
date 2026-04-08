@@ -57,7 +57,7 @@ async def get_login_use_case(
         password_hasher: BcryptPasswordHasher = Depends(get_password_hasher),
         event_bus: MockEventBus = Depends(get_event_bus)) -> LoginUseCase:
     """Get login use case dependency"""
-    return LoginUseCase(user_repository, password_hasher, event_bus)
+    return LoginUseCase(user_repository, password_hasher, event_bus, require_email_verification=False)
 
 
 async def get_reset_password_use_case(

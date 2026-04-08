@@ -28,13 +28,13 @@ async def lifespan(app: FastAPI):
     logger.info("🚀 Starting Auth Tokens API...", extra={"event": "startup"})
     
     try:
-        await db_config.create_tables()
-        logger.info("✅ PostgreSQL database tables created successfully", extra={
+        # await db_config.create_tables()
+        logger.info("✅ Database connection initialized (Table creation skipped)", extra={
             "event": "database_setup", 
             "status": "success"
         })
     except Exception as e:
-        logger.error(f"⚠️ Failed to create database tables: {e}", extra={
+        logger.error(f"⚠️ Failed to initialize database: {e}", extra={
             "event": "database_setup",
             "status": "failed",
             "error": str(e)

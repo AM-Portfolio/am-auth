@@ -17,7 +17,7 @@ class UserStatus(str, Enum):
     
     def can_login(self) -> bool:
         """Check if user can log in"""
-        return self in (UserStatus.ACTIVE,)
+        return self in (UserStatus.ACTIVE, UserStatus.PENDING_VERIFICATION)
     
     def requires_verification(self) -> bool:
         """Check if user needs email verification"""

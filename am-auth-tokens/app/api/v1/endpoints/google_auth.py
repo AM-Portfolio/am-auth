@@ -172,9 +172,12 @@ async def create_or_update_google_user(user_profile: Dict[str, Any]) -> Dict[str
         User data from user management service
     """
     try:
+        target_url = f"{settings.USER_SERVICE_URL}/users/account/v1/auth/google"
+        print(f"DEBUG: Calling User Service at {target_url}")
+        
         async with httpx.AsyncClient(timeout=settings.USER_SERVICE_TIMEOUT) as client:
             response = await client.post(
-                f"{settings.USER_SERVICE_URL}/api/v1/auth/google",
+                target_url,
                 json={
                     "google_id": user_profile["google_id"],
                     "email": user_profile["email"],
@@ -191,12 +194,15 @@ async def create_or_update_google_user(user_profile: Dict[str, Any]) -> Dict[str
                 headers={"Content-Type": "application/json"}
             )
             
+            print(f"DEBUG: User Service Response Status: {response.status_code}")
+            
             if response.status_code == 200:
                 data = response.json()
                 return data
             
             elif response.status_code == 404:
-                raise ValueError("User management service endpoint not found. Google auth may not be implemented in user service.")
+                print(f"DEBUG: 404 Content: {response.text}")
+                raise ValueError(f"User management service endpoint not found at {target_url}")
             
             else:
                 error_detail = response.json() if response.text else {"detail": "Unknown error"}

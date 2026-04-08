@@ -39,6 +39,7 @@ services:
       - .env.docker
     environment:
       - LOG_LEVEL=INFO
+      - DEBUG=true
     networks:
       - am-network
     depends_on:
@@ -50,18 +51,18 @@ services:
       - ./shared:/app/shared
 
   # --- Diagnostic Web (Flutter) ---
-  am-diagnostic-web:
-    container_name: am-diagnostic-web
-    build:
-      context: ./am-diagnostic-web
-      dockerfile: Dockerfile
-    ports:
-      - "9001:80"
-    environment:
-      - API_GATEWAY_URL=http://localhost:9001/api
-    networks:
-      - am-network
-    restart: unless-stopped
+#  am-diagnostic-web:
+#    container_name: am-diagnostic-web
+#    build:
+#      context: ./am-diagnostic-web
+#      dockerfile: Dockerfile
+#    ports:
+#      - "9001:80"
+#    environment:
+#      - API_GATEWAY_URL=http://localhost:9001/api
+#    networks:
+#      - am-network
+#    restart: unless-stopped
     
   # --- API Gateway (Python/FastAPI) ---
   am-api-gateway:
@@ -70,7 +71,7 @@ services:
       context: ./am-api-gateway
       dockerfile: Dockerfile
     ports:
-      - "8010:8000"
+      - "8011:8000"
     env_file:
       - .env
       - .env.docker
