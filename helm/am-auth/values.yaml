@@ -23,7 +23,7 @@ global:
   vault:
     enabled: true
     address: "http://vault.vault.svc.cluster.local:8200"
-    role: "am-auth"
+    role: "am-backend-role"
     authPath: "auth/kubernetes"
     # Every key below is a Vault KV v2 path.
     # Each path should contain ALL env vars the respective services need.

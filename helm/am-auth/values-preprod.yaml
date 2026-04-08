@@ -21,7 +21,7 @@ global:
 
   vault:
     address: "http://vault.vault.svc.cluster.local:8200"
-    role: "am-auth-preprod"
+    role: "am-backend-role"
     authPath: "auth/kubernetes"
     secrets:
       jwt:          "secret/data/am-auth/preprod/jwt"

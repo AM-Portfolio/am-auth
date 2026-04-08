@@ -43,7 +43,7 @@ spec:
         {{- end }}
     spec:
       {{- if .Values.global.vault.enabled }}
-      serviceAccountName: am-auth-vault-sa
+      serviceAccountName: am-backend-sa
       {{- end }}
       containers:
         - name: am-api-gateway
