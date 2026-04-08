@@ -3,8 +3,21 @@ run-name: "Run ${{ github.run_id }} | Workflow: ${{ github.workflow_id }} | Acto
 
 on:
   push:
-    branches: ["main"]
-  workflow_dispatch:
+    branches: ["main", "develop"]
+    paths:
+      - "am/am-auth/**"
+      - "am/am-user-management/**"
+      - "am/am-auth-tokens/**"
+  pull_request:
+    branches: ["main", "develop"]
+    paths:
+      - "am/am-auth/**"
+      - "am/am-user-management/**"
+      - "am/am-auth-tokens/**"
+# on:
+#   push:
+#     branches: ["main"]
+#   workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io
