@@ -57,7 +57,7 @@ class DatabaseConfig:
         if '?sslmode=' in self.database_url:
             self.database_url = self.database_url.split('?sslmode=')[0]
         
-        print(f"🔗 Connecting to database: {self.database_url}")
+        print(f"Connecting to database: {self.database_url}")
         
         # Create async engine
         self.engine: AsyncEngine = create_async_engine(

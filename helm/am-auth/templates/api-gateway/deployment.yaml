@@ -33,9 +33,9 @@ spec:
           export {{`{{`}} $k {{`}}`}}="{{`{{`}} $v {{`}}`}}"
           {{`{{`}} end {{`}}`}}
           {{`{{`}} end {{`}}`}}
-        vault.hashicorp.com/agent-inject-secret-database: {{ .Values.global.vault.secrets.database | quote }}
-        vault.hashicorp.com/agent-inject-template-database: |
-          {{`{{`}}- with secret {{ .Values.global.vault.secrets.database | quote }} {{`}}`}}
+        vault.hashicorp.com/agent-inject-secret-postgres: {{ .Values.global.vault.secrets.postgres | quote }}
+        vault.hashicorp.com/agent-inject-template-postgres: |
+          {{`{{`}}- with secret {{ .Values.global.vault.secrets.postgres | quote }} {{`}}`}}
           {{`{{`}}- range $k, $v := .Data.data {{`}}`}}
           export {{`{{`}} $k {{`}}`}}="{{`{{`}} $v {{`}}`}}"
           {{`{{`}} end {{`}}`}}
@@ -56,7 +56,7 @@ spec:
             - |
               {{- if .Values.global.vault.enabled }}
               . /vault/secrets/jwt 2>/dev/null || true
-              . /vault/secrets/database 2>/dev/null || true
+              . /vault/secrets/postgres 2>/dev/null || true
               {{- end }}
               exec uvicorn main:app --host 0.0.0.0 --port {{ .Values.apiGateway.port }}
           env:

@@ -72,9 +72,21 @@ def parse_credentials_file(file_path):
                 
     return data
 
+def get_secret_path(category, env):
+    """Determines the correct Vault path based on category and environment."""
+    infra_categories = ["database", "postgres", "redis", "kafka", "influxdb", "mongodb"]
+    if category.lower() in infra_categories:
+        # Standardize 'database' as 'postgres' in the new structure
+        sub_path = "postgres" if category.lower() == "database" else category.lower()
+        return f"secret/data/{env}/infra/{sub_path}"
+    
+    # Default to app-specific (auth) for now
+    return f"secret/data/{env}/apps/auth/{category}"
+
 def update_vault_path(url, headers, category, env, key, value=None, bulk_data=None):
     """Performs the read-modify-write cycle for a specific category path."""
-    print(f"[INFO] Processing: am-auth/{env}/{category}")
+    path_display = "/".join(url.split("/v1/")[1].replace("data/", "", 1).split("/"))
+    print(f"[INFO] Processing Vault Path: {path_display}")
 
     # 1. Read step to preserve existing keys (Read-Modify-Write)
     existing_data = {}
@@ -105,7 +117,7 @@ def update_vault_path(url, headers, category, env, key, value=None, bulk_data=No
         req_post = urllib.request.Request(url, headers=headers, data=json.dumps(payload).encode('utf-8'), method="POST")
         with urllib.request.urlopen(req_post) as response_post:
             if response_post.status in [200, 204]:
-                print(f"   [SUCCESS] Path 'am-auth/{env}/{category}' is in sync.")
+                print(f"   [SUCCESS] Path '{path_display}' is in sync.")
             else:
                 print(f"   [ERROR] Writing: Status {response_post.status}")
                 return False
@@ -135,6 +147,8 @@ def main():
         print("[ERROR] No Vault Token found. Use VAULT_TOKEN env or ensure it exists in the sync file.")
         sys.exit(1)
 
+    # Normalize vault server address (remove trailing slash)
+    vault_addr = vault_addr.rstrip("/")
     print(f"[INFO] Target Vault: {vault_addr}")
     headers = {"X-Vault-Token": vault_token, "Content-Type": "application/json"}
 
@@ -146,12 +160,14 @@ def main():
         
         print(f"[INFO] Bulk Sync: Found {len(sync_data)} categories in {args.sync_file}")
         for category, bulk_kv in sync_data.items():
-            url = f"{vault_addr}/v1/secret/data/am-auth/{args.env}/{category}"
+            vault_path = get_secret_path(category, args.env)
+            url = f"{vault_addr}/v1/{vault_path}"
             update_vault_path(url, headers, category, args.env, None, None, bulk_kv)
     
     # 3. Single Key mode
     elif args.category and args.key and args.value:
-        url = f"{vault_addr}/v1/secret/data/am-auth/{args.env}/{args.category}"
+        vault_path = get_secret_path(args.category, args.env)
+        url = f"{vault_addr}/v1/{vault_path}"
         update_vault_path(url, headers, args.category, args.env, args.key, args.value)
     
     else:

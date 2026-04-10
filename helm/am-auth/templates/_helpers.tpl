@@ -17,7 +17,7 @@ environment: {{ .Values.environment }}
 
 {{/*
 Vault Agent Sidecar Injector annotations
-Usage: {{- include "am-auth.vaultAnnotations" (dict "root" . "secrets" (list "jwt" "database")) }}
+Usage: {{- include "am-auth.vaultAnnotations" (dict "root" . "secrets" (list "jwt" "postgres")) }}
 
 How it works:
   1. Vault Agent sidecar authenticates to Vault using Kubernetes ServiceAccount JWT
@@ -45,17 +45,14 @@ vault.hashicorp.com/agent-inject-file: "env"
 
 {{/*
 Vault-aware container command
-Sources /vault/secrets/env before starting the app.
-Usage: {{ include "am-auth.vaultCommand" (list "uvicorn" "main:app" "--host" "0.0.0.0" "--port" "8001") }}
+Sources injected secrets before starting the app.
 */}}
 {{- define "am-auth.vaultCommand" -}}
 command: ["/bin/sh", "-c"]
 args:
   - |
     . /vault/secrets/jwt 2>/dev/null || true
-    . /vault/secrets/database 2>/dev/null || true
+    . /vault/secrets/postgres 2>/dev/null || true
     . /vault/secrets/redis 2>/dev/null || true
-    . /vault/secrets/kafka 2>/dev/null || true
-    . /vault/secrets/internal-jwt 2>/dev/null || true
     exec {{ . | join " " }}
 {{- end }}
