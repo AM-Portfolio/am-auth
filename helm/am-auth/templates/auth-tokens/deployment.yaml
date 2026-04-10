@@ -49,8 +49,19 @@ spec:
       {{- if .Values.global.vault.enabled }}
       serviceAccountName: am-backend-sa
       {{- end }}
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
       containers:
         - name: am-auth-tokens
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop:
+                - ALL
           image: "{{ .Values.global.image.registry }}/{{ .Values.authTokens.image.repository }}:{{ .Values.global.image.tag }}"
           imagePullPolicy: {{ .Values.global.image.pullPolicy }}
           ports:
