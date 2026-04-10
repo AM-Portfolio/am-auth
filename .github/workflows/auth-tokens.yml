@@ -1,0 +1,31 @@
+name: Auth Tokens Publish
+
+on:
+  push:
+    branches: ["main", "develop"]
+    paths:
+      - 'am/am-auth-tokens/**'
+      - 'am/shared/**'
+  pull_request:
+    branches: ["main", "develop"]
+    paths:
+      - 'am/am-auth-tokens/**'
+      - 'am/shared/**'
+  workflow_dispatch:
+
+jobs:
+  publish:
+    name: Publish Auth Tokens
+    permissions:
+      contents: read
+      packages: write
+    uses: AM-Portfolio/am-pipelines/.github/workflows/central-build-publish.yml@main
+    with:
+      language: 'python'
+      working_directory: 'am/am-auth-tokens'
+      image_name: 'am-auth-tokens'
+      build_context: '..'
+      preprod_namespace: 'am-apps-preprod'
+      prod_namespace: 'am-apps-prod'
+      deploy_prod: true
+    secrets: inherit
