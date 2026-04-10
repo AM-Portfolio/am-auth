@@ -1,0 +1,20 @@
+{
+  "name": "am-auth",
+  "version": "1.0.0",
+  "description": "Authentication and User Management Service",
+  "scripts": {
+    "vault:sync": "python scripts/update_vault.py --sync-file ../am-infra/infrastructure-secrets/latest/credentials.txt --env preprod",
+    "vault:sync:local": "python scripts/update_vault.py --sync-file ../am-infra/infrastructure-secrets/latest/credentials.txt --env local",
+    "setup": "python scripts/setup.py",
+    "deploy:local": "python scripts/deploy_local.py",
+    "test:logging": "python scripts/test_logging_integration.py",
+    "db:test": "python scripts/test_db_connection.py",
+    "test:all": "python scripts/run_all_tests.py",
+    "run:user": "python -c \"from scripts.run_local import run_user; run_user()\"",
+    "run:auth": "python -c \"from scripts.run_local import run_auth; run_auth()\"",
+    "test": "pytest",
+    "lint": "flake8 ."
+  },
+  "author": "Antigravity",
+  "license": "ISC"
+}

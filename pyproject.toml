@@ -7,19 +7,10 @@ requires-python = ">=3.11"
 dependencies = ["uvicorn (>=0.41.0,<0.42.0)", "fastapi (>=0.135.1,<0.136.0)", "psycopg2-binary (>=2.9.11,<3.0.0)"]
 
 
+
 [tool.poetry]
 packages = [
     { include = "am" },
     { include = "shared" },
     { include = "scripts" }
 ]
-
-[project.scripts]
-setup = "scripts.setup:main"
-deploy-local = "scripts.deploy_local:main"
-test-logging = "scripts.test_logging_integration:main"
-db-test = "scripts.test_db_connection:main"
-test-all = "scripts.run_all_tests:main"
-run-user = "scripts.run_local:run_user"
-run-auth = "scripts.run_local:run_auth"
-update-vault = "scripts.update_vault:main"

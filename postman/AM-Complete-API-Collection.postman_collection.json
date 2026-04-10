@@ -5,9 +5,38 @@
     "description": "Complete testing collection for all microservices\n\n**Base URLs:**\n- API Gateway: http://localhost:8000\n- User Management: http://localhost:8010\n- Auth Tokens: http://localhost:8001\n- Document Processor (Internal): http://am-document-processor:8070\n- Portfolio Service (Internal): http://am-portfolio:8080\n\n**Environment Variables:**\n- base_url: http://localhost:8000\n- user_url: http://localhost:8010\n- auth_url: http://localhost:8001\n- access_token: (set after login)\n- user_id: (set after registration)\n- process_id: (set after document upload)\n\n**✨ Latest Updates:**\n- Section 15: Trade Service endpoints\n- Section 11: Portfolio Service endpoints (market indices, portfolios, holdings, analytics)\n- Section 10: Document Processor endpoints\n- All internal services: Network isolated, port not exposed\n- Generic proxy pattern: 1 function per service in API Gateway\n- Two-tier JWT: User JWT + Service JWT for internal communication",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
+  "event": [
+    {
+      "listen": "test",
+      "script": {
+        "exec": [
+          "// Auto-Token Synchronization Script",
+          "// Automatically updates the 'access_token' environment variable if present in response",
+          "if (pm.response.code === 200 || pm.response.code === 201) {",
+          "    try {",
+          "        var jsonData = pm.response.json();",
+          "        var token = jsonData.access_token || jsonData.token || (jsonData.token_data ? jsonData.token_data.access_token : null);",
+          "        ",
+          "        if (token) {",
+          "            pm.environment.set(\"access_token\", token);",
+          "            console.log(\"✅ Auto-Token Updater: Set 'access_token' in current environment\");",
+          "        }",
+          "        ",
+          "        if (jsonData.user_id) {",
+          "            pm.environment.set(\"user_id\", jsonData.user_id);",
+          "        }",
+          "    } catch (e) {",
+          "        // Not a JSON response, skip automation",
+          "    }",
+          "}"
+        ],
+        "type": "text/javascript"
+      }
+    }
+  ],
   "item": [
     {
-      "name": "1. Service Health & Info",
+      "name": "[HEALTH] Service Health & Info",
       "item": [
         {
           "name": "API Gateway - Health Check",
@@ -84,7 +113,7 @@
       ]
     },
     {
-      "name": "2. User Registration & Activation",
+      "name": "[USER] Registration & Activation",
       "item": [
         {
           "name": "Register New User",
@@ -188,7 +217,7 @@
       ]
     },
     {
-      "name": "3. Authentication & Login",
+      "name": "[AUTH] Authentication & Login",
       "item": [
         {
           "name": "Login - Get JWT Token",
@@ -351,7 +380,7 @@
       ]
     },
     {
-      "name": "Google Authentication",
+      "name": "[AUTH] Google Authentication",
       "item": [
         {
           "name": "1. Generate Mock Google Token",
@@ -563,7 +592,7 @@
       ]
     },
     {
-      "name": "4. Password Reset Feature",
+      "name": "[USER] Password Reset Feature",
       "item": [
         {
           "name": "Step 1 - Request Password Reset",
@@ -669,7 +698,7 @@
       ]
     },
     {
-      "name": "5. API Gateway Protected Endpoints",
+      "name": "[GW] Protected Proxy Endpoints",
       "item": [
         {
           "name": "Get Documents (Protected)",
@@ -749,7 +778,7 @@
       ]
     },
     {
-      "name": "6. Security Testing",
+      "name": "[GW] Security Testing",
       "item": [
         {
           "name": "Test - No Token (Should Fail)",
@@ -824,7 +853,7 @@
       ]
     },
     {
-      "name": "7. Rate Limiting Testing",
+      "name": "[GW] Rate Limiting Testing",
       "item": [
         {
           "name": "Single Request (Should Pass)",
@@ -879,7 +908,7 @@
       ]
     },
     {
-      "name": "8. Error Scenarios",
+      "name": "[GW] Error Scenarios",
       "item": [
         {
           "name": "Invalid Email Format",
@@ -1002,7 +1031,7 @@
       ]
     },
     {
-      "name": "9. Security Verification Tests",
+      "name": "[GW] Security Verification Tests",
       "item": [
         {
           "name": "✅ Port 8000 (API Gateway) - Should Work",
@@ -1104,7 +1133,7 @@
       ]
     },
     {
-      "name": "10. Document Processor (Via API Gateway)",
+      "name": "[DOC] Document Processor (Via Gateway)",
       "item": [
         {
           "name": "Get Document Types (Protected - Via Gateway)",
@@ -1208,7 +1237,7 @@
       ]
     },
     {
-      "name": "12. Document Processor (Internal/Testing Only)",
+      "name": "[DOC] Internal Testing & Arch",
       "item": [
         {
           "name": "⚠️ SECURITY ARCHITECTURE - READ THIS FIRST",
@@ -1231,7 +1260,7 @@
       ]
     },
     {
-      "name": "11. Portfolio Service (Via API Gateway)",
+      "name": "[PORTFOLIO] Portfolio Service (Via Gateway)",
       "item": [
         {
           "name": "Get All Market Indices",
@@ -1473,7 +1502,7 @@
       ]
     },
     {
-      "name": "13. Market Data Service",
+      "name": "[MARKET] Market Data Service",
       "item": [
         {
           "name": "Calculate Breakeven (Via Gateway)",
@@ -1584,7 +1613,7 @@
       ]
     },
     {
-      "name": "14. Documentation & Reference",
+      "name": "[INFO] Documentation & Reference",
       "item": [
         {
           "name": "🔗 API Gateway - Swagger UI",
@@ -1661,7 +1690,7 @@
       ]
     },
     {
-      "name": "15. Trade Service (Via API Gateway)",
+      "name": "[TRADE] Trade Service (Via Gateway)",
       "item": [
         {
           "name": "Get All Trades",
@@ -1756,7 +1785,7 @@
       ]
     },
     {
-      "name": "16. System Diagnostics (Via API Gateway)",
+      "name": "[HEALTH] System Diagnostics (Via Gateway)",
       "item": [
         {
           "name": "Full Health Check",
@@ -1924,19 +1953,19 @@
   "variable": [
     {
       "key": "base_url",
-      "value": "http://localhost:8000",
+      "value": "",
       "type": "string",
       "disabled": false
     },
     {
       "key": "user_url",
-      "value": "http://localhost:8010",
+      "value": "",
       "type": "string",
       "disabled": false
     },
     {
       "key": "auth_url",
-      "value": "http://localhost:8001",
+      "value": "",
       "type": "string",
       "disabled": false
     },

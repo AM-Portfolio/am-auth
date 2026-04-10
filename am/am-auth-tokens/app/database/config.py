@@ -2,6 +2,7 @@
 from typing import AsyncGenerator
 from sqlalchemy.ext.asyncio import AsyncSession, AsyncEngine, create_async_engine, async_sessionmaker
 import os
+import urllib.parse
 from dotenv import load_dotenv
 from .base import Base
 from .models import AuthorizationCodeORM, TokenRecordORM
@@ -21,11 +22,15 @@ class DatabaseConfig:
             db_name = os.getenv('DB_NAME', 'heliumdb')
             db_user = os.getenv('DB_USER', 'postgres')
             db_password = os.getenv('DB_PASSWORD', 'postgres')
+
+            # URL-encode components to handle special characters (e.g. '@' in password)
+            safe_user = urllib.parse.quote_plus(db_user)
+            safe_password = urllib.parse.quote_plus(db_password)
             
             if db_password:
-                database_url = f'postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}'
+                database_url = f'postgresql://{safe_user}:{safe_password}@{db_host}:{db_port}/{db_name}'
             else:
-                database_url = f'postgresql://{db_user}@{db_host}:{db_port}/{db_name}'
+                database_url = f'postgresql://{safe_user}@{db_host}:{db_port}/{db_name}'
         
         if database_url.startswith('postgresql://'):
             self.database_url = database_url.replace('postgresql://', 'postgresql+asyncpg://')
