@@ -1,12 +1,13 @@
-FROM python:3.11-slim
+ARG BASE_REGISTRY=""
+FROM ${BASE_REGISTRY}am-python-base:latest
 
 WORKDIR /app
 
-COPY requirements.txt .
+COPY am-user-management/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
-COPY shared ./shared
+COPY am-user-management/ .
+COPY shared/ ./shared/
 
 EXPOSE 8000
 
