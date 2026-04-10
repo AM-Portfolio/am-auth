@@ -3,7 +3,7 @@ run-name: "Run ${{ github.run_id }} | ${{ github.actor }} | ${{ github.event_nam
 
 on:
   push:
-    branches: ["main", "develop"]
+    branches: ["main", "develop", "test/**"]
     paths:
       - 'am/am-api-gateway/**'
       - 'am/am-auth-tokens/**'
