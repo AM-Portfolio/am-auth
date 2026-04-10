@@ -1,133 +1,14 @@
-name: AM Auth Publish
-run-name: "Run ${{ github.run_id }} | ${{ github.actor }} | ${{ github.event_name }}"
-
+# DEPRECATED — Replaced by am-auth-publish.yml
+# This file is intentionally disabled. Do not add jobs here.
+name: DEPRECATED CI-CD
 on:
-  push:
-    branches: ["main", "develop"]
-    paths:
-      - 'am/am-api-gateway/**'
-      - 'am/am-auth-tokens/**'
-      - 'am/am-user-management/**'
-      - 'am/shared/**'
-  pull_request:
-    branches: ["main", "develop"]
-    paths:
-      - 'am/am-api-gateway/**'
-      - 'am/am-auth-tokens/**'
-      - 'am/am-user-management/**'
-      - 'am/shared/**'
   workflow_dispatch:
-
+    inputs:
+      reason:
+        description: 'This workflow is deprecated. Use am-auth-publish.yml instead.'
+        required: false
 jobs:
-  # ── Detect which services changed ─────────────────────────────────────────
-  detect-changes:
-    name: Detect Changed Services
+  notice:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    outputs:
-      api-gateway:      ${{ steps.check.outputs.api-gateway }}
-      auth-tokens:      ${{ steps.check.outputs.auth-tokens }}
-      user-management:  ${{ steps.check.outputs.user-management }}
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Detect path changes
-        id: check
-        run: |
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            BASE="${{ github.event.pull_request.base.sha }}"
-            HEAD="${{ github.event.pull_request.head.sha }}"
-          elif [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            # Manual trigger: build everything
-            echo "api-gateway=true"     >> $GITHUB_OUTPUT
-            echo "auth-tokens=true"     >> $GITHUB_OUTPUT
-            echo "user-management=true" >> $GITHUB_OUTPUT
-            exit 0
-          else
-            BASE="${{ github.event.before }}"
-            HEAD="${{ github.sha }}"
-          fi
-
-          if [ -z "$BASE" ] || [ "$BASE" = "0000000000000000000000000000000000000000" ]; then
-            CHANGED=$(git diff --name-only HEAD~1 HEAD 2>/dev/null || git ls-files)
-          else
-            CHANGED=$(git diff --name-only "$BASE" "$HEAD")
-          fi
-
-          echo "=== Files changed ==="
-          echo "$CHANGED"
-          echo "====================="
-
-          # Shared changes trigger all services
-          SHARED_CHANGED=$(echo "$CHANGED" | grep -q "^am/shared/" && echo 'true' || echo 'false')
-
-          GW=$(echo "$CHANGED"   | grep -q "^am/am-api-gateway/"    && echo 'true' || echo 'false')
-          TK=$(echo "$CHANGED"   | grep -q "^am/am-auth-tokens/"    && echo 'true' || echo 'false')
-          UM=$(echo "$CHANGED"   | grep -q "^am/am-user-management/" && echo 'true' || echo 'false')
-
-          # Promote to true if shared changed
-          [ "$SHARED_CHANGED" = "true" ] && GW="true" && TK="true" && UM="true"
-
-          echo "api-gateway=$GW"     >> $GITHUB_OUTPUT
-          echo "auth-tokens=$TK"     >> $GITHUB_OUTPUT
-          echo "user-management=$UM" >> $GITHUB_OUTPUT
-
-  # ── API Gateway ────────────────────────────────────────────────────────────
-  publish-api-gateway:
-    name: Publish API Gateway
-    needs: detect-changes
-    if: needs.detect-changes.outputs.api-gateway == 'true'
-    permissions:
-      contents: read
-      packages: write
-    uses: AM-Portfolio/am-pipelines/.github/workflows/central-build-publish.yml@main
-    with:
-      language: 'python'
-      working_directory: 'am/am-api-gateway'
-      image_name: 'am-api-gateway'
-      build_context: 'am'
-      preprod_namespace: 'am-apps-preprod'
-      prod_namespace: 'am-apps-prod'
-      deploy_prod: true
-    secrets: inherit
-
-  # ── Auth Tokens ────────────────────────────────────────────────────────────
-  publish-auth-tokens:
-    name: Publish Auth Tokens
-    needs: detect-changes
-    if: needs.detect-changes.outputs.auth-tokens == 'true'
-    permissions:
-      contents: read
-      packages: write
-    uses: AM-Portfolio/am-pipelines/.github/workflows/central-build-publish.yml@main
-    with:
-      language: 'python'
-      working_directory: 'am/am-auth-tokens'
-      image_name: 'am-auth-tokens'
-      build_context: 'am'
-      preprod_namespace: 'am-apps-preprod'
-      prod_namespace: 'am-apps-prod'
-      deploy_prod: true
-    secrets: inherit
-
-  # ── User Management ────────────────────────────────────────────────────────
-  publish-user-management:
-    name: Publish User Management
-    needs: detect-changes
-    if: needs.detect-changes.outputs.user-management == 'true'
-    permissions:
-      contents: read
-      packages: write
-    uses: AM-Portfolio/am-pipelines/.github/workflows/central-build-publish.yml@main
-    with:
-      language: 'python'
-      working_directory: 'am/am-user-management'
-      image_name: 'am-user-management'
-      build_context: 'am'
-      preprod_namespace: 'am-apps-preprod'
-      prod_namespace: 'am-apps-prod'
-      deploy_prod: true
-    secrets: inherit
+      - run: echo "This workflow is deprecated. Please use am-auth-publish.yml"
