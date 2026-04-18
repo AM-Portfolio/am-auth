@@ -1,0 +1,13 @@
+environment: dev
+replicaCount: 1
+
+global:
+  vault:
+    secrets:
+      jwt:      "secret/data/dev/apps/security"
+      postgres: "secret/data/dev/apps/database"
+      redis:    "secret/data/dev/apps/database"
+      config:   "secret/data/dev/apps/config"
+
+env:
+  LOG_LEVEL: "DEBUG"
