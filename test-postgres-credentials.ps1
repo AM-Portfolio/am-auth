@@ -6,9 +6,14 @@ Write-Host "PostgreSQL Credential Tester" -ForegroundColor Cyan
 Write-Host "==========================================" -ForegroundColor Cyan
 Write-Host ""
 
+$test_pass = $env:PGPASSWORD_TEST
+if (-not $test_pass) {
+    # Default to simple defaults if not provided via env
+    $test_pass = "postgres"
+}
+
 $credentials = @(
-    @{User="postgres"; Password="wX8MVFdifFs4ZhnJ5pFZCbQ9"},
-    @{User="postgres"; Password="postgres"},
+    @{User="postgres"; Password=$test_pass},
     @{User="postgres"; Password="password"},
     @{User="postgrid"; Password="postgrid"},
     @{User="postgrid"; Password="password"}

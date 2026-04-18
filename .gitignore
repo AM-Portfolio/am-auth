@@ -106,6 +106,9 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+am/config/*.env
+am/.env.docker
+.env.secrets
 
 # Spyder project settings
 .spyderproject
@@ -174,6 +177,9 @@ deploy_config.json
 
 # Backup files
 *.bak
+**/*.backup
+backups/
+scripts/backups/
 
 # Test reports
 test-results/
