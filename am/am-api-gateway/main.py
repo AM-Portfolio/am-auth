@@ -16,13 +16,18 @@ shared_path = Path(__file__).parent.parent / "shared"
 if str(shared_path) not in sys.path:
     sys.path.insert(0, str(shared_path))
 
-from shared.logging import initialize_logging, get_logger, LogConfig
-from shared.logging.middleware import setup_fastapi_logging
-
-# Initialize logging
-# We use a default config here, but it will pick up env vars like LOG_LEVEL
-initialize_logging("am-api-gateway", LogConfig(service_name="am-api-gateway"))
-logger = get_logger("am-api-gateway.main")
+try:
+    from shared.logging import initialize_logging, get_logger, LogConfig
+    from shared.logging.middleware import setup_fastapi_logging
+    # Initialize logging
+    # We use a default config here, but it will pick up env vars like LOG_LEVEL
+    initialize_logging("am-api-gateway", LogConfig(service_name="am-api-gateway"))
+    logger = get_logger("am-api-gateway.main")
+except ImportError:
+    import logging
+    logger = logging.getLogger("am-api-gateway.fallback")
+    logger.warning("Shared logging middleware not available, using fallback logger")
+    def setup_fastapi_logging(*args, **kwargs): pass
 
 from api.v1.endpoints import trades, market_data, document_processor, portfolio_service, diagnostics
 from middleware.rate_limiter import RateLimiterMiddleware

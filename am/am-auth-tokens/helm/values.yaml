@@ -2,6 +2,8 @@ global:
   image:
     registry: ghcr.io/am-portfolio
     pullPolicy: Always
+    imagePullSecrets:
+      - name: regcred
   vault:
     enabled: true
     address: "http://vault.vault.svc.cluster.local:8200"

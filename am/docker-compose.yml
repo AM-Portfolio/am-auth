@@ -2,10 +2,10 @@ services:
   # API Gateway - Single Entry Point for All Client Requests
   am-api-gateway:
     build:
-      context: ./am-api-gateway
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: am-api-gateway/Dockerfile
     ports:
-      - "${PORT_AM_API_GATEWAY:-8000}:8000"
+      - "${PORT_AM_API_GATEWAY:-8080}:8080"
     env_file:
       - ./.env.docker
       - ./config/app.env
@@ -55,8 +55,8 @@ services:
   # Real User Management Service
   am-user-management:
     build:
-      context: ./am-user-management
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: am-user-management/Dockerfile
     ports:
       - "${PORT_AM_USER_MANAGEMENT:-8010}:8000" # Map external port 8010 to internal port 8000
     env_file:
@@ -96,8 +96,8 @@ services:
   # Auth Tokens Service
   auth-tokens:
     build:
-      context: ./am-auth-tokens
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: am-auth-tokens/Dockerfile
     ports:
       - "${PORT_AM_AUTH_TOKENS:-8001}:8001"
     env_file:
@@ -181,5 +181,5 @@ services:
 
 networks:
   am-network:
-    driver: bridge
+    external: true
     name: am-network
