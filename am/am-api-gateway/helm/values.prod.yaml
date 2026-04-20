@@ -1,9 +1,8 @@
+# Prod Environment — am-api-gateway
 environment: prod
 replicaCount: 2
 
 global:
   vault:
     secrets:
-      jwt:      "secret/data/prod/apps/security"
-      postgres: "secret/data/prod/apps/database"
-      config:   "secret/data/prod/apps/config"
+      auth: "kv/data/prod/apps/auth"

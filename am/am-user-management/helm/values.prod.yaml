@@ -1,10 +1,8 @@
+# Prod Environment — am-user-management
 environment: prod
 replicaCount: 2
 
 global:
   vault:
     secrets:
-      jwt:      "secret/data/prod/apps/security"
-      postgres: "secret/data/prod/apps/database"
-      redis:    "secret/data/prod/apps/database"
-      config:   "secret/data/prod/apps/config"
+      auth: "kv/data/prod/apps/auth"

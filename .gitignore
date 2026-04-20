@@ -97,6 +97,7 @@ celerybeat.pid
 
 # Environments
 .env
+**/.env
 .env.local
 .env.*.local
 .env.deploy
@@ -180,6 +181,7 @@ deploy_config.json
 **/*.backup
 backups/
 scripts/backups/
+scripts/seed_preprod_auth_vault.py
 
 # Test reports
 test-results/

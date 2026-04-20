@@ -1,3 +1,5 @@
+# Base Helm values for am-api-gateway
+# Used by the universal-chart from am-pipelines
 global:
   image:
     registry: ghcr.io/am-portfolio
@@ -6,7 +8,6 @@ global:
       - name: regcred
   vault:
     enabled: true
-    address: "http://vault.vault.svc.cluster.local:8200"
     role: "am-backend-role"
     authPath: "auth/kubernetes"
     serviceAccountName: "am-backend-sa"
@@ -15,8 +16,14 @@ image:
   repository: am-api-gateway
 port: 8080
 language: python
+entrypoint: "exec uvicorn main:app --host 0.0.0.0 --port 8080"
+
+security:
+  automountServiceAccountToken: true
 
 env:
   LOG_FORMAT: "json"
   LOG_LEVEL: "INFO"
   TZ: "UTC"
+  AUTH_SERVICE_URL: "http://am-auth-tokens:8080"
+  USER_MANAGEMENT_URL: "http://am-user-management:8080"

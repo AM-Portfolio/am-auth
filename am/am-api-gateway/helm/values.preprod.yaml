@@ -1,9 +1,9 @@
+# Preprod Environment — am-api-gateway
+# Vault path aligned with seeded secret at kv/preprod/apps/auth
 environment: preprod
 replicaCount: 1
 
 global:
   vault:
     secrets:
-      jwt:      "secret/data/preprod/apps/security"
-      postgres: "secret/data/preprod/apps/database"
-      config:   "secret/data/preprod/apps/config"
+      auth: "kv/data/preprod/apps/auth"
