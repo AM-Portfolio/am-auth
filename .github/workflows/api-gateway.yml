@@ -2,12 +2,12 @@ name: API Gateway Publish
 
 on:
   push:
-    branches: ["main", "develop"]
+    branches: ["main", "develop", "fix/develop-md"]
     paths:
       - "am/am-api-gateway/**"
       - "am/shared/**"
   pull_request:
-    branches: ["main", "develop"]
+    branches: ["main", "develop", "fix/develop-md"]
     paths:
       - "am/am-api-gateway/**"
       - "am/shared/**"

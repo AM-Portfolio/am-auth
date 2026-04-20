@@ -2,12 +2,12 @@ name: User Management Publish
 
 on:
   push:
-    branches: ["main", "develop"]
+    branches: ["main", "develop", "fix/develop-md"]
     paths:
       - "am/am-user-management/**"
       - "am/shared/**"
   pull_request:
-    branches: ["main", "develop"]
+    branches: ["main", "develop", "fix/develop-md"]
     paths:
       - "am/am-user-management/**"
       - "am/shared/**"
