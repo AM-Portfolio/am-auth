@@ -7,6 +7,7 @@
     "vault:backup": "python scripts/vault_orchestrator.py --backup",
     "vault:provision": "python scripts/vault_orchestrator.py --provision",
     "vault:sync:clean": "python scripts/vault_orchestrator.py --provision && python scripts/vault_orchestrator.py --sync",
+    "vault:orchestrate": "python scripts/vault_orchestrator.py --provision && python scripts/vault_orchestrator.py --sync",
     "setup": "python scripts/setup.py",
     "deploy:local": "python scripts/deploy_local.py",
     "test:logging": "python scripts/test_logging_integration.py",

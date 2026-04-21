@@ -157,6 +157,8 @@ class VaultOrchestrator:
     def provision(self):
         """Administrative provisioning tasks."""
         if not self.guardian.start(): return
+        
+        # 1. Secret Engines
         print("[*] Checking Infrastructure Mounts...")
         resp = requests.get(f"{self.addr}/v1/sys/mounts", headers=self.headers)
         if "apps/" not in resp.json():
@@ -165,6 +167,29 @@ class VaultOrchestrator:
             print("[SUCCESS] 'apps/' engine enabled.")
         else:
             print("[OK] 'apps/' engine already exists.")
+
+        # 2. Security Policies
+        self.provision_policies()
+
+    def provision_policies(self, policy_dir="vault/policies"):
+        """Enumerates and applies all HCL policies in the policy directory."""
+        print(f"[*] Provisioning security policies from {policy_dir}/...")
+        if not os.path.exists(policy_dir):
+            print(f"[WARN] Policy directory {policy_dir} not found.")
+            return
+
+        for policy_file in Path(policy_dir).glob("*.hcl"):
+            policy_name = policy_file.stem
+            print(f" [+] Applying policy: {policy_name}")
+            with open(policy_file, "r") as f:
+                rules = f.read()
+            
+            api_url = f"{self.addr}/v1/sys/policy/{policy_name}"
+            resp = requests.post(api_url, headers=self.headers, json={"policy": rules})
+            if resp.status_code not in [200, 204]:
+                print(f"  [!] Error applying {policy_name}: {resp.text}")
+            else:
+                print(f"  [OK] Policy {policy_name} applied.")
 
     def close(self):
         self.guardian.stop()
