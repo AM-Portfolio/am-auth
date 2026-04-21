@@ -111,6 +111,12 @@ am/config/*.env
 am/.env.docker
 .env.secrets
 
+# Kubernetes & Cluster Config (Critical)
+kubeconfig.vps
+*.vps
+kubeconfig
+.kube
+
 # Spyder project settings
 .spyderproject
 .spyproject
@@ -186,6 +192,9 @@ scripts/seed_preprod_auth_vault.py
 # Test reports
 test-results/
 .pytest_cache/
+
+# Vault Data Hub (Master Blueprints & Backups)
+/vault/
 
 # Shared module copies for Docker build
 am/am-*/shared/
