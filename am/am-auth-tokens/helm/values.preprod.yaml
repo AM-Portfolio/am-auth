@@ -8,3 +8,8 @@ global:
     secrets:
       auth: "apps/data/preprod/services/am-auth"
       infra: "apps/data/preprod/infra/postgres"
+    templates:
+      infra: |
+        {{- with secret "apps/data/preprod/infra/postgres" -}}
+        export DATABASE_URL="{{ .Data.data.url }}"
+        {{- end }}
