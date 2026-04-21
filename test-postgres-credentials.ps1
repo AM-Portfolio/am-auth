@@ -1,13 +1,19 @@
 # PostgreSQL Connection Test Script
 # This script tests different PostgreSQL credentials
 
-Write-Host "=========================================="  -ForegroundColor Cyan
+Write-Host "==========================================" -ForegroundColor Cyan
 Write-Host "PostgreSQL Credential Tester" -ForegroundColor Cyan
 Write-Host "==========================================" -ForegroundColor Cyan
 Write-Host ""
 
+$test_pass = $env:PGPASSWORD_TEST
+if (-not $test_pass) {
+    # Default to simple defaults if not provided via env
+    $test_pass = "postgres"
+}
+
 $credentials = @(
-    @{User="postgres"; Password="postgres"},
+    @{User="postgres"; Password=$test_pass},
     @{User="postgres"; Password="password"},
     @{User="postgrid"; Password="postgrid"},
     @{User="postgrid"; Password="password"}
@@ -19,13 +25,14 @@ foreach ($cred in $credentials) {
     $user = $cred.User
     $pass = $cred.Password
     
-    Write-Host "Testing: $user / $pass" -ForegroundColor Yellow -NoNewline
+    Write-Host "Testing: $user / $pass ... " -ForegroundColor Yellow -NoNewline
     
     $env:PGPASSWORD = $pass
-    $result = psql -U $user -h localhost -d postgres -c "SELECT 1;" 2>&1
+    # Using --quiet and --tuples-only to avoid extra output
+    $result = psql -U $user -h localhost -p 5432 -d postgres -c "SELECT 1;" 2>&1
     
     if ($LASTEXITCODE -eq 0) {
-        Write-Host " âœ… SUCCESS!" -ForegroundColor Green
+        Write-Host "SUCCESS!" -ForegroundColor Green
         Write-Host ""
         Write-Host "============================================" -ForegroundColor Green
         Write-Host "FOUND WORKING CREDENTIALS:" -ForegroundColor Green
@@ -39,7 +46,7 @@ foreach ($cred in $credentials) {
         $success = $true
         break
     } else {
-        Write-Host " âœ— Failed" -ForegroundColor Red
+        Write-Host "Failed" -ForegroundColor Red
     }
 }
 
@@ -56,7 +63,7 @@ if (-not $success) {
     Write-Host ""
     Write-Host "To reset PostgreSQL password:" -ForegroundColor Yellow
     Write-Host "  psql -U postgres" -ForegroundColor White
-    Write-Host "  ALTER USER postgres WITH PASSWORD 'postgres'`;" -ForegroundColor White
+    Write-Host "  ALTER USER postgres WITH PASSWORD 'postgres';" -ForegroundColor White
 }
 
 # Clean up

@@ -1,12 +1,13 @@
 # 🔐 AM User Management
 
-A production-ready user management system built with **Clean Ar# Run tests
+A production-ready user management system built with \*\*Clean Ar# Run tests
 python -m pytest
 
 # Test API endpoints
+
 python tests/api/test_integrated_api.py
 
-# Test with curlure** principles, featuring secure authentication, email verification, and PostgreSQL integration.
+# Test with curlure\*\* principles, featuring secure authentication, email verification, and PostgreSQL integration.
 
 ## 🚀 **Current Status: FULLY FUNCTIONAL**
 
@@ -40,11 +41,13 @@ python tests/api/test_integrated_api.py
 ## 🚀 **Quick Start**
 
 ### Prerequisites
+
 - Python 3.9+
 - PostgreSQL 15+
 - pip or poetry
 
 ### 1. Clone & Setup
+
 ```bash
 git clone https://github.com/AM-Portfolio/am-user-management.git
 cd am-user-management
@@ -52,6 +55,7 @@ pip install -r requirements.txt
 ```
 
 ### 2. Database Setup
+
 ```bash
 # Install PostgreSQL (macOS with Homebrew)
 brew install postgresql@15
@@ -62,6 +66,7 @@ createdb am_user_management
 ```
 
 ### 3. Environment Configuration
+
 ```bash
 # Create .env file
 cp .env.example .env
@@ -71,6 +76,7 @@ DATABASE_URL=postgresql+asyncpg://your_username@localhost:5432/am_user_managemen
 ```
 
 ### 4. Run Application
+
 ```bash
 python3 main_integrated.py
 ```
@@ -80,12 +86,14 @@ The API will be available at `http://localhost:8000` with automatic documentatio
 ## 📡 **API Endpoints**
 
 ### Authentication
+
 - `POST /api/v1/auth/register` - Create new user account
 - `POST /api/v1/auth/login` - Authenticate user
 - `GET /api/v1/auth/verify-email` - Verify email address
 - `POST /api/v1/auth/resend-verification` - Resend verification email
 
 ### System
+
 - `GET /health` - Health check endpoint
 - `GET /api/v1/auth/status` - Authentication system status
 
@@ -170,4 +178,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 **Built with ❤️ by the AM Portfolio team**
+
 # am-user-management

@@ -238,17 +238,71 @@ Test input validation:
 
 ---
 
-### 9️⃣ Documentation & Reference (4 links)
+### 9️⃣ Security Verification Tests
 
-Quick links to Swagger/ReDoc documentation:
-- API Gateway Swagger
-- API Gateway ReDoc
-- User Management Swagger
-- Auth Tokens Swagger
-
-Click to open in browser for interactive API docs.
+Verify security protections:
+- **Port 8000 (API Gateway)** - Should work (valid token)
+- **Port 8070 (Direct)** - Should FAIL (connection refused)
+- **Port 8080 (Direct)** - Should FAIL (connection refused)
 
 ---
+
+### 🔟 Document Processor (Via Gateway)
+
+Process and manage documents:
+- **Get Document Types** - List supported types
+- **Process Document** - Upload file for processing
+- **Get Document Status** - Check task progress
+
+---
+
+### 1️⃣1️⃣ Portfolio Service (Via Gateway)
+
+Manage financial portfolios:
+- **Get All Market Indices** - Global index data
+- **Get User Portfolios** - List portfolios
+- **Get Portfolio Summary** - Performance metrics
+- **Get Portfolio Holdings** - List assets
+
+---
+
+### 1️⃣2️⃣ Document Processor (Internal Testing)
+
+Security documentation regarding network isolation for services. Direct access is blocked.
+
+---
+
+### 1️⃣3️⃣ Market Data Service (Via Gateway)
+
+- **Calculate Breakeven** - Brokerage calculations
+
+---
+
+### 1️⃣4️⃣ Documentation & Reference
+
+Quick links to interact with Swagger/ReDoc docs for all services.
+
+---
+
+### 1️⃣5️⃣ Trade Service (Via Gateway)
+
+Manage trades:
+- **Get All Trades** - History
+- **Get Trade by ID** - Details
+- **Create Trade** - Submit order
+
+---
+
+### 1️⃣6️⃣ System Diagnostics (Via Gateway)
+
+Comprehensive system diagnostics:
+- **Full Health Check** - Tests all services & DB
+- **Services Status** - Quick uptime check
+- **Database Status** - Connectivity metrics
+- **Run Full Diagnostics** - Trigger check
+
+---
+
 
 ## 🔧 Common Tasks
 

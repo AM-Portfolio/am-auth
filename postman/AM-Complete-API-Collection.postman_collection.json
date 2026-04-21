@@ -5,9 +5,38 @@
     "description": "Complete testing collection for all microservices\n\n**Base URLs:**\n- API Gateway: http://localhost:8000\n- User Management: http://localhost:8010\n- Auth Tokens: http://localhost:8001\n- Document Processor (Internal): http://am-document-processor:8070\n- Portfolio Service (Internal): http://am-portfolio:8080\n\n**Environment Variables:**\n- base_url: http://localhost:8000\n- user_url: http://localhost:8010\n- auth_url: http://localhost:8001\n- access_token: (set after login)\n- user_id: (set after registration)\n- process_id: (set after document upload)\n\n**✨ Latest Updates:**\n- Section 15: Trade Service endpoints\n- Section 11: Portfolio Service endpoints (market indices, portfolios, holdings, analytics)\n- Section 10: Document Processor endpoints\n- All internal services: Network isolated, port not exposed\n- Generic proxy pattern: 1 function per service in API Gateway\n- Two-tier JWT: User JWT + Service JWT for internal communication",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
+  "event": [
+    {
+      "listen": "test",
+      "script": {
+        "exec": [
+          "// Auto-Token Synchronization Script",
+          "// Automatically updates the 'access_token' environment variable if present in response",
+          "if (pm.response.code === 200 || pm.response.code === 201) {",
+          "    try {",
+          "        var jsonData = pm.response.json();",
+          "        var token = jsonData.access_token || jsonData.token || (jsonData.token_data ? jsonData.token_data.access_token : null);",
+          "        ",
+          "        if (token) {",
+          "            pm.environment.set(\"access_token\", token);",
+          "            console.log(\"✅ Auto-Token Updater: Set 'access_token' in current environment\");",
+          "        }",
+          "        ",
+          "        if (jsonData.user_id) {",
+          "            pm.environment.set(\"user_id\", jsonData.user_id);",
+          "        }",
+          "    } catch (e) {",
+          "        // Not a JSON response, skip automation",
+          "    }",
+          "}"
+        ],
+        "type": "text/javascript"
+      }
+    }
+  ],
   "item": [
     {
-      "name": "1. Service Health & Info",
+      "name": "[HEALTH] Service Health & Info",
       "item": [
         {
           "name": "API Gateway - Health Check",
@@ -84,7 +113,7 @@
       ]
     },
     {
-      "name": "2. User Registration & Activation",
+      "name": "[USER] Registration & Activation",
       "item": [
         {
           "name": "Register New User",
@@ -188,7 +217,7 @@
       ]
     },
     {
-      "name": "3. Authentication & Login",
+      "name": "[AUTH] Authentication & Login",
       "item": [
         {
           "name": "Login - Get JWT Token",
@@ -351,7 +380,7 @@
       ]
     },
     {
-      "name": "Google Authentication",
+      "name": "[AUTH] Google Authentication",
       "item": [
         {
           "name": "1. Generate Mock Google Token",
@@ -500,11 +529,70 @@
             "description": "Exchange a REAL Google ID token for App Access Token (JWT).\n\n**Instructions:**\n1. Get a token from Google OAuth Playground or your Frontend.\n2. Paste it into the `id_token` field in the Body.\n3. Send request.\n4. The `access_token` environment variable will be updated automatically."
           },
           "response": []
+        },
+        {
+          "name": "4. Manage Google User (User Management)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"google_id\": \"1234567890\",\n  \"email\": \"googleuser@example.com\",\n  \"name\": \"Google User\"\n}"
+            },
+            "url": {
+              "raw": "{{user_url}}/api/v1/auth/google",
+              "host": [
+                "{{user_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "google"
+              ]
+            },
+            "description": "Create or update user from Google OAuth authentication"
+          },
+          "response": []
+        },
+        {
+          "name": "5. Get User by Google ID (User Management)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{user_url}}/api/v1/auth/google/user/:google_id",
+              "host": [
+                "{{user_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "google",
+                "user",
+                ":google_id"
+              ],
+              "variable": [
+                {
+                  "key": "google_id",
+                  "value": "1234567890"
+                }
+              ]
+            },
+            "description": "Get user details by Google ID"
+          },
+          "response": []
         }
       ]
     },
     {
-      "name": "4. Password Reset Feature",
+      "name": "[USER] Password Reset Feature",
       "item": [
         {
           "name": "Step 1 - Request Password Reset",
@@ -610,7 +698,7 @@
       ]
     },
     {
-      "name": "5. API Gateway Protected Endpoints",
+      "name": "[GW] Protected Proxy Endpoints",
       "item": [
         {
           "name": "Get Documents (Protected)",
@@ -690,7 +778,7 @@
       ]
     },
     {
-      "name": "6. Security Testing",
+      "name": "[GW] Security Testing",
       "item": [
         {
           "name": "Test - No Token (Should Fail)",
@@ -765,7 +853,7 @@
       ]
     },
     {
-      "name": "7. Rate Limiting Testing",
+      "name": "[GW] Rate Limiting Testing",
       "item": [
         {
           "name": "Single Request (Should Pass)",
@@ -820,7 +908,7 @@
       ]
     },
     {
-      "name": "8. Error Scenarios",
+      "name": "[GW] Error Scenarios",
       "item": [
         {
           "name": "Invalid Email Format",
@@ -943,7 +1031,7 @@
       ]
     },
     {
-      "name": "9. Security Verification Tests",
+      "name": "[GW] Security Verification Tests",
       "item": [
         {
           "name": "✅ Port 8000 (API Gateway) - Should Work",
@@ -1045,7 +1133,7 @@
       ]
     },
     {
-      "name": "10. Document Processor (Via API Gateway)",
+      "name": "[DOC] Document Processor (Via Gateway)",
       "item": [
         {
           "name": "Get Document Types (Protected - Via Gateway)",
@@ -1149,7 +1237,7 @@
       ]
     },
     {
-      "name": "12. Document Processor (Internal/Testing Only)",
+      "name": "[DOC] Internal Testing & Arch",
       "item": [
         {
           "name": "⚠️ SECURITY ARCHITECTURE - READ THIS FIRST",
@@ -1172,7 +1260,7 @@
       ]
     },
     {
-      "name": "11. Portfolio Service (Via API Gateway)",
+      "name": "[PORTFOLIO] Portfolio Service (Via Gateway)",
       "item": [
         {
           "name": "Get All Market Indices",
@@ -1414,7 +1502,7 @@
       ]
     },
     {
-      "name": "13. Market Data Service",
+      "name": "[MARKET] Market Data Service",
       "item": [
         {
           "name": "Calculate Breakeven (Via Gateway)",
@@ -1525,7 +1613,7 @@
       ]
     },
     {
-      "name": "14. Documentation & Reference",
+      "name": "[INFO] Documentation & Reference",
       "item": [
         {
           "name": "🔗 API Gateway - Swagger UI",
@@ -1602,7 +1690,7 @@
       ]
     },
     {
-      "name": "15. Trade Service (Via API Gateway)",
+      "name": "[TRADE] Trade Service (Via Gateway)",
       "item": [
         {
           "name": "Get All Trades",
@@ -1695,24 +1783,189 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "[HEALTH] System Diagnostics (Via Gateway)",
+      "item": [
+        {
+          "name": "Full Health Check",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/system/health",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "system",
+                "health"
+              ]
+            },
+            "description": "Comprehensive system diagnostics report"
+          },
+          "response": []
+        },
+        {
+          "name": "Services Status",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/system/services/status",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "system",
+                "services",
+                "status"
+              ]
+            },
+            "description": "Quick services status check"
+          },
+          "response": []
+        },
+        {
+          "name": "Database Status",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/system/database/status",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "system",
+                "database",
+                "status"
+              ]
+            },
+            "description": "Database connectivity status"
+          },
+          "response": []
+        },
+        {
+          "name": "Python Scripts Status",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/system/python-scripts/status",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "system",
+                "python-scripts",
+                "status"
+              ]
+            },
+            "description": "Python test scripts availability"
+          },
+          "response": []
+        },
+        {
+          "name": "Run Full Diagnostics",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/system/diagnostics/run",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "system",
+                "diagnostics",
+                "run"
+              ]
+            },
+            "description": "Run full system diagnostics"
+          },
+          "response": []
+        },
+        {
+          "name": "System Info",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/system/info",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "system",
+                "info"
+              ]
+            },
+            "description": "System information"
+          },
+          "response": []
+        }
+      ]
     }
   ],
   "variable": [
     {
       "key": "base_url",
-      "value": "http://localhost:8000",
+      "value": "",
       "type": "string",
       "disabled": false
     },
     {
       "key": "user_url",
-      "value": "http://localhost:8010",
+      "value": "",
       "type": "string",
       "disabled": false
     },
     {
       "key": "auth_url",
-      "value": "http://localhost:8001",
+      "value": "",
       "type": "string",
       "disabled": false
     },

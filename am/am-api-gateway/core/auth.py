@@ -1,6 +1,6 @@
 """Authentication utilities for API Gateway"""
 import httpx
-from fastapi import Depends, HTTPException
+from fastapi import Depends, HTTPException, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from typing import Optional, List
 import logging
@@ -19,13 +19,36 @@ class CurrentUser:
         self.token = token
 
 async def get_current_user(
-    credentials: HTTPAuthorizationCredentials = Depends(security)
+    request: Request,
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security)
 ) -> CurrentUser:
     """
-    Validate user token and get current user info
-    This is called for every API request that requires authentication
+    Validate user token and get current user info.
+    Prioritizes X-User-ID and other identity headers from Traefik/Edge proxy.
+    Falls back to direct token validation with auth service.
     """
+    # 1. Check if identity headers are already provided by edge proxy (Traefik forward-auth)
+    x_user_id = request.headers.get("X-User-ID")
+    x_email = request.headers.get("X-Email")
+    
+    if x_user_id and x_email:
+        logger.info(f"Trusting edge-proxy identity: {x_user_id} ({x_email})")
+        roles = request.headers.get("X-Roles", "").split(",")
+        # Strip whitespace from roles
+        roles = [r.strip() for r in roles if r.strip()]
+        
+        return CurrentUser(
+            user_id=x_user_id,
+            email=x_email,
+            roles=roles,
+            token=credentials.credentials if credentials else ""
+        )
+
+    # 2. Fallback to direct validation with auth service
     try:
+        if not credentials:
+            raise HTTPException(status_code=401, detail="Not authenticated")
+            
         token = credentials.credentials
         
         # Validate token with auth service
@@ -53,9 +76,8 @@ async def get_current_user(
                 )
             logger.info(f"User authenticated: {data.get('user_id')}")
             
-            # Map scopes to roles (validation endpoint returns 'scopes', not 'roles')
+            # Map scopes to roles
             roles = data.get("roles", data.get("scopes", []))
-            logger.info(f"User roles/scopes: {roles}")
             
             return CurrentUser(
                 user_id=data.get("user_id"),

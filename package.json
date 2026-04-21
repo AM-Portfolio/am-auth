@@ -1,0 +1,26 @@
+{
+  "name": "am-auth",
+  "version": "1.0.0",
+  "description": "Authentication and User Management Service",
+  "scripts": {
+    "vault:sync": "python scripts/vault_orchestrator.py --sync",
+    "vault:backup": "python scripts/vault_orchestrator.py --backup",
+    "vault:provision": "python scripts/vault_orchestrator.py --provision",
+    "vault:sync:clean": "python scripts/vault_orchestrator.py --provision && python scripts/vault_orchestrator.py --sync",
+    "vault:orchestrate": "python scripts/vault_orchestrator.py --provision && python scripts/vault_orchestrator.py --sync",
+    "setup": "python scripts/setup.py",
+    "deploy:local": "python scripts/deploy_local.py",
+    "test:logging": "python scripts/test_logging_integration.py",
+    "db:test": "python scripts/test_db_connection.py",
+    "test:all": "python scripts/run_all_tests.py",
+    "run:user": "python -c \"from scripts.run_local import run_user; run_user()\"",
+    "run:auth": "python -c \"from scripts.run_local import run_auth; run_auth()\"",
+    "test": "pytest",
+    "lint": "flake8 ."
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5"
+  },
+  "author": "Antigravity",
+  "license": "ISC"
+}

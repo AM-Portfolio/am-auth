@@ -1,12 +1,16 @@
-FROM python:3.11-slim
+# AM User Management
+ARG BASE_REGISTRY=""
+FROM ${BASE_REGISTRY}am-python-base:latest
 
 WORKDIR /app
 
-COPY requirements.txt .
+# Install dependencies
+COPY am-user-management/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
-COPY shared ./shared
+# Copy application and shared library
+COPY am-user-management/ .
+COPY shared/ ./shared/
 
 EXPOSE 8000
 

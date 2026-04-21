@@ -3,6 +3,7 @@ from typing import AsyncGenerator
 from sqlalchemy.ext.asyncio import AsyncSession, AsyncEngine, create_async_engine, async_sessionmaker
 from sqlalchemy.orm import sessionmaker
 import os
+import urllib.parse
 from dotenv import load_dotenv
 
 from modules.account_management.infrastructure.models.user_account_orm import Base
@@ -25,7 +26,7 @@ class DatabaseConfig:
         print(f'DB_NAME: {os.getenv("DB_NAME")}')
         print(f'DB_USER: {os.getenv("DB_USER")}')
         print(f'DB_PASSWORD: {os.getenv("DB_PASSWORD")}')
-                # Get database URL from environment - prefer PostgreSQL
+        # Get database URL from environment - prefer PostgreSQL
         database_url = os.getenv('DATABASE_URL')
         
         if not database_url:
@@ -36,11 +37,15 @@ class DatabaseConfig:
             db_user = os.getenv('DB_USER', 'postgres')
             db_password = os.getenv('DB_PASSWORD', 'postgres')
 
+            # URL-encode components to handle special characters (e.g. '@' in password)
+            safe_user = urllib.parse.quote_plus(db_user)
+            safe_password = urllib.parse.quote_plus(db_password)
+
             # Build URL - handle empty password
             if db_password:
-                database_url = f'postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}'
+                database_url = f'postgresql://{safe_user}:{safe_password}@{db_host}:{db_port}/{db_name}'
             else:
-                database_url = f'postgresql://{db_user}@{db_host}:{db_port}/{db_name}'
+                database_url = f'postgresql://{safe_user}@{db_host}:{db_port}/{db_name}'
         
         # Convert PostgreSQL URL to async if needed
         if database_url.startswith('postgresql://'):
@@ -52,7 +57,7 @@ class DatabaseConfig:
         if '?sslmode=' in self.database_url:
             self.database_url = self.database_url.split('?sslmode=')[0]
         
-        print(f"🔗 Connecting to database: {self.database_url}")
+        print(f"Connecting to database: {self.database_url}")
         
         # Create async engine
         self.engine: AsyncEngine = create_async_engine(

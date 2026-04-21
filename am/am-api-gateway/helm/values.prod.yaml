@@ -1,0 +1,8 @@
+# Prod Environment — am-api-gateway
+environment: prod
+replicaCount: 2
+
+global:
+  vault:
+    secrets:
+      auth: "kv/data/prod/apps/auth"

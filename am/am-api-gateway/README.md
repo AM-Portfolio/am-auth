@@ -54,6 +54,7 @@ am-api-gateway/
 ## 🔐 Security Flow
 
 ### 1. User Token Validation
+
 ```python
 Authorization: Bearer <user_jwt_token>
          ↓
@@ -63,6 +64,7 @@ Returns CurrentUser(user_id, roles, token)
 ```
 
 ### 2. Service Token Generation
+
 ```python
 generate_service_token(user_token, service_id, permissions)
          ↓
@@ -72,6 +74,7 @@ Returns service_jwt_token
 ```
 
 ### 3. Internal Service Call
+
 ```python
 httpx.get(
     f"{PYTHON_SERVICE_URL}/internal/documents",
@@ -82,29 +85,35 @@ httpx.get(
 ## 🚀 Endpoints
 
 ### Documents (Python Internal Service)
+
 - `GET /api/v1/documents` - Get user documents
 - `GET /api/v1/documents/all` - Get all documents (admin only)
 - `GET /api/v1/documents/service-info` - Service information
 
 ### Reports (Java Internal Service)
+
 - `GET /api/v1/reports` - Get user reports
 - `GET /api/v1/reports/all` - Get all reports (admin only)
 - `POST /api/v1/reports/generate` - Generate new report
 - `GET /api/v1/reports/service-info` - Service information
 
 ### Portfolio (Coming Soon)
+
 - `GET /api/v1/portfolio` - Get portfolio
 - `POST /api/v1/portfolio/transaction` - Create transaction
 
 ### Trades (Coming Soon)
+
 - `GET /api/v1/trades` - Get trades
 - `POST /api/v1/trades/execute` - Execute trade
 
 ### Market Data (Coming Soon)
+
 - `GET /api/v1/market-data/stocks/{symbol}` - Stock data
 - `GET /api/v1/market-data/quotes` - Market quotes
 
 ### Health & System
+
 - `GET /health` - Health check
 - `GET /` - Welcome message with system info
 
@@ -135,6 +144,7 @@ LONG_TIMEOUT: 60.0
 ## 🧪 Testing with Postman
 
 ### 1. Register User
+
 ```
 POST http://localhost:8010/api/v1/users/register
 {
@@ -145,11 +155,13 @@ POST http://localhost:8010/api/v1/users/register
 ```
 
 ### 2. Activate User
+
 ```
 POST http://localhost:8010/api/v1/users/{user_id}/activate
 ```
 
 ### 3. Login
+
 ```
 POST http://localhost:8001/api/v1/auth/login
 {
@@ -165,6 +177,7 @@ Response:
 ```
 
 ### 4. Call API Gateway Endpoints
+
 ```
 GET http://localhost:8000/api/v1/documents
 Headers:
@@ -184,15 +197,17 @@ Headers:
   - `X-RateLimit-Reset: 1703001234`
 
 Response when limit exceeded:
+
 ```json
 {
-    "detail": "Rate limit exceeded. Try again in 45 seconds"
+  "detail": "Rate limit exceeded. Try again in 45 seconds"
 }
 ```
 
 ## 📊 Logging
 
 All requests are logged with:
+
 - Request method and path
 - Client IP address
 - User ID (if authenticated)
@@ -200,41 +215,47 @@ All requests are logged with:
 - Response status code
 
 Headers added:
+
 - `X-Process-Time: 0.123` (seconds)
 
 ## 🐛 Error Handling
 
 ### 401 Unauthorized
+
 ```json
 {
-    "detail": "Invalid or expired token"
+  "detail": "Invalid or expired token"
 }
 ```
 
 ### 403 Forbidden
+
 ```json
 {
-    "detail": "Admin access required"
+  "detail": "Admin access required"
 }
 ```
 
 ### 429 Too Many Requests
+
 ```json
 {
-    "detail": "Rate limit exceeded. Try again in 45 seconds"
+  "detail": "Rate limit exceeded. Try again in 45 seconds"
 }
 ```
 
 ### 503 Service Unavailable
+
 ```json
 {
-    "detail": "Document service unavailable"
+  "detail": "Document service unavailable"
 }
 ```
 
 ## 🚢 Deployment
 
 ### Local Development
+
 ```bash
 cd am/am-api-gateway
 pip install -r requirements.txt
@@ -242,6 +263,7 @@ uvicorn main:app --reload --port 8000
 ```
 
 ### Docker
+
 ```bash
 cd am
 docker-compose up -d am-api-gateway
@@ -251,6 +273,7 @@ docker-compose logs -f am-api-gateway
 ## 🔍 Monitoring
 
 ### Health Check
+
 ```
 GET http://localhost:8000/health
 
@@ -263,6 +286,7 @@ Response:
 ```
 
 ### Service Info
+
 ```
 GET http://localhost:8000/
 
@@ -292,17 +316,21 @@ Response:
 ## 🎓 Key Concepts
 
 ### Why Not Direct Access?
+
 ❌ Client → Internal Service (Bad)
+
 - Exposes internal services to internet
 - Can't add centralized security
 - Multiple attack surfaces
 
 ✅ Client → API Gateway → Internal Service (Good)
+
 - Single entry point
 - Centralized auth, rate limiting, logging
 - Reduced attack surface
 
 ### Service Token vs User Token
+
 - **User Token**: Client authenticates to API Gateway
 - **Service Token**: API Gateway authenticates to internal services
 - **Why?**: Separation of concerns, fine-grained permissions
@@ -317,6 +345,7 @@ Response:
 ## 🤝 Contributing
 
 When adding new endpoints:
+
 1. Create endpoint file in `api/v1/endpoints/`
 2. Follow existing pattern (documents.py, reports.py)
 3. Register router in `main.py`

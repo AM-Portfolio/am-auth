@@ -1,0 +1,68 @@
+name: Direct Deploy (Existing Container)
+
+on:
+  workflow_dispatch:
+    inputs:
+      service:
+        description: "Select the service to deploy"
+        required: true
+        type: choice
+        options:
+          - am-api-gateway
+          - am-auth-tokens
+          - am-user-management
+      environment:
+        description: "Target environment"
+        required: true
+        type: choice
+        options:
+          - preprod
+          - prod
+      image_tag:
+        description: "Docker Image Tag (e.g., latest or a specific run-id)"
+        required: true
+        default: "latest"
+        type: string
+
+jobs:
+  setup:
+    name: Prepare Parameters
+    runs-on: ubuntu-latest
+    outputs:
+      working_directory: ${{ steps.vars.outputs.working_directory }}
+      language: ${{ steps.vars.outputs.language }}
+      namespace: ${{ steps.vars.outputs.namespace }}
+    steps:
+      - id: vars
+        run: |
+          # Service Mappings (Auth repo uses am/ subdirectory)
+          if [ "${{ github.event.inputs.service }}" == "am-api-gateway" ]; then
+             echo "working_directory=am/am-api-gateway" >> $GITHUB_OUTPUT
+             echo "language=python" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event.inputs.service }}" == "am-auth-tokens" ]; then
+             echo "working_directory=am/am-auth-tokens" >> $GITHUB_OUTPUT
+             echo "language=python" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event.inputs.service }}" == "am-user-management" ]; then
+             echo "working_directory=am/am-user-management" >> $GITHUB_OUTPUT
+             echo "language=python" >> $GITHUB_OUTPUT
+          fi
+
+          # Namespace Mappings
+          if [ "${{ github.event.inputs.environment }}" == "prod" ]; then
+             echo "namespace=am-apps-prod" >> $GITHUB_OUTPUT
+          else
+             echo "namespace=am-apps-preprod" >> $GITHUB_OUTPUT
+          fi
+
+  deploy:
+    name: Execute Deploy
+    needs: setup
+    uses: AM-Portfolio/am-pipelines/.github/workflows/central-deploy.yml@develop
+    with:
+      service_name: ${{ github.event.inputs.service }}
+      working_directory: ${{ needs.setup.outputs.working_directory }}
+      language: ${{ needs.setup.outputs.language }}
+      environment: ${{ github.event.inputs.environment }}
+      image_tag: ${{ github.event.inputs.image_tag }}
+      namespace: ${{ needs.setup.outputs.namespace }}
+    secrets: inherit

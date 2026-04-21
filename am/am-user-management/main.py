@@ -93,32 +93,32 @@ async def get_login_use_case(
 async def lifespan(app: FastAPI):
     """Manage application lifecycle"""
     # Startup
-    logger.info("🚀 Starting AM User Management API...", extra={"event": "startup"})
+    logger.info("Starting AM User Management API...", extra={"event": "startup"})
 
     # Create database tables
     try:
         await db_config.create_tables()
-        logger.info("✅ PostgreSQL database tables created successfully", extra={
+        logger.info("PostgreSQL database tables created successfully", extra={
             "event": "database_setup",
             "status": "success",
             "database_url": str(db_config.database_url).split("@")[-1]  # Hide credentials
         })
-        logger.debug(f"📊 Full Database URL pattern: {db_config.database_url[:20]}...", extra={
+        logger.debug(f"Full Database URL pattern: {db_config.database_url[:20]}...", extra={
             "event": "database_setup",
             "url_prefix": str(db_config.database_url)[:20]
         })
     except Exception as e:
-        logger.error(f"❌ Failed to create PostgreSQL database tables: {e}", extra={
+        logger.error(f"Failed to create PostgreSQL database tables: {e}", extra={
             "event": "database_setup",
             "status": "failed",
             "error": str(e),
             "error_type": type(e).__name__
         }, exc_info=True)
-        logger.warning("💡 Make sure PostgreSQL is running: brew services start postgresql@15", extra={
+        logger.warning("Make sure PostgreSQL is running: brew services start postgresql@15", extra={
             "event": "database_setup",
             "troubleshooting": "postgresql_not_running"
         })
-        logger.warning("💡 Make sure database exists: createdb am_user_management", extra={
+        logger.warning("Make sure database exists: createdb am_user_management", extra={
             "event": "database_setup", 
             "troubleshooting": "database_not_exists"
         })
@@ -127,7 +127,7 @@ async def lifespan(app: FastAPI):
     yield
 
     # Shutdown
-    logger.info("🛑 Shutting down AM User Management API...", extra={"event": "shutdown"})
+    logger.info("Shutting down AM User Management API...", extra={"event": "shutdown"})
     await db_config.close()
 
 
@@ -304,6 +304,10 @@ async def login(request: LoginRequestModel,
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail=str(e))
     except Exception as e:
+        logger.error("Login unexpected error", extra={
+            "error": str(e),
+            "error_type": type(e).__name__
+        }, exc_info=True)
         if "invalid" in str(e).lower() or "not found" in str(e).lower():
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                                 detail="Invalid email or password")
@@ -509,4 +513,4 @@ async def reset_database():
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True, log_config=None)

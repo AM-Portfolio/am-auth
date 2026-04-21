@@ -1,0 +1,11 @@
+# Dev Environment — am-user-management
+environment: dev
+replicaCount: 1
+
+global:
+  vault:
+    secrets:
+      auth: "kv/data/dev/apps/auth"
+
+env:
+  LOG_LEVEL: "DEBUG"

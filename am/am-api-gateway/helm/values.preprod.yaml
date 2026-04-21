@@ -1,0 +1,10 @@
+# Preprod Environment — am-api-gateway
+# Vault path aligned with seeded secret at kv/preprod/apps/auth
+environment: preprod
+replicaCount: 1
+
+global:
+  vault:
+    secrets:
+      auth: "apps/data/preprod/services/am-api-gateway"
+      infra: "apps/data/preprod/infra/shared-api"

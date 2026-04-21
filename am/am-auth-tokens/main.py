@@ -28,7 +28,7 @@ auth_logger = get_auth_logger()
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Manage application lifecycle"""
-    logger.info("🚀 Starting Auth Tokens API...", extra={"event": "startup"})
+    logger.info("Starting Auth Tokens API...", extra={"event": "startup"})
     auth_logger.log_info("Auth Tokens service starting up", event="startup")
     
     # Initialize fire-and-forget logging
@@ -37,7 +37,7 @@ async def lifespan(app: FastAPI):
     try:
         async with auth_logger.trace_context("database_initialization"):
             await db_config.create_tables()
-            logger.info("✅ PostgreSQL database tables created successfully", extra={
+            logger.info("PostgreSQL database tables created successfully", extra={
                 "event": "database_setup", 
                 "status": "success"
             })
@@ -55,14 +55,14 @@ async def lifespan(app: FastAPI):
                 "context": {"event": "database_setup", "status": "success"}
             })
     except Exception as e:
-        logger.error(f"⚠️ Failed to create database tables: {e}", extra={
+        logger.error(f"Failed to create database tables: {e}", extra={
             "event": "database_setup",
             "status": "failed",
             "error": str(e)
         }, exc_info=True)
         auth_logger.log_error(f"Database setup failed: {e}", 
                              event="database_setup", status="failed", error=str(e))
-        logger.warning("💡 Service will continue but OAuth 2.0 features may not work", extra={
+        logger.warning("Service will continue but OAuth 2.0 features may not work", extra={
             "event": "database_setup",
             "status": "degraded"
         })
@@ -71,7 +71,7 @@ async def lifespan(app: FastAPI):
     
     yield
     
-    logger.info("🛑 Shutting down Auth Tokens API...", extra={"event": "shutdown"})
+    logger.info("Shutting down Auth Tokens API...", extra={"event": "shutdown"})
     auth_logger.log_info("Auth Tokens service shutting down", event="shutdown")
     
     # Shutdown fire-and-forget logging gracefully
@@ -187,5 +187,6 @@ if __name__ == "__main__":
         host=settings.HOST,
         port=settings.PORT,
         reload=settings.DEBUG,
-        log_level=settings.LOG_LEVEL if not settings.DEBUG else "debug"
+        log_level=settings.LOG_LEVEL.lower() if not settings.DEBUG else "debug",
+        log_config=None
     )
