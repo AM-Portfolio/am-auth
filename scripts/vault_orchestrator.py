@@ -154,6 +154,34 @@ class VaultOrchestrator:
         if resp.status_code not in [200, 204]:
             print(f" [!] Error writing {path}: {resp.text}")
 
+    def unseal(self, keys=None):
+        """Unseals Vault using the provided keys."""
+        if not self.guardian.start(): return
+        
+        if not keys:
+            keys_raw = os.getenv("VAULT_UNSEAL_KEYS")
+            if keys_raw:
+                keys = [k.strip() for k in keys_raw.split(",")]
+        
+        if not keys:
+            print("[ERROR] No unseal keys found in VAULT_UNSEAL_KEYS environment variable.")
+            return
+
+        print(f"[*] Attempting to unseal Vault at {self.addr}...")
+        for key in keys:
+            api_url = f"{self.addr}/v1/sys/unseal"
+            resp = requests.post(api_url, json={"key": key})
+            if resp.status_code == 200:
+                data = resp.json()
+                progress = f"{data.get('progress')}/{data.get('t')}"
+                if not data.get("sealed"):
+                    print("[SUCCESS] Vault is unsealed and active.")
+                    return
+                else:
+                    print(f" [+] Key accepted. Progress: {progress}")
+            else:
+                print(f" [!] Error sending unseal key: {resp.text}")
+
     def provision(self):
         """Administrative provisioning tasks."""
         if not self.guardian.start(): return
@@ -199,11 +227,13 @@ def main():
     parser.add_argument("--backup", action="store_true", help="Backup Vault data")
     parser.add_argument("--sync", action="store_true", help="Sync data from blueprint")
     parser.add_argument("--provision", action="store_true", help="Provision mounts")
+    parser.add_argument("--unseal", action="store_true", help="Unseal Vault using keys from env")
     
     args = parser.parse_args()
     orch = VaultOrchestrator()
     
     try:
+        if args.unseal: orch.unseal()
         if args.provision: orch.provision()
         if args.sync: orch.sync()
         if args.backup: orch.backup()

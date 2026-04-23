@@ -6,6 +6,7 @@
     "vault:sync": "python scripts/vault_orchestrator.py --sync",
     "vault:backup": "python scripts/vault_orchestrator.py --backup",
     "vault:provision": "python scripts/vault_orchestrator.py --provision",
+    "vault:unseal": "python scripts/vault_orchestrator.py --unseal",
     "vault:sync:clean": "python scripts/vault_orchestrator.py --provision && python scripts/vault_orchestrator.py --sync",
     "vault:orchestrate": "python scripts/vault_orchestrator.py --provision && python scripts/vault_orchestrator.py --sync",
     "setup": "python scripts/setup.py",
