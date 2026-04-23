@@ -1,25 +1,15 @@
-global:
-  image:
-    registry: ghcr.io/am-portfolio
-    pullPolicy: Always
-  vault:
-    enabled: true
-    address: "http://vault.vault.svc.cluster.local:8200"
-    role: "am-backend-role"
-    authPath: "auth/kubernetes"
-    serviceAccountName: "am-backend-sa"
-    secrets:
-      jwt:      "secret/data/preprod/apps/auth/jwt"
-      postgres: "secret/data/preprod/infra/postgres"
-
+# Preprod Environment — am-auth-tokens
+# Vault path aligned with seeded secret at kv/preprod/apps/auth
 environment: preprod
 replicaCount: 1
-language: python
-image:
-  repository: am-auth-tokens
-port: 8001
-entrypoint: "exec uvicorn main:app --host 0.0.0.0 --port 8001"
 
-env:
-  LOG_FORMAT: "json"
-  LOG_LEVEL: "INFO"
+global:
+  vault:
+    secrets:
+      auth: "apps/data/preprod/services/am-auth"
+      infra: "apps/data/preprod/infra/postgres"
+    templates:
+      infra: |
+        {{- with secret "apps/data/preprod/infra/postgres" -}}
+        export DATABASE_URL="{{ .Data.data.url }}"
+        {{- end }}

@@ -1,25 +1,8 @@
-global:
-  image:
-    registry: ghcr.io/am-portfolio
-    pullPolicy: Always
-  vault:
-    enabled: true
-    address: "http://vault.vault.svc.cluster.local:8200"
-    role: "am-backend-role"
-    authPath: "auth/kubernetes"
-    serviceAccountName: "am-backend-sa"
-    secrets:
-      jwt:      "secret/data/prod/apps/auth/jwt"
-      postgres: "secret/data/prod/infra/postgres"
-
+# Prod Environment — am-api-gateway
 environment: prod
 replicaCount: 2
-language: python
-image:
-  repository: am-api-gateway
-port: 8080
-entrypoint: "exec uvicorn main:app --host 0.0.0.0 --port 8080"
 
-env:
-  LOG_FORMAT: "json"
-  LOG_LEVEL: "INFO"
+global:
+  vault:
+    secrets:
+      auth: "kv/data/prod/apps/auth"

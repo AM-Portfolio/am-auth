@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "AM Portfoilo Authentication Services"
 authors = [{ name = "Antigravity Agent", email = "agent@google.com" }]
 requires-python = ">=3.11"
-dependencies = ["uvicorn (>=0.41.0,<0.42.0)", "fastapi (>=0.135.1,<0.136.0)", "psycopg2-binary (>=2.9.11,<3.0.0)"]
+dependencies = ["uvicorn (>=0.41.0,<0.42.0)", "fastapi (>=0.135.1,<0.136.0)", "psycopg2-binary (>=2.9.11,<3.0.0)", "python-dotenv (>=1.0.1)"]
 
 
 

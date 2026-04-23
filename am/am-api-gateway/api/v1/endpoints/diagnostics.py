@@ -136,7 +136,7 @@ async def check_database_health() -> DatabaseStatus:
         # Simulated check - replace with actual database connection
         start_time = time.time()
         
-        # In production, you'd do:
+        # In production, you'd do:z
         # async with get_db() as db:
         #     tables = db.query(...).all()
         
