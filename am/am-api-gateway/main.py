@@ -85,7 +85,7 @@ async def root():
             "portfolio": "/am/portfolio/{path}",
             "market_data": "/am/market-data/{path}",
             "documents": "/am/documents/{path}",
-            "diagnostics": "/api/v1/diagnostics"
+            "diagnostics": "/v1/diagnostics"
         },
         "note": "All endpoints require authentication via Bearer token"
     }
@@ -96,7 +96,7 @@ app.include_router(trades.router, tags=["Trades"])  # No prefix - handles /am/tr
 app.include_router(market_data.router, tags=["Market Data"])
 app.include_router(document_processor.router, tags=["Document Processor"])
 app.include_router(portfolio_service.router, tags=["Portfolio Service"])
-app.include_router(diagnostics.router, prefix="/api/v1", tags=["System Diagnostics"])
+app.include_router(diagnostics.router, prefix="/v1", tags=["System Diagnostics"])
 
 
 # Global exception handler

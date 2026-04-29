@@ -468,9 +468,9 @@ async def get_service_info():
                 "/internal/v1/service-info"
             ],
             "public": [
-                "/api/v1/auth/register",
-                "/api/v1/auth/login", 
-                "/api/v1/auth/status"
+                "/v1/auth/register",
+                "/v1/auth/login", 
+                "/v1/auth/status"
             ]
         }
     }
