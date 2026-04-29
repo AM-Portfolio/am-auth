@@ -87,15 +87,15 @@ The API will be available at `http://localhost:8000` with automatic documentatio
 
 ### Authentication
 
-- `POST /api/v1/auth/register` - Create new user account
-- `POST /api/v1/auth/login` - Authenticate user
-- `GET /api/v1/auth/verify-email` - Verify email address
-- `POST /api/v1/auth/resend-verification` - Resend verification email
+- `POST /v1/auth/register` - Create new user account
+- `POST /v1/auth/login` - Authenticate user
+- `GET /v1/auth/verify-email` - Verify email address
+- `POST /v1/auth/resend-verification` - Resend verification email
 
 ### System
 
 - `GET /health` - Health check endpoint
-- `GET /api/v1/auth/status` - Authentication system status
+- `GET /v1/auth/status` - Authentication system status
 
 ## 🧪 **Testing**
 
@@ -107,7 +107,7 @@ python -m pytest
 python debug_login_process.py
 
 # Test with curl
-curl -X POST "http://localhost:8000/api/v1/auth/register" \
+curl -X POST "http://localhost:8000/v1/auth/register" \
   -H "Content-Type: application/json" \
   -d '{"email": "test@example.com", "password": "secure123", "first_name": "Test", "last_name": "User"}'
 ```
@@ -180,3 +180,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 **Built with ❤️ by the AM Portfolio team**
 
 # am-user-management
+

@@ -229,7 +229,7 @@ docker-compose -f docker-compose-business.yml down
 docker-compose -f docker-compose-trade.yml up -d
 
 # Test trade service
-curl http://localhost:8073/api/v1/trades/health
+curl http://localhost:8073/v1/trades/health
 ```
 
 ## Loading Environment Variables
@@ -412,3 +412,4 @@ docker-compose restart service-name
 - See `QUICK_START.md` for setup instructions
 - See `.env.docker` for local development overrides
 - See `config/*.env` files for detailed variable documentation
+

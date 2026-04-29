@@ -151,7 +151,6 @@
                 "{{user_url}}"
               ],
               "path": [
-                "api",
                 "v1",
                 "auth",
                 "register"
@@ -181,7 +180,6 @@
                 "{{user_url}}"
               ],
               "path": [
-                "api",
                 "v1",
                 "users",
                 "{{user_id}}",
@@ -203,7 +201,6 @@
                 "{{user_url}}"
               ],
               "path": [
-                "api",
                 "v1",
                 "users",
                 "{{user_id}}",
@@ -259,7 +256,6 @@
                 "{{auth_url}}"
               ],
               "path": [
-                "api",
                 "v1",
                 "tokens"
               ]
@@ -288,7 +284,6 @@
                 "{{auth_url}}"
               ],
               "path": [
-                "api",
                 "v1",
                 "validate"
               ]
@@ -337,7 +332,6 @@
                 "{{auth_url}}"
               ],
               "path": [
-                "api",
                 "v1",
                 "auth",
                 "refresh"
@@ -367,7 +361,6 @@
                 "{{auth_url}}"
               ],
               "path": [
-                "api",
                 "v1",
                 "auth",
                 "logout"
@@ -468,7 +461,6 @@
                 "{{auth_url}}"
               ],
               "path": [
-                "api",
                 "v1",
                 "auth",
                 "google",
@@ -519,7 +511,6 @@
                 "{{auth_url}}"
               ],
               "path": [
-                "api",
                 "v1",
                 "auth",
                 "google",
@@ -550,7 +541,6 @@
                 "{{user_url}}"
               ],
               "path": [
-                "api",
                 "v1",
                 "auth",
                 "google"
@@ -571,7 +561,6 @@
                 "{{user_url}}"
               ],
               "path": [
-                "api",
                 "v1",
                 "auth",
                 "google",
@@ -628,7 +617,6 @@
                 "{{user_url}}"
               ],
               "path": [
-                "api",
                 "v1",
                 "request-reset"
               ]
@@ -657,7 +645,6 @@
                 "{{user_url}}"
               ],
               "path": [
-                "api",
                 "v1",
                 "validate-reset-token"
               ]
@@ -686,7 +673,6 @@
                 "{{user_url}}"
               ],
               "path": [
-                "api",
                 "v1",
                 "confirm-reset"
               ]
@@ -711,12 +697,11 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/documents",
+              "raw": "{{base_url}}/v1/documents",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
-                "api",
                 "v1",
                 "documents"
               ]
@@ -736,12 +721,11 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/reports",
+              "raw": "{{base_url}}/v1/reports",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
-                "api",
                 "v1",
                 "reports"
               ]
@@ -761,12 +745,11 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/portfolio",
+              "raw": "{{base_url}}/v1/portfolio",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
-                "api",
                 "v1",
                 "portfolio"
               ]
@@ -786,12 +769,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/v1/documents",
+              "raw": "{{base_url}}/v1/documents",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
-                "api",
                 "v1",
                 "documents"
               ]
@@ -811,12 +793,11 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/documents",
+              "raw": "{{base_url}}/v1/documents",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
-                "api",
                 "v1",
                 "documents"
               ]
@@ -836,12 +817,11 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/documents",
+              "raw": "{{base_url}}/v1/documents",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
-                "api",
                 "v1",
                 "documents"
               ]
@@ -866,12 +846,11 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/documents",
+              "raw": "{{base_url}}/v1/documents",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
-                "api",
                 "v1",
                 "documents"
               ]
@@ -891,12 +870,11 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/documents",
+              "raw": "{{base_url}}/v1/documents",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
-                "api",
                 "v1",
                 "documents"
               ]
@@ -930,7 +908,6 @@
                 "{{user_url}}"
               ],
               "path": [
-                "api",
                 "v1",
                 "auth",
                 "register"
@@ -960,7 +937,6 @@
                 "{{user_url}}"
               ],
               "path": [
-                "api",
                 "v1",
                 "auth",
                 "register"
@@ -990,7 +966,6 @@
                 "{{auth_url}}"
               ],
               "path": [
-                "api",
                 "v1",
                 "tokens"
               ]
@@ -1019,7 +994,6 @@
                 "{{user_url}}"
               ],
               "path": [
-                "api",
                 "v1",
                 "confirm-reset"
               ]
@@ -1067,12 +1041,11 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/documents/types",
+              "raw": "{{base_url}}/v1/documents/types",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
-                "api",
                 "v1",
                 "documents",
                 "types"
@@ -1120,7 +1093,6 @@
               ],
               "port": "8070",
               "path": [
-                "api",
                 "v1",
                 "documents",
                 "types"
@@ -1146,12 +1118,11 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/documents/types",
+              "raw": "{{base_url}}/v1/documents/types",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
-                "api",
                 "v1",
                 "documents",
                 "types"
@@ -1192,12 +1163,11 @@
               ]
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/documents/process",
+              "raw": "{{base_url}}/v1/documents/process",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
-                "api",
                 "v1",
                 "documents",
                 "process"
@@ -1218,12 +1188,11 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/documents/status/{{process_id}}",
+              "raw": "{{base_url}}/v1/documents/status/{{process_id}}",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
-                "api",
                 "v1",
                 "documents",
                 "status",
@@ -1273,12 +1242,11 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/portfolio/market-index/all",
+              "raw": "{{base_url}}/v1/portfolio/market-index/all",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
-                "api",
                 "v1",
                 "portfolio",
                 "market-index",
@@ -1300,12 +1268,11 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/portfolio/portfolios?userId={{user_id}}",
+              "raw": "{{base_url}}/v1/portfolio/portfolios?userId={{user_id}}",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
-                "api",
                 "v1",
                 "portfolio",
                 "portfolios"
@@ -1332,12 +1299,11 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/portfolio/portfolios/:portfolioId",
+              "raw": "{{base_url}}/v1/portfolio/portfolios/:portfolioId",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
-                "api",
                 "v1",
                 "portfolio",
                 "portfolios",
@@ -1365,12 +1331,11 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/portfolio/portfolios/summary?userId={{user_id}}&interval=1M",
+              "raw": "{{base_url}}/v1/portfolio/portfolios/summary?userId={{user_id}}&interval=1M",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
-                "api",
                 "v1",
                 "portfolio",
                 "portfolios",
@@ -1409,12 +1374,11 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/portfolio/portfolios/holdings?userId={{user_id}}&interval=1M",
+              "raw": "{{base_url}}/v1/portfolio/portfolios/holdings?userId={{user_id}}&interval=1M",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
-                "api",
                 "v1",
                 "portfolio",
                 "portfolios",
@@ -1453,12 +1417,11 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/portfolio/portfolios/list?userId={{user_id}}",
+              "raw": "{{base_url}}/v1/portfolio/portfolios/list?userId={{user_id}}",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
-                "api",
                 "v1",
                 "portfolio",
                 "portfolios",
@@ -1488,7 +1451,6 @@
               ],
               "port": "8080",
               "path": [
-                "api",
                 "v1",
                 "portfolio",
                 "market-index",
@@ -1515,12 +1477,11 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/brokerage/breakeven?symbol=RELIANCE&price=2500&quantity=10&exchange=NSE&tradeType=DELIVERY&brokerType=DISCOUNT",
+              "raw": "{{base_url}}/v1/brokerage/breakeven?symbol=RELIANCE&price=2500&quantity=10&exchange=NSE&tradeType=DELIVERY&brokerType=DISCOUNT",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
-                "api",
                 "v1",
                 "brokerage",
                 "breakeven"
@@ -1574,7 +1535,6 @@
               ],
               "port": "8092",
               "path": [
-                "api",
                 "v1",
                 "brokerage",
                 "breakeven"
@@ -1703,12 +1663,11 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/trades",
+              "raw": "{{base_url}}/v1/trades",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
-                "api",
                 "v1",
                 "trades"
               ]
@@ -1728,12 +1687,11 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/trades/:tradeId",
+              "raw": "{{base_url}}/v1/trades/:tradeId",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
-                "api",
                 "v1",
                 "trades",
                 ":tradeId"
@@ -1768,12 +1726,11 @@
               "raw": "{\n  \"symbol\": \"RELIANCE\",\n  \"quantity\": 10,\n  \"price\": 2500.00,\n  \"type\": \"BUY\",\n  \"exchange\": \"NSE\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/trades",
+              "raw": "{{base_url}}/v1/trades",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
-                "api",
                 "v1",
                 "trades"
               ]
@@ -1798,12 +1755,11 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/system/health",
+              "raw": "{{base_url}}/v1/system/health",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
-                "api",
                 "v1",
                 "system",
                 "health"
@@ -1824,12 +1780,11 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/system/services/status",
+              "raw": "{{base_url}}/v1/system/services/status",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
-                "api",
                 "v1",
                 "system",
                 "services",
@@ -1851,12 +1806,11 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/system/database/status",
+              "raw": "{{base_url}}/v1/system/database/status",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
-                "api",
                 "v1",
                 "system",
                 "database",
@@ -1878,12 +1832,11 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/system/python-scripts/status",
+              "raw": "{{base_url}}/v1/system/python-scripts/status",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
-                "api",
                 "v1",
                 "system",
                 "python-scripts",
@@ -1905,12 +1858,11 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/system/diagnostics/run",
+              "raw": "{{base_url}}/v1/system/diagnostics/run",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
-                "api",
                 "v1",
                 "system",
                 "diagnostics",
@@ -1932,12 +1884,11 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/system/info",
+              "raw": "{{base_url}}/v1/system/info",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
-                "api",
                 "v1",
                 "system",
                 "info"

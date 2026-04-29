@@ -108,7 +108,7 @@ app.add_middleware(
     allow_origins=settings.allowed_origins_list,
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"],
+    allow_headers=["Content-Type", "Authorization", "Accept", "Origin", "X-Requested-With"],
 )
 logger.info("Added CORS middleware", extra={"middleware": "cors"})
 

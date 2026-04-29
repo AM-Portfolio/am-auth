@@ -35,11 +35,11 @@ async def proxy_portfolio_service(
     Portfolio Service URL: /{path} (passes entire path as-is)
     
     Examples:
-    - Gateway: GET /am/portfolio/api/v1/portfolios?userId=123
-      → Portfolio Service: GET /api/v1/portfolios?userId=123
+    - Gateway: GET /am/portfolio/v1/portfolios?userId=123
+      → Portfolio Service: GET /v1/portfolios?userId=123
     
-    - Gateway: GET /am/portfolio/api/v1/holdings/{id}
-      → Portfolio Service: GET /api/v1/holdings/{id}
+    - Gateway: GET /am/portfolio/v1/holdings/{id}
+      → Portfolio Service: GET /v1/holdings/{id}
     
     This allows the portfolio microservice to have multiple API paths without 
     hardcoding each one in the gateway.
@@ -106,3 +106,4 @@ async def proxy_portfolio_service(
             exc_info=True
         )
         raise HTTPException(status_code=500, detail="Internal server error")
+
