@@ -30,19 +30,19 @@ docker-compose up -d --build
 **Get Complete System Health:**
 ```bash
 curl -H "Authorization: Bearer YOUR_TOKEN" \
-  http://localhost:8000/api/v1/system/health
+  http://localhost:8000/v1/system/health
 ```
 
 **Get Service Count:**
 ```bash
 curl -H "Authorization: Bearer YOUR_TOKEN" \
-  http://localhost:8000/api/v1/system/services/status
+  http://localhost:8000/v1/system/services/status
 ```
 
 **Check Database:**
 ```bash
 curl -H "Authorization: Bearer YOUR_TOKEN" \
-  http://localhost:8000/api/v1/system/database/status
+  http://localhost:8000/v1/system/database/status
 ```
 
 ---
@@ -51,7 +51,7 @@ curl -H "Authorization: Bearer YOUR_TOKEN" \
 
 ### 1. **Complete System Diagnostics**
 
-**Endpoint:** `GET /api/v1/system/health`
+**Endpoint:** `GET /v1/system/health`
 
 **Purpose:** Get comprehensive health check of entire system
 
@@ -101,7 +101,7 @@ curl -H "Authorization: Bearer YOUR_TOKEN" \
 
 ### 2. **Services Status**
 
-**Endpoint:** `GET /api/v1/system/services/status`
+**Endpoint:** `GET /v1/system/services/status`
 
 **Purpose:** Quick check of all microservices
 
@@ -133,7 +133,7 @@ curl -H "Authorization: Bearer YOUR_TOKEN" \
 
 ### 3. **Database Status**
 
-**Endpoint:** `GET /api/v1/system/database/status`
+**Endpoint:** `GET /v1/system/database/status`
 
 **Purpose:** Check database connection and stability
 
@@ -159,7 +159,7 @@ curl -H "Authorization: Bearer YOUR_TOKEN" \
 
 ### 4. **Python Scripts Status**
 
-**Endpoint:** `GET /api/v1/system/python-scripts/status`
+**Endpoint:** `GET /v1/system/python-scripts/status`
 
 **Purpose:** Check availability of all Python test scripts
 
@@ -197,7 +197,7 @@ curl -H "Authorization: Bearer YOUR_TOKEN" \
 
 ### 5. **Run Full Diagnostics**
 
-**Endpoint:** `POST /api/v1/system/diagnostics/run`
+**Endpoint:** `POST /v1/system/diagnostics/run`
 
 **Query Parameters:**
 - `include_python_tests` (bool, default: true) - Check Python scripts
@@ -224,7 +224,7 @@ curl -H "Authorization: Bearer YOUR_TOKEN" \
 
 ### 6. **System Information**
 
-**Endpoint:** `GET /api/v1/system/info`
+**Endpoint:** `GET /v1/system/info`
 
 **Purpose:** Get system info and available diagnostics endpoints
 
@@ -243,12 +243,12 @@ curl -H "Authorization: Bearer YOUR_TOKEN" \
     "java_internal_service": "http://java-internal-service:8003"
   },
   "diagnostics_endpoints": {
-    "full_health_check": "/api/v1/system/health",
-    "services_status": "/api/v1/system/services/status",
-    "database_status": "/api/v1/system/database/status",
-    "python_scripts": "/api/v1/system/python-scripts/status",
-    "run_diagnostics": "/api/v1/system/diagnostics/run",
-    "system_info": "/api/v1/system/info"
+    "full_health_check": "/v1/system/health",
+    "services_status": "/v1/system/services/status",
+    "database_status": "/v1/system/database/status",
+    "python_scripts": "/v1/system/python-scripts/status",
+    "run_diagnostics": "/v1/system/diagnostics/run",
+    "system_info": "/v1/system/info"
   },
   "test_scripts_location": "am/am-tests/"
 }
@@ -371,13 +371,13 @@ test_system_health.py::TestDatabaseHealth::test_database_connected PASSED ✅
 **API Call:**
 ```bash
 curl -H "Authorization: Bearer TOKEN" \
-  http://localhost:8000/api/v1/system/services/status
+  http://localhost:8000/v1/system/services/status
 ```
 
 **Extract count:**
 ```bash
 curl -s -H "Authorization: Bearer TOKEN" \
-  http://localhost:8000/api/v1/system/services/status | jq '.services_up'
+  http://localhost:8000/v1/system/services/status | jq '.services_up'
 ```
 
 **Or using Python:**
@@ -394,7 +394,7 @@ print(f"APIs up: {count['up']}")  # Output: APIs up: 5
 **API Call:**
 ```bash
 curl -H "Authorization: Bearer TOKEN" \
-  http://localhost:8000/api/v1/system/database/status
+  http://localhost:8000/v1/system/database/status
 ```
 
 **Python:**
@@ -426,7 +426,7 @@ else:
 **API Call:**
 ```bash
 curl -H "Authorization: Bearer TOKEN" \
-  http://localhost:8000/api/v1/system/python-scripts/status
+  http://localhost:8000/v1/system/python-scripts/status
 ```
 
 **Response shows** if all Python scripts are available and where they are located
@@ -446,7 +446,7 @@ Authorization: Bearer YOUR_JWT_TOKEN
 
 ```bash
 # First register a user
-curl -X POST http://localhost:8010/api/v1/users/register \
+curl -X POST http://localhost:8010/v1/users/register \
   -H "Content-Type: application/json" \
   -d '{
     "email": "test@example.com",
@@ -455,10 +455,10 @@ curl -X POST http://localhost:8010/api/v1/users/register \
   }'
 
 # Activate the user (use user_id from registration)
-curl -X POST http://localhost:8010/api/v1/users/{USER_ID}/activate
+curl -X POST http://localhost:8010/v1/users/{USER_ID}/activate
 
 # Get token (login)
-curl -X POST http://localhost:8001/api/v1/auth/login \
+curl -X POST http://localhost:8001/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "email": "test@example.com",
@@ -467,7 +467,7 @@ curl -X POST http://localhost:8001/api/v1/auth/login \
 
 # Use the token in diagnostics requests
 curl -H "Authorization: Bearer {TOKEN}" \
-  http://localhost:8000/api/v1/system/health
+  http://localhost:8000/v1/system/health
 ```
 
 ---
@@ -487,7 +487,7 @@ echo "Waiting for all services to be healthy..."
 for i in {1..30}; do
   RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
     -H "Authorization: Bearer TEST_TOKEN" \
-    http://localhost:8000/api/v1/system/health)
+    http://localhost:8000/v1/system/health)
   
   if [ "$RESPONSE" = "200" ]; then
     echo "✅ System is healthy"
@@ -562,13 +562,13 @@ while True:
 
 ```bash
 # Get token first
-TOKEN=$(curl -s -X POST http://localhost:8001/api/v1/auth/login \
+TOKEN=$(curl -s -X POST http://localhost:8001/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"test@example.com","password":"Test123!"}' | jq -r '.access_token')
 
 # Use token
 curl -H "Authorization: Bearer $TOKEN" \
-  http://localhost:8000/api/v1/system/health
+  http://localhost:8000/v1/system/health
 ```
 
 ---
@@ -631,7 +631,7 @@ am/
 
 - [ ] All services start in docker-compose.yml
 - [ ] API Gateway health check responds: `GET /health`
-- [ ] System diagnostics respond: `GET /api/v1/system/health`
+- [ ] System diagnostics respond: `GET /v1/system/health`
 - [ ] Services count shows all 5 services up
 - [ ] Database connection status shows "connected"
 - [ ] Python scripts available
@@ -656,4 +656,5 @@ For issues or questions, check:
 - Endpoint responses in Swagger UI: `http://localhost:8000/docs`
 - Docker logs: `docker-compose logs -f`
 - Python test output: `pytest -vvs`
+
 

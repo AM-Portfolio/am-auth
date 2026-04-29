@@ -9,7 +9,7 @@ if [ -z "$ID_TOKEN" ]; then
 fi
 
 echo "Exchanging token for Access Token..."
-AUTH_RESPONSE=$(curl -s -X POST http://localhost:8002/api/v1/auth/google/token -H "Content-Type: application/json" -d "{\"id_token\": \"$ID_TOKEN\"}")
+AUTH_RESPONSE=$(curl -s -X POST http://localhost:8002/v1/auth/google/token -H "Content-Type: application/json" -d "{\"id_token\": \"$ID_TOKEN\"}")
 ACCESS_TOKEN=$(echo $AUTH_RESPONSE | python3 -c "import sys, json; print(json.load(sys.stdin).get('access_token', ''))")
 
 if [ -z "$ACCESS_TOKEN" ]; then
@@ -21,4 +21,5 @@ fi
 echo "Access Token: $ACCESS_TOKEN"
 
 echo "Testing Protected API (Document Types)..."
-curl -v -H "Authorization: Bearer $ACCESS_TOKEN" http://localhost:8000/api/v1/documents/types
+curl -v -H "Authorization: Bearer $ACCESS_TOKEN" http://localhost:8000/v1/documents/types
+

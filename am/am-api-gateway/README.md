@@ -86,31 +86,31 @@ httpx.get(
 
 ### Documents (Python Internal Service)
 
-- `GET /api/v1/documents` - Get user documents
-- `GET /api/v1/documents/all` - Get all documents (admin only)
-- `GET /api/v1/documents/service-info` - Service information
+- `GET /v1/documents` - Get user documents
+- `GET /v1/documents/all` - Get all documents (admin only)
+- `GET /v1/documents/service-info` - Service information
 
 ### Reports (Java Internal Service)
 
-- `GET /api/v1/reports` - Get user reports
-- `GET /api/v1/reports/all` - Get all reports (admin only)
-- `POST /api/v1/reports/generate` - Generate new report
-- `GET /api/v1/reports/service-info` - Service information
+- `GET /v1/reports` - Get user reports
+- `GET /v1/reports/all` - Get all reports (admin only)
+- `POST /v1/reports/generate` - Generate new report
+- `GET /v1/reports/service-info` - Service information
 
 ### Portfolio (Coming Soon)
 
-- `GET /api/v1/portfolio` - Get portfolio
-- `POST /api/v1/portfolio/transaction` - Create transaction
+- `GET /v1/portfolio` - Get portfolio
+- `POST /v1/portfolio/transaction` - Create transaction
 
 ### Trades (Coming Soon)
 
-- `GET /api/v1/trades` - Get trades
-- `POST /api/v1/trades/execute` - Execute trade
+- `GET /v1/trades` - Get trades
+- `POST /v1/trades/execute` - Execute trade
 
 ### Market Data (Coming Soon)
 
-- `GET /api/v1/market-data/stocks/{symbol}` - Stock data
-- `GET /api/v1/market-data/quotes` - Market quotes
+- `GET /v1/market-data/stocks/{symbol}` - Stock data
+- `GET /v1/market-data/quotes` - Market quotes
 
 ### Health & System
 
@@ -146,7 +146,7 @@ LONG_TIMEOUT: 60.0
 ### 1. Register User
 
 ```
-POST http://localhost:8010/api/v1/users/register
+POST http://localhost:8010/v1/users/register
 {
     "email": "test@example.com",
     "password": "Password123!",
@@ -157,13 +157,13 @@ POST http://localhost:8010/api/v1/users/register
 ### 2. Activate User
 
 ```
-POST http://localhost:8010/api/v1/users/{user_id}/activate
+POST http://localhost:8010/v1/users/{user_id}/activate
 ```
 
 ### 3. Login
 
 ```
-POST http://localhost:8001/api/v1/auth/login
+POST http://localhost:8001/v1/auth/login
 {
     "email": "test@example.com",
     "password": "Password123!"
@@ -179,11 +179,11 @@ Response:
 ### 4. Call API Gateway Endpoints
 
 ```
-GET http://localhost:8000/api/v1/documents
+GET http://localhost:8000/v1/documents
 Headers:
     Authorization: Bearer eyJhbGc...
 
-GET http://localhost:8000/api/v1/reports
+GET http://localhost:8000/v1/reports
 Headers:
     Authorization: Bearer eyJhbGc...
 ```
@@ -295,11 +295,11 @@ Response:
     "service": "AM API Gateway",
     "version": "1.0.0",
     "endpoints": {
-        "documents": "/api/v1/documents",
-        "reports": "/api/v1/reports",
-        "portfolio": "/api/v1/portfolio",
-        "trades": "/api/v1/trades",
-        "market_data": "/api/v1/market-data"
+        "documents": "/v1/documents",
+        "reports": "/v1/reports",
+        "portfolio": "/v1/portfolio",
+        "trades": "/v1/trades",
+        "market_data": "/v1/market-data"
     }
 }
 ```
@@ -355,3 +355,4 @@ When adding new endpoints:
 ## 📝 License
 
 Internal AM Project - Confidential
+

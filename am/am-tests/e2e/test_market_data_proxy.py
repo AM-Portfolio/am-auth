@@ -28,7 +28,7 @@ def test_market_data_proxy():
     }
     
     # Test brokerage breakeven endpoint (stateless)
-    endpoint = "/api/v1/brokerage/breakeven"
+    endpoint = "/v1/brokerage/breakeven"
     params = {
         "symbol": "RELIANCE",
         "price": "2500",
@@ -71,3 +71,4 @@ def generate_service_token_for_debug():
 
 if __name__ == "__main__":
     test_market_data_proxy()
+

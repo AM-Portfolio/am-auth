@@ -89,7 +89,7 @@ def setup_fastapi_logging_for_auth_tokens():
         return lambda app: setup_fastapi_logging(
             app,
             service_name="am-auth-tokens",
-            exclude_paths=["/health", "/metrics", "/docs", "/openapi.json", "/api/v1/health"]
+            exclude_paths=["/health", "/metrics", "/docs", "/openapi.json", "/v1/health"]
         )
     except ImportError:
         # FastAPI not available - return no-op function
