@@ -2,7 +2,7 @@ name: User Management Publish
 
 on:
   push:
-    branches: ["main", "develop", "fix/develop-md"]
+    branches: ["main", "develop", "fix/**", "hotfix/**", "feature/**"]
     paths:
       - "am/am-user-management/**"
       - "am/shared/**"
