@@ -164,10 +164,10 @@ logger.info("Added CORS middleware", extra={"middleware": "cors"})
 
 # Include routers
 app.include_router(service_router)
-app.include_router(auth_router, prefix="/api/v1")
-app.include_router(google_auth_router, prefix="/api/v1")
-app.include_router(user_status_router, prefix="/api/v1")
-app.include_router(password_reset_router, prefix="/api/v1")
+app.include_router(auth_router, prefix="/v1")
+app.include_router(google_auth_router, prefix="/v1")
+app.include_router(user_status_router, prefix="/v1")
+app.include_router(password_reset_router, prefix="/v1")
 
 
 # Pydantic models for API requests/responses
@@ -215,7 +215,7 @@ async def health_check(session: AsyncSession = Depends(get_db_session)):
         }
 
 
-@app.get("/api/v1/auth/status")
+@app.get("/v1/auth/status")
 async def auth_status():
     return {
         "status":
@@ -229,7 +229,7 @@ async def auth_status():
 
 
 # Real authentication endpoints using our use cases
-@app.post("/api/v1/auth/register", response_model=CreateUserResponse)
+@app.post("/v1/auth/register", response_model=CreateUserResponse)
 async def register(request: RegisterRequest,
                    create_user_use_case: CreateUserUseCase = Depends(
                        get_create_user_use_case)):
@@ -238,7 +238,7 @@ async def register(request: RegisterRequest,
         logger.info("User registration attempt", extra={
             "email": request.email,
             "has_phone": bool(request.phone_number),
-            "endpoint": "/api/v1/auth/register"
+            "endpoint": "/v1/auth/register"
         })
         
         # Convert API request to use case request
@@ -278,7 +278,7 @@ async def register(request: RegisterRequest,
                             detail=f"Internal server error: {str(e)}")
 
 
-@app.post("/api/v1/auth/login")
+@app.post("/v1/auth/login")
 async def login(request: LoginRequestModel,
                 login_use_case: LoginUseCase = Depends(get_login_use_case)):
     """Authenticate user and return user data for token creation"""
@@ -476,12 +476,12 @@ async def get_service_info():
     }
 
 
-@app.post("/api/v1/admin/reset-database")
+@app.post("/v1/admin/reset-database")
 async def reset_database():
     """Reset database - Drop and recreate all tables (DEV ONLY)"""
     try:
         logger.warning("Database reset requested - dropping all tables", extra={
-            "endpoint": "/api/v1/admin/reset-database",
+            "endpoint": "/v1/admin/reset-database",
             "action": "reset_database"
         })
         
