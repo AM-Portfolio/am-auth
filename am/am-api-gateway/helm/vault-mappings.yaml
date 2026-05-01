@@ -1,0 +1,5 @@
+vault:
+  secretPaths:
+    auth:
+      mappings:
+        ALLOWED_ORIGINS: "ALLOWED_ORIGINS"

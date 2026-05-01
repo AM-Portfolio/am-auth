@@ -27,3 +27,4 @@ env:
   TZ: "UTC"
   AUTH_SERVICE_URL: "http://am-auth-tokens:8080"
   USER_MANAGEMENT_URL: "http://am-user-management:8080"
+  ALLOWED_ORIGINS: "http://localhost:8080,http://localhost:3000,https://am.asrax.in"

@@ -153,12 +153,14 @@ except ImportError:
     logger.warning("FastAPI logging middleware not available", extra={"middleware": "logging"})
 
 # Add CORS middleware
+from shared_infra.config.settings import settings
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=settings.allowed_origins_list,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    allow_headers=["Content-Type", "Authorization", "Accept", "Origin", "X-Requested-With"],
 )
 logger.info("Added CORS middleware", extra={"middleware": "cors"})
 

@@ -95,6 +95,17 @@ class ApplicationSettings(BaseSettings):
     secret_key: str = Field(..., alias="SECRET_KEY")
     jwt_secret_key: str = Field(..., alias="JWT_SECRET_KEY")
     
+    # CORS Configuration
+    allowed_origins: str = Field(default="", alias="ALLOWED_ORIGINS")
+    
+    @property
+    def allowed_origins_list(self) -> List[str]:
+        if not self.allowed_origins:
+            return []
+        if self.allowed_origins == "*":
+            return ["*"]
+        return [origin.strip() for origin in self.allowed_origins.split(",")]
+    
     @property
     def is_development(self) -> bool:
         return self.environment.lower() == "development"

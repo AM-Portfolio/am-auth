@@ -41,15 +41,24 @@ app = FastAPI(
     redoc_url="/redoc"
 )
 
+import os
+from dotenv import load_dotenv
+
+# Load .env file
+load_dotenv()
+
 # Setup shared logging middleware
 setup_fastapi_logging(app, service_name="am-api-gateway")
 
 # CORS middleware
+allowed_origins_str = os.getenv("ALLOWED_ORIGINS", "")
+allowed_origins_list = [o.strip() for o in allowed_origins_str.split(",")] if allowed_origins_str else []
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Configure properly in production
+    allow_origins=allowed_origins_list,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allow_headers=["Content-Type", "Authorization", "Accept", "Origin", "X-Requested-With"],
 )
 

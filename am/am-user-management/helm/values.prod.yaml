@@ -2,7 +2,8 @@
 environment: prod
 replicaCount: 2
 
-global:
-  vault:
-    secrets:
-      auth: "kv/data/prod/apps/auth"
+vault:
+  enabled: true
+  secretPaths:
+    auth:
+      path: "kv/data/prod/apps/auth"
