@@ -54,6 +54,8 @@ class Settings(BaseSettings):
     @property
     def allowed_origins_list(self) -> list:
         """Convert ALLOWED_ORIGINS string to list."""
+        if not self.ALLOWED_ORIGINS:
+            return []
         if self.ALLOWED_ORIGINS == "*":
             return ["*"]
         return [origin.strip() for origin in self.ALLOWED_ORIGINS.split(",")]
