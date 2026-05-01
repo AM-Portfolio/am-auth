@@ -3,3 +3,5 @@ vault:
     auth:
       mappings:
         ALLOWED_ORIGINS: "ALLOWED_ORIGINS"
+        SECRET_KEY: "SECRET_KEY"
+        JWT_SECRET: "JWT_SECRET"
