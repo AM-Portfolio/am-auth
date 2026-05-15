@@ -2,6 +2,7 @@
 from pydantic_settings import BaseSettings
 from typing import Optional
 
+
 class Settings(BaseSettings):
     """API Gateway configuration"""
     
@@ -20,7 +21,7 @@ class Settings(BaseSettings):
     MARKET_DATA_SERVICE_ID: str = "market-data-service"
     
     # JWT Settings
-    JWT_SECRET_KEY: str = "jwt-super-secret-signing-key-change-in-production-must-be-32chars-minimum-xyz"
+    JWT_SECRET: str = "jwt-super-secret-signing-key-change-in-production-must-be-32chars-minimum-xyz"
     JWT_ALGORITHM: str = "HS256"
     
     # Rate Limiting

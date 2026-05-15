@@ -33,7 +33,7 @@ class Settings(BaseSettings):
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "info")
     
     # CORS Configuration
-    ALLOWED_ORIGINS: str = os.getenv("ALLOWED_ORIGINS", "*")
+    ALLOWED_ORIGINS: str = os.getenv("ALLOWED_ORIGINS", "")
     
     # Google OAuth Configuration
     GOOGLE_CLIENT_ID: str = os.getenv("GOOGLE_CLIENT_ID", "test-google-client-id.apps.googleusercontent.com")
@@ -54,6 +54,8 @@ class Settings(BaseSettings):
     @property
     def allowed_origins_list(self) -> list:
         """Convert ALLOWED_ORIGINS string to list."""
+        if not self.ALLOWED_ORIGINS:
+            return []
         if self.ALLOWED_ORIGINS == "*":
             return ["*"]
         return [origin.strip() for origin in self.ALLOWED_ORIGINS.split(",")]

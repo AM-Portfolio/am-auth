@@ -43,11 +43,11 @@ class EmailSettings(BaseSettings):
 class SecuritySettings(BaseSettings):
     """Security configuration"""
     secret_key: str = Field(..., env="SECRET_KEY")
-    jwt_secret_key: str = Field(..., env="JWT_SECRET_KEY")
+    jwt_secret: str = Field(..., env="JWT_SECRET")
     jwt_algorithm: str = Field(default="HS256", env="JWT_ALGORITHM")
     jwt_expire_minutes: int = Field(default=30, env="JWT_EXPIRE_MINUTES")
     
-    @validator("secret_key", "jwt_secret_key")
+    @validator("secret_key", "jwt_secret")
     def validate_secret_keys(cls, v):
         if len(v) < 32:
             raise ValueError("Secret keys must be at least 32 characters long")
@@ -93,7 +93,18 @@ class ApplicationSettings(BaseSettings):
     
     # Security
     secret_key: str = Field(..., alias="SECRET_KEY")
-    jwt_secret_key: str = Field(..., alias="JWT_SECRET_KEY")
+    jwt_secret: str = Field(..., alias="JWT_SECRET")
+    
+    # CORS Configuration
+    allowed_origins: str = Field(default="", alias="ALLOWED_ORIGINS")
+    
+    @property
+    def allowed_origins_list(self) -> List[str]:
+        if not self.allowed_origins:
+            return []
+        if self.allowed_origins == "*":
+            return ["*"]
+        return [origin.strip() for origin in self.allowed_origins.split(",")]
     
     @property
     def is_development(self) -> bool:
