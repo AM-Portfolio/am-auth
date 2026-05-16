@@ -41,15 +41,24 @@ app = FastAPI(
     redoc_url="/redoc"
 )
 
+import os
+from dotenv import load_dotenv
+
+# Load .env file
+load_dotenv()
+
 # Setup shared logging middleware
 setup_fastapi_logging(app, service_name="am-api-gateway")
 
 # CORS middleware
+allowed_origins_str = os.getenv("ALLOWED_ORIGINS", "")
+allowed_origins_list = [o.strip() for o in allowed_origins_str.split(",")] if allowed_origins_str else []
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Configure properly in production
+    allow_origins=allowed_origins_list,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allow_headers=["*"],
 )
 
@@ -85,7 +94,7 @@ async def root():
             "portfolio": "/am/portfolio/{path}",
             "market_data": "/am/market-data/{path}",
             "documents": "/am/documents/{path}",
-            "diagnostics": "/api/v1/diagnostics"
+            "diagnostics": "/v1/diagnostics"
         },
         "note": "All endpoints require authentication via Bearer token"
     }
@@ -96,7 +105,7 @@ app.include_router(trades.router, tags=["Trades"])  # No prefix - handles /am/tr
 app.include_router(market_data.router, tags=["Market Data"])
 app.include_router(document_processor.router, tags=["Document Processor"])
 app.include_router(portfolio_service.router, tags=["Portfolio Service"])
-app.include_router(diagnostics.router, prefix="/api/v1", tags=["System Diagnostics"])
+app.include_router(diagnostics.router, prefix="/v1", tags=["System Diagnostics"])
 
 
 # Global exception handler

@@ -27,11 +27,11 @@ async def proxy_market_data_service(
     Market Data Service URL: /{path} (passes entire path as-is)
     
     Examples:
-    - Gateway: GET /am/market-data/api/v1/stocks/{symbol}
-      → Market Data Service: GET /api/v1/stocks/{symbol}
+    - Gateway: GET /am/market-data/v1/stocks/{symbol}
+      → Market Data Service: GET /v1/stocks/{symbol}
     
-    - Gateway: GET /am/market-data/api/v1/brokerage/calculate
-      → Market Data Service: GET /api/v1/brokerage/calculate
+    - Gateway: GET /am/market-data/v1/brokerage/calculate
+      → Market Data Service: GET /v1/brokerage/calculate
     """
     
     try:
@@ -119,7 +119,7 @@ async def proxy_brokerage_service(
             body = await request.body()
         
         # Forward request to Market Data Service (Brokerage Controller)
-        target_url = f"{settings.MARKET_DATA_SERVICE_URL}/api/v1/brokerage/{path}"
+        target_url = f"{settings.MARKET_DATA_SERVICE_URL}/v1/brokerage/{path}"
         logger.info(f"Proxying to Brokerage Service: {target_url}")
         
         async with httpx.AsyncClient(timeout=settings.LONG_TIMEOUT) as client:
@@ -153,3 +153,4 @@ async def proxy_brokerage_service(
     except Exception as e:
         logger.error(f"Error proxying to brokerage service: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Internal server error")
+

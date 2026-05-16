@@ -2,6 +2,7 @@
 from pydantic_settings import BaseSettings
 from typing import Optional
 
+
 class Settings(BaseSettings):
     """API Gateway configuration"""
     
@@ -14,13 +15,13 @@ class Settings(BaseSettings):
     DOCUMENT_PROCESSOR_SERVICE_ID: str = "document-processor"
     PORTFOLIO_SERVICE_URL: str = "http://host.docker.internal:8072"
     PORTFOLIO_SERVICE_ID: str = "portfolio-service"
-    TRADE_SERVICE_URL: str = "http://host.docker.internal:8077"  # Base URL, endpoint appends /api/v1/trades/{path}
+    TRADE_SERVICE_URL: str = "http://host.docker.internal:8077"  # Base URL, endpoint appends /v1/trades/{path}
     TRADE_SERVICE_ID: str = "trade-service"
     MARKET_DATA_SERVICE_URL: str = "http://host.docker.internal:8092"
     MARKET_DATA_SERVICE_ID: str = "market-data-service"
     
     # JWT Settings
-    JWT_SECRET_KEY: str = "jwt-super-secret-signing-key-change-in-production-must-be-32chars-minimum-xyz"
+    JWT_SECRET: str = "jwt-super-secret-signing-key-change-in-production-must-be-32chars-minimum-xyz"
     JWT_ALGORITHM: str = "HS256"
     
     # Rate Limiting
@@ -36,3 +37,4 @@ class Settings(BaseSettings):
         case_sensitive = True
 
 settings = Settings()
+

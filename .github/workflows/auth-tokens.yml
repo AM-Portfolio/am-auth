@@ -2,12 +2,12 @@ name: Auth Tokens Publish
 
 on:
   push:
-    branches: ["main", "develop"]
+    branches: ["main", "develop", "fix/**", "hotfix/**", "feature/**"]
     paths:
       - "am/am-auth-tokens/**"
       - "am/shared/**"
   pull_request:
-    branches: ["main", "develop"]
+    branches: ["main", "develop", "fix/**", "hotfix/**", "feature/**"]
     paths:
       - "am/am-auth-tokens/**"
       - "am/shared/**"
@@ -19,7 +19,7 @@ jobs:
     permissions:
       contents: read
       packages: write
-    uses: AM-Portfolio/am-pipelines/.github/workflows/central-build-publish.yml@develop
+    uses: AM-Portfolio/am-pipelines/.github/workflows/central-build-publish.yml@main
     with:
       language: "python"
       working_directory: "am/am-auth-tokens"

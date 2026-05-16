@@ -372,7 +372,7 @@ async def create_service_token(
     try:
         async with httpx.AsyncClient() as client:
             response = await client.post(
-                f"{user_service_url}/api/v1/service/validate-credentials",
+                f"{user_service_url}/v1/service/validate-credentials",
                 json={
                     "consumer_key": token_request.consumer_key,
                     "consumer_secret": token_request.consumer_secret

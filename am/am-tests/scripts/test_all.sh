@@ -89,7 +89,7 @@ test_info "Registering a test user..."
 TIMESTAMP=$(date +%s)
 TEST_EMAIL="testuser${TIMESTAMP}@example.com"
 
-REGISTER_RESPONSE=$(curl -s -X POST http://localhost:8010/api/v1/auth/register \
+REGISTER_RESPONSE=$(curl -s -X POST http://localhost:8010/v1/auth/register \
   -H "Content-Type: application/json" \
   -d '{
     "email":"'"${TEST_EMAIL}"'",
@@ -115,7 +115,7 @@ if [ -z "$USER_ID" ]; then
 else
     test_info "Activating user $USER_ID..."
     
-    ACTIVATE_RESPONSE=$(curl -s -X PATCH http://localhost:8010/api/v1/users/$USER_ID/status \
+    ACTIVATE_RESPONSE=$(curl -s -X PATCH http://localhost:8010/v1/users/$USER_ID/status \
       -H "Content-Type: application/json" \
       -d '{
         "status":"active"
@@ -139,7 +139,7 @@ if [ -z "$USER_ID" ]; then
 else
     test_info "Logging in with test user..."
     
-    LOGIN_RESPONSE=$(curl -s -X POST http://localhost:8001/api/v1/tokens \
+    LOGIN_RESPONSE=$(curl -s -X POST http://localhost:8001/v1/tokens \
       -H "Content-Type: application/json" \
       -d '{
         "username":"'"${TEST_EMAIL}"'",
@@ -182,7 +182,7 @@ else
     test_info "Testing protected endpoints with Bearer token..."
     
     # Get Documents - should return JSON (could be empty array [] or with data)
-    DOCS_RESPONSE=$(curl -s http://localhost:8000/api/v1/documents \
+    DOCS_RESPONSE=$(curl -s http://localhost:8000/v1/documents \
       -H "Authorization: Bearer $ACCESS_TOKEN")
     if echo "$DOCS_RESPONSE" | grep -qE '\[|\{'; then
         test_pass "API Gateway /documents endpoint accessible"
@@ -192,7 +192,7 @@ else
     fi
     
     # Get Reports - should return JSON (could be empty array [] or with data)
-    REPORTS_RESPONSE=$(curl -s http://localhost:8000/api/v1/reports \
+    REPORTS_RESPONSE=$(curl -s http://localhost:8000/v1/reports \
       -H "Authorization: Bearer $ACCESS_TOKEN")
     if echo "$REPORTS_RESPONSE" | grep -qE '\[|\{'; then
         test_pass "API Gateway /reports endpoint accessible"
@@ -252,7 +252,7 @@ print_header "🔑 Test 9: Security - JWT Token Validation"
 
 test_info "Testing that protected endpoints reject requests without tokens..."
 
-RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/api/v1/documents)
+RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/v1/documents)
 
 if [ "$RESPONSE" = "403" ] || [ "$RESPONSE" = "401" ]; then
     test_pass "Protected endpoints require authentication (received $RESPONSE)"
@@ -294,3 +294,4 @@ else
     echo -e "\n${RED}⚠️  Some tests failed${NC}"
     exit 1
 fi
+

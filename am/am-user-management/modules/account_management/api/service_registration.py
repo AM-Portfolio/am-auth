@@ -10,7 +10,7 @@ from sqlalchemy import select
 from shared_infra.database.config import db_config
 from modules.account_management.infrastructure.models.registered_service_orm import RegisteredServiceORM
 
-router = APIRouter(prefix="/api/v1/service", tags=["Service Registration"])
+router = APIRouter(prefix="/v1/service", tags=["Service Registration"])
 
 VALID_SCOPES = ["profile:read", "data:read", "data:write", "admin:full"]
 

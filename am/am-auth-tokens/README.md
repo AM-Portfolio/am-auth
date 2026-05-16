@@ -51,13 +51,13 @@ am-auth-tokens/
 ## API Endpoints
 
 ### Authentication
-- `POST /api/v1/tokens` - Create access token with username/password
-- `POST /api/v1/tokens/oauth` - OAuth2 compatible token endpoint
+- `POST /v1/tokens` - Create access token with username/password
+- `POST /v1/tokens/oauth` - OAuth2 compatible token endpoint
 
 ### Validation
-- `POST /api/v1/validate` - Validate JWT token and return user info
-- `POST /api/v1/validate/bearer` - Alternative token validation endpoint
-- `GET /api/v1/validate/me` - Validate token via query parameter
+- `POST /v1/validate` - Validate JWT token and return user info
+- `POST /v1/validate/bearer` - Alternative token validation endpoint
+- `GET /v1/validate/me` - Validate token via query parameter
 
 ### Health & Info
 - `GET /` - Service information
@@ -144,7 +144,7 @@ docker-compose down
 
 ### Create Token
 ```bash
-curl -X POST "http://localhost:8000/api/v1/tokens" \
+curl -X POST "http://localhost:8000/v1/tokens" \
   -H "Content-Type: application/json" \
   -d '{
     "username": "testuser",
@@ -166,7 +166,7 @@ Response:
 
 ### Validate Token
 ```bash
-curl -X POST "http://localhost:8000/api/v1/validate" \
+curl -X POST "http://localhost:8000/v1/validate" \
   -H "Content-Type: application/json" \
   -d '{
     "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
@@ -199,15 +199,15 @@ pytest
 
 ### API Documentation
 When running in debug mode, visit:
-- Swagger UI: `http://localhost:8000/api/v1/docs`
-- ReDoc: `http://localhost:8000/api/v1/redoc`
+- Swagger UI: `http://localhost:8000/v1/docs`
+- ReDoc: `http://localhost:8000/v1/redoc`
 
 ### Code Structure
 
 - **`app/core/security.py`**: JWT token creation, validation, and utility functions
 - **`app/services/user_validation.py`**: Integration with user management service
-- **`app/api/v1/endpoints/`**: API endpoint implementations
-- **`app/api/v1/deps.py`**: FastAPI dependency injection functions
+- **`app/v1/endpoints/`**: API endpoint implementations
+- **`app/v1/deps.py`**: FastAPI dependency injection functions
 - **`shared_infra/config/settings.py`**: Centralized configuration management
 
 ## Integration
