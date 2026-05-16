@@ -25,5 +25,4 @@ env:
   LOG_FORMAT: "json"
   LOG_LEVEL: "INFO"
   TZ: "UTC"
-  USER_SERVICE_URL: "http://am-user-management:8080"
-  ALLOWED_ORIGINS: "http://localhost:8080,http://localhost:3000,https://am.asrax.in"
+  ALLOWED_ORIGINS: "http://localhost:8080,http://localhost:3000,https://am.asrax.in,https://am-dev.asrax.in"

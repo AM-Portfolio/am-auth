@@ -43,7 +43,9 @@ ingress:
   hosts:
     - host: am-dev.asrax.in
       paths:
-        - path: /auth
+        - path: /am
+          pathType: Prefix
+        - path: /v1/diagnostics
           pathType: Prefix
 
 env:
