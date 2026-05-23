@@ -95,9 +95,10 @@ celerybeat.pid
 # SageMath parsed files
 *.sage.py
 
-# Environments
-.env
-**/.env
+# Environments — only *.env.template committed
+.env*
+!.env.template
+!**/.env.template
 .env.local
 .env.*.local
 .env.deploy
@@ -110,6 +111,9 @@ venv.bak/
 am/config/*.env
 am/.env.docker
 .env.secrets
+
+# Vault backups (may contain secrets)
+vault/backups/
 
 # Kubernetes & Cluster Config (Critical)
 kubeconfig.vps

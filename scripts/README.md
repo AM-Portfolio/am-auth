@@ -43,6 +43,24 @@ A master test runner that orchestrates:
 
 ---
 
+## Vault (VPS)
+
+Config: copy **`scripts/.env.template`** → **`scripts/.env`** (gitignored).
+
+```bash
+cd am-auth
+copy scripts\.env.template scripts\.env   # Windows
+# Edit scripts/.env — VAULT_TOKEN, VAULT_UNSEAL_KEY_B64, VPS_KUBECONFIG path
+
+npm run vault:backup      # full KV backup → vault/backups/
+npm run vault:provision   # mounts + policies
+npm run vault:sync        # push vault/blueprints/v3_master.json
+```
+
+Requires `kubectl` access to the VPS cluster (`kubeconfig.vps` in repo root or path in `.env`).
+
+---
+
 ## Directory Structure
 - `scripts/deploy_local.py`: Core deployment logic.
 - `scripts/test_logging_integration.py`: Logging SDK validation.
