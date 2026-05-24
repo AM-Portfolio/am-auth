@@ -6,6 +6,12 @@ global:
   vault:
     secrets:
       auth: "apps/data/dev/services/am-user-management"
+      infra: "apps/data/dev/infra/postgres"
+    templates:
+      infra: |
+        {{- with secret "apps/data/dev/infra/postgres" -}}
+        export DATABASE_URL="{{ .Data.data.url }}"
+        {{- end }}
 
 env:
   LOG_LEVEL: "DEBUG"
