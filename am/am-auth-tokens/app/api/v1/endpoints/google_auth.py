@@ -210,7 +210,7 @@ async def get_google_auth_info():
         "client_id_configured": bool(settings.GOOGLE_CLIENT_ID),
         "allowed_domains": settings.google_allowed_domains_list,
         "endpoints": {
-            "authenticate": "POST /api/v1/auth/google/token",
+            "authenticate": f"POST {settings.API_V1_STR}/auth/google/token",
             "test_token_generator": "POST /test/mock/google/token"
         },
         "notes": [
