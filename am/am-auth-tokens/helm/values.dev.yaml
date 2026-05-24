@@ -6,6 +6,15 @@ global:
   vault:
     secrets:
       auth: "apps/data/dev/services/am-auth"
+      redis: "apps/data/dev/infra/redis"
+    templates:
+      redis: |
+        {{- with secret "apps/data/dev/infra/redis" -}}
+        export REDIS_HOST="{{ .Data.data.host }}"
+        export REDIS_PORT="{{ .Data.data.port }}"
+        export REDIS_PASSWORD="{{ .Data.data.password }}"
+        export REDIS_URL="{{ .Data.data.url }}"
+        {{- end }}
 
 env:
   LOG_LEVEL: "DEBUG"
