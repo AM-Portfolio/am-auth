@@ -5,7 +5,7 @@ replicaCount: 1
 global:
   vault:
     secrets:
-      auth: "kv/data/dev/apps/auth"
+      auth: "apps/data/dev/services/am-user-management"
 
 env:
   LOG_LEVEL: "DEBUG"
