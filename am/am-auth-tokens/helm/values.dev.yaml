@@ -5,8 +5,7 @@ replicaCount: 1
 global:
   vault:
     secrets:
-      auth: "kv/data/dev/apps/auth"
+      auth: "apps/data/dev/services/am-auth"
 
 env:
   LOG_LEVEL: "DEBUG"
-  GOOGLE_CLIENT_ID: "307768822337-ad7tee4d82cc0b4flgrfs157e5e6rc0g.apps.googleusercontent.com"
