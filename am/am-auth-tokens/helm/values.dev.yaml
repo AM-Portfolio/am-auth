@@ -10,3 +10,16 @@ global:
 env:
   LOG_LEVEL: "DEBUG"
   API_V1_STR: "/auth/v1"
+
+ingress:
+  enabled: true
+  className: "traefik"
+  annotations:
+    kubernetes.io/ingress.class: "traefik"
+    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+    traefik.ingress.kubernetes.io/router.middlewares: am-apps-dev-dev-global-cors@kubernetescrd
+  hosts:
+    - host: am-dev.asrax.in
+      paths:
+        - path: /auth
+          pathType: Prefix
