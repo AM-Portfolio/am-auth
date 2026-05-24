@@ -6,8 +6,13 @@ global:
   vault:
     secrets:
       auth: "apps/data/dev/services/am-auth"
+      infra: "apps/data/dev/infra/postgres"
       redis: "apps/data/dev/infra/redis"
     templates:
+      infra: |
+        {{- with secret "apps/data/dev/infra/postgres" -}}
+        export DATABASE_URL="{{ .Data.data.url }}"
+        {{- end }}
       redis: |
         {{- with secret "apps/data/dev/infra/redis" -}}
         export REDIS_HOST="{{ .Data.data.host }}"
