@@ -15,6 +15,8 @@ global:
 image:
   repository: am-auth-tokens
 port: 8080
+service:
+  port: 8080
 language: python
 entrypoint: "exec uvicorn main:app --host 0.0.0.0 --port 8080"
 
