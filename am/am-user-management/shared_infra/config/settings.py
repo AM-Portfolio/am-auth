@@ -2,7 +2,7 @@
 import os
 from typing import Optional, List
 from pydantic_settings import BaseSettings
-from pydantic import Field, validator
+from pydantic import Field, validator, AliasChoices
 
 
 class DatabaseSettings(BaseSettings):
@@ -43,7 +43,7 @@ class EmailSettings(BaseSettings):
 class SecuritySettings(BaseSettings):
     """Security configuration"""
     secret_key: str = Field(..., env="SECRET_KEY")
-    jwt_secret: str = Field(..., env="JWT_SECRET")
+    jwt_secret: str = Field(..., validation_alias=AliasChoices("JWT_SECRET", "JWT_SECRET_KEY"))
     jwt_algorithm: str = Field(default="HS256", env="JWT_ALGORITHM")
     jwt_expire_minutes: int = Field(default=30, env="JWT_EXPIRE_MINUTES")
     
@@ -93,7 +93,7 @@ class ApplicationSettings(BaseSettings):
     
     # Security
     secret_key: str = Field(..., alias="SECRET_KEY")
-    jwt_secret: str = Field(..., alias="JWT_SECRET")
+    jwt_secret: str = Field(..., validation_alias=AliasChoices("JWT_SECRET", "JWT_SECRET_KEY"))
     
     # CORS Configuration
     allowed_origins: str = Field(default="", alias="ALLOWED_ORIGINS")
