@@ -32,7 +32,12 @@ class UserValidationResponse(BaseModel):
 
 class UserValidationService:
     def __init__(self):
-        self.base_url = settings.USER_SERVICE_URL
+        # Strip trailing slashes and ingress prefix if present
+        base_url = settings.USER_SERVICE_URL.rstrip('/')
+        if base_url.endswith('/user'):
+            base_url = base_url[:-5]
+            
+        self.base_url = base_url
         self.timeout = settings.USER_SERVICE_TIMEOUT
     
     async def validate_user_credentials(
