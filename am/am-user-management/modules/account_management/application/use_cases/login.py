@@ -133,6 +133,11 @@ class LoginUseCase:
         """Call Auth Tokens service to get JWT access token using validated user_id"""
         auth_service_url = os.getenv("AUTH_SERVICE_URL", "http://localhost:8080")
         
+        # Strip trailing slash and '/auth' suffix if present (internal route doesn't use ingress prefix)
+        auth_service_url = auth_service_url.rstrip('/')
+        if auth_service_url.endswith('/auth'):
+            auth_service_url = auth_service_url[:-5]
+            
         try:
             async with httpx.AsyncClient() as client:
                 response = await client.post(
