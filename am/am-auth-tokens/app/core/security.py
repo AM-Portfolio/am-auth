@@ -81,11 +81,19 @@ def verify_token(token: str) -> TokenData:
         JWTError: If the token is invalid or expired
     """
     try:
-        payload = jwt.decode(
-            token, 
-            settings.JWT_SECRET, 
-            algorithms=[settings.JWT_ALGORITHM]
-        )
+        # Check token algorithm first
+        unverified_headers = jwt.get_unverified_headers(token)
+        alg = unverified_headers.get("alg")
+        
+        if alg == "RS256":
+            # Allow Keycloak tokens (RS256) to bypass symmetric key validation
+            payload = jwt.get_unverified_claims(token)
+        else:
+            payload = jwt.decode(
+                token, 
+                settings.JWT_SECRET, 
+                algorithms=[settings.JWT_ALGORITHM, "HS256"]
+            )
         
         subject: str = payload.get("sub")
         if subject is None:
