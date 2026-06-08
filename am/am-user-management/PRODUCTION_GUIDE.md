@@ -452,7 +452,7 @@ const EmailVerification = () => {
     useEffect(() => {
         const verifyEmail = async () => {
             try {
-                const response = await fetch(`/api/v1/auth/verify-email?token=${token}`, {
+                const response = await fetch(`/v1/auth/verify-email?token=${token}`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -553,7 +553,7 @@ class RateLimiter:
 # Usage in FastAPI middleware
 @app.middleware("http")
 async def rate_limit_middleware(request: Request, call_next):
-    if request.url.path.startswith("/api/v1/auth"):
+    if request.url.path.startswith("/v1/auth"):
         client_ip = request.client.host
         key = f"rate_limit:{client_ip}:{request.url.path}"
         

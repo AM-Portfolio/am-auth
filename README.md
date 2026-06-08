@@ -116,6 +116,19 @@ USER MANAGEMENT       AUTH TOKENS            PROTECTED ENDPOINTS
 | **Auth Tokens** | 8001 | ✅ Public | JWT tokens, validation |
 | **Python Service** | 8002 | ⚠️ Internal | Document processing |
 | **Java Service** | 8003 | ⚠️ Internal | Report generation |
+| **PR Agent** | N/A | 🤖 AI | Automated PR Review (Gemini 1.5 Flash) |
+
+## 🤖 AI PR Agent
+
+This repository is automatically reviewed by the **Global AI PR Agent** (powered by Google Gemini 1.5 Flash). 
+
+- **Auto-Enabled**: No local configuration is required. This feature is managed centrally via the organization's `.github` repository and `am-pipelines`.
+- **Automatic Reviews**: Every time a PR is opened, the agent will automatically provide a description and a code review.
+- **Manual Commands**: You can trigger the agent manually by commenting on a PR:
+  - `/review`: Request a comprehensive code review.
+  - `/describe`: Update the PR description and add a summary.
+  - `/improve`: Suggest code improvements.
+  - `/ask <question>`: Ask the agent a specific question about the PR.
 
 ## 🔌 Complete API Reference
 

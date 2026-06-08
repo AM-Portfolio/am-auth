@@ -97,8 +97,8 @@ async def get_google_auth_info():
         "endpoints": {
             "generate_mock_token": "POST /test/mock/google/token",
             "setup_environment": "POST /test/setup/google-auth",
-            "authenticate": "POST /api/v1/auth/google/token",
-            "validate": "POST /api/v1/validate"
+            "authenticate": "POST /v1/auth/google/token",
+            "validate": "POST /v1/validate"
         },
         "example_request": {
             "email": "testuser@gmail.com",
@@ -112,3 +112,4 @@ async def get_google_auth_info():
             "Tokens expire based on the 'exp' parameter (default: 1 hour)"
         ]
     }
+

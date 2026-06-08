@@ -50,9 +50,9 @@ def main():
     tests = [
         ("GET", "/", None, "Root Endpoint - API Information"),
         ("GET", "/health", None, "Health Check Endpoint"),
-        ("GET", "/api/v1/auth/status", None, "Auth Status Endpoint"),
-        ("POST", "/api/v1/auth/register", None, "Register Placeholder"),
-        ("POST", "/api/v1/auth/login", None, "Login Placeholder"),
+        ("GET", "/v1/auth/status", None, "Auth Status Endpoint"),
+        ("POST", "/v1/auth/register", None, "Register Placeholder"),
+        ("POST", "/v1/auth/login", None, "Login Placeholder"),
     ]
     
     success_count = 0

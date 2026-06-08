@@ -60,7 +60,7 @@ def main():
     print_test_result("Health Check", result)
     
     # Test 3: Auth status
-    result = make_request("GET", "/api/v1/auth/status")
+    result = make_request("GET", "/v1/auth/status")
     print_test_result("Auth Status", result)
     
     # Test 4: User registration (success case)
@@ -69,11 +69,11 @@ def main():
         "password": "SecurePassword123!",
         "phone_number": "+1234567890"
     }
-    result = make_request("POST", "/api/v1/auth/register", test_user_data)
+    result = make_request("POST", "/v1/auth/register", test_user_data)
     print_test_result("User Registration (New User)", result)
     
     # Test 5: User registration (duplicate email - should fail)
-    result = make_request("POST", "/api/v1/auth/register", test_user_data)
+    result = make_request("POST", "/v1/auth/register", test_user_data)
     print_test_result("User Registration (Duplicate Email)", result)
     
     # Test 6: User registration (invalid email)
@@ -82,7 +82,7 @@ def main():
         "password": "SecurePassword123!",
         "phone_number": "+1234567890"
     }
-    result = make_request("POST", "/api/v1/auth/register", invalid_user_data)
+    result = make_request("POST", "/v1/auth/register", invalid_user_data)
     print_test_result("User Registration (Invalid Email)", result)
     
     # Test 7: User registration (weak password)
@@ -91,7 +91,7 @@ def main():
         "password": "123",
         "phone_number": "+1234567891"
     }
-    result = make_request("POST", "/api/v1/auth/register", weak_password_data)
+    result = make_request("POST", "/v1/auth/register", weak_password_data)
     print_test_result("User Registration (Weak Password)", result)
     
     # Test 8: User login (success case)
@@ -99,7 +99,7 @@ def main():
         "email": "test@example.com",
         "password": "SecurePassword123!"
     }
-    result = make_request("POST", "/api/v1/auth/login", login_data)
+    result = make_request("POST", "/v1/auth/login", login_data)
     print_test_result("User Login (Valid Credentials)", result)
     
     # Test 9: User login (invalid password)
@@ -107,7 +107,7 @@ def main():
         "email": "test@example.com",
         "password": "WrongPassword"
     }
-    result = make_request("POST", "/api/v1/auth/login", invalid_login_data)
+    result = make_request("POST", "/v1/auth/login", invalid_login_data)
     print_test_result("User Login (Invalid Password)", result)
     
     # Test 10: User login (non-existent user)
@@ -115,7 +115,7 @@ def main():
         "email": "nonexistent@example.com",
         "password": "SomePassword123!"
     }
-    result = make_request("POST", "/api/v1/auth/login", nonexistent_login_data)
+    result = make_request("POST", "/v1/auth/login", nonexistent_login_data)
     print_test_result("User Login (Non-existent User)", result)
     
     # Test 11: Register user without phone number
@@ -123,7 +123,7 @@ def main():
         "email": "nophone@example.com",
         "password": "SecurePassword123!"
     }
-    result = make_request("POST", "/api/v1/auth/register", no_phone_data)
+    result = make_request("POST", "/v1/auth/register", no_phone_data)
     print_test_result("User Registration (No Phone Number)", result)
     
     print("\n" + "="*60)

@@ -1,9 +1,9 @@
+# Prod Environment — am-auth-tokens
 environment: prod
 replicaCount: 2
 
-global:
-  vault:
-    secrets:
-      jwt:      "secret/data/prod/apps/security"
-      postgres: "secret/data/prod/apps/database"
-      config:   "secret/data/prod/apps/config"
+vault:
+  enabled: true
+  secretPaths:
+    auth:
+      path: "kv/data/prod/apps/auth"

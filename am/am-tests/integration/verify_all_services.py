@@ -63,10 +63,10 @@ def main():
     time.sleep(5)
     
     results = {
-        "Market Data": test_service("Market Data", "/api/v1/market-data/symbols/NSE"),
-        "Document Processor": test_service("Document Processor", "/api/v1/documents/types"),
-        "Portfolio Service": test_service("Portfolio Service", "/api/v1/portfolios"), # Expect 200 or 404
-        "Trade Service": test_service("Trade Service", "/api/v1/trades") # Expect 200 or 404
+        "Market Data": test_service("Market Data", "/v1/market-data/symbols/NSE"),
+        "Document Processor": test_service("Document Processor", "/v1/documents/types"),
+        "Portfolio Service": test_service("Portfolio Service", "/v1/portfolios"), # Expect 200 or 404
+        "Trade Service": test_service("Trade Service", "/v1/trades") # Expect 200 or 404
     }
     
     print("\n=== SUMMARY ===")
@@ -86,3 +86,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

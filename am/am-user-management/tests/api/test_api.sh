@@ -13,15 +13,15 @@ curl -s http://localhost:8000/health | python3 -m json.tool
 
 echo ""
 echo "3. Testing Auth Status:"
-curl -s http://localhost:8000/api/v1/auth/status | python3 -m json.tool
+curl -s http://localhost:8000/v1/auth/status | python3 -m json.tool
 
 echo ""
 echo "4. Testing Register Placeholder:"
-curl -s -X POST http://localhost:8000/api/v1/auth/register | python3 -m json.tool
+curl -s -X POST http://localhost:8000/v1/auth/register | python3 -m json.tool
 
 echo ""
 echo "5. Testing Login Placeholder:"
-curl -s -X POST http://localhost:8000/api/v1/auth/login | python3 -m json.tool
+curl -s -X POST http://localhost:8000/v1/auth/login | python3 -m json.tool
 
 echo ""
 echo "✅ API Testing Complete!"

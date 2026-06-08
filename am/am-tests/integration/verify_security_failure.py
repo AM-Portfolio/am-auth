@@ -27,7 +27,7 @@ def test_security_rejection():
     
     token = generate_fake_token()
     headers = {"Authorization": f"Bearer {token}"}
-    url = f"{API_GATEWAY_URL}/api/v1/trades"
+    url = f"{API_GATEWAY_URL}/v1/trades"
     
     print(f"Target: {url}")
     print("Sending request with FORGED token...")
@@ -51,3 +51,4 @@ def test_security_rejection():
 
 if __name__ == "__main__":
     test_security_rejection()
+

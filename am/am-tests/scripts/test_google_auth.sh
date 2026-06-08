@@ -13,4 +13,5 @@ if [ -z "$ID_TOKEN" ]; then
 fi
 
 echo "Exchanging token..."
-curl -s -X POST http://localhost:8002/api/v1/auth/google/token -H "Content-Type: application/json" -d "{\"id_token\": \"$ID_TOKEN\"}"
+curl -s -X POST http://localhost:8002/v1/auth/google/token -H "Content-Type: application/json" -d "{\"id_token\": \"$ID_TOKEN\"}"
+

@@ -166,7 +166,7 @@ async def create_or_update_google_user(user_profile: Dict[str, Any]) -> Dict[str
     try:
         async with httpx.AsyncClient(timeout=settings.USER_SERVICE_TIMEOUT) as client:
             response = await client.post(
-                f"{settings.USER_SERVICE_URL}/api/v1/auth/google",
+                f"{settings.USER_SERVICE_URL}/v1/auth/google",
                 json={
                     "google_id": user_profile["google_id"],
                     "email": user_profile["email"],
@@ -210,7 +210,7 @@ async def get_google_auth_info():
         "client_id_configured": bool(settings.GOOGLE_CLIENT_ID),
         "allowed_domains": settings.google_allowed_domains_list,
         "endpoints": {
-            "authenticate": "POST /api/v1/auth/google/token",
+            "authenticate": "POST /v1/auth/google/token",
             "test_token_generator": "POST /test/mock/google/token"
         },
         "notes": [

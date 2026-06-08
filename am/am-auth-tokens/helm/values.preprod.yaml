@@ -1,9 +1,12 @@
+# Preprod Environment — am-auth-tokens
+# Vault path aligned with seeded secret at kv/preprod/apps/auth
 environment: preprod
 replicaCount: 1
 
-global:
-  vault:
-    secrets:
-      jwt:      "secret/data/preprod/apps/security"
-      postgres: "secret/data/preprod/apps/database"
-      config:   "secret/data/preprod/apps/config"
+vault:
+  enabled: true
+  secretPaths:
+    auth:
+      path: "apps/data/preprod/services/am-auth"
+    postgres:
+      path: "apps/data/preprod/infra/postgres"

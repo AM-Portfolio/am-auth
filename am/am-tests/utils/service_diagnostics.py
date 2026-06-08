@@ -69,7 +69,7 @@ class ServiceDiagnostics:
         Raises:
             requests.RequestException: If request fails
         """
-        url = f"{self.gateway_url}/api/v1/system/health"
+        url = f"{self.gateway_url}/v1/system/health"
         response = requests.get(url, headers=self.headers)
         response.raise_for_status()
         return response.json()
@@ -81,7 +81,7 @@ class ServiceDiagnostics:
         Returns:
             Dict with services count and status details
         """
-        url = f"{self.gateway_url}/api/v1/system/services/status"
+        url = f"{self.gateway_url}/v1/system/services/status"
         response = requests.get(url, headers=self.headers)
         response.raise_for_status()
         return response.json()
@@ -93,7 +93,7 @@ class ServiceDiagnostics:
         Returns:
             Dict with database connection details
         """
-        url = f"{self.gateway_url}/api/v1/system/database/status"
+        url = f"{self.gateway_url}/v1/system/database/status"
         response = requests.get(url, headers=self.headers)
         response.raise_for_status()
         return response.json()
@@ -105,7 +105,7 @@ class ServiceDiagnostics:
         Returns:
             Dict with available Python test scripts
         """
-        url = f"{self.gateway_url}/api/v1/system/python-scripts/status"
+        url = f"{self.gateway_url}/v1/system/python-scripts/status"
         response = requests.get(url, headers=self.headers)
         response.raise_for_status()
         return response.json()
@@ -117,7 +117,7 @@ class ServiceDiagnostics:
         Returns:
             Dict with system info and diagnostics endpoints
         """
-        url = f"{self.gateway_url}/api/v1/system/info"
+        url = f"{self.gateway_url}/v1/system/info"
         response = requests.get(url, headers=self.headers)
         response.raise_for_status()
         return response.json()
@@ -132,7 +132,7 @@ class ServiceDiagnostics:
         Returns:
             Dict with full diagnostics report including execution time
         """
-        url = f"{self.gateway_url}/api/v1/system/diagnostics/run"
+        url = f"{self.gateway_url}/v1/system/diagnostics/run"
         params = {"include_python_tests": include_python_tests}
         response = requests.post(url, headers=self.headers, params=params)
         response.raise_for_status()
@@ -322,3 +322,4 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"\n❌ Error: {e}")
         sys.exit(1)
+

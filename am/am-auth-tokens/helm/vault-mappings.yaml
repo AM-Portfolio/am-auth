@@ -1,0 +1,11 @@
+vault:
+  secretPaths:
+    auth:
+      mappings:
+        ALLOWED_ORIGINS: "ALLOWED_ORIGINS"
+        SECRET_KEY: "SECRET_KEY"
+        JWT_SECRET: "JWT_SECRET"
+        USER_SERVICE_URL: "USER_MANAGEMENT_URL"
+    postgres:
+      mappings:
+        DATABASE_URL: "url"

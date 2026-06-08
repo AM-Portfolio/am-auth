@@ -25,12 +25,12 @@ def test_document_types():
     token = generate_test_token()
     headers = {"Authorization": f"Bearer {token}"}
     
-    # The Gateway proxy maps /api/v1/documents/{path} -> Document Processor
+    # The Gateway proxy maps /v1/documents/{path} -> Document Processor
     # But wait, looking at document_processor.py:
     # @router.api_route("/documents/{path:path}")
-    # So it's /api/v1/documents/types -> /api/v1/documents/types
+    # So it's /v1/documents/types -> /v1/documents/types
     
-    url = f"{API_GATEWAY_URL}/api/v1/documents/types"
+    url = f"{API_GATEWAY_URL}/v1/documents/types"
     print(f"Testing URL: {url}")
     
     try:
@@ -50,3 +50,4 @@ def test_document_types():
 
 if __name__ == "__main__":
     test_document_types()
+

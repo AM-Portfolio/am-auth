@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     USER_SERVICE_TIMEOUT: int = int(os.getenv("USER_SERVICE_TIMEOUT", "30"))
     
     # API Configuration
-    API_V1_STR: str = os.getenv("API_V1_STR", "/api/v1")
+    API_V1_STR: str = os.getenv("API_V1_STR", "/v1")
     PROJECT_NAME: str = os.getenv("PROJECT_NAME", "Auth Tokens Service")
     VERSION: str = os.getenv("VERSION", "1.0.0")
     
@@ -33,7 +33,7 @@ class Settings(BaseSettings):
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "info")
     
     # CORS Configuration
-    ALLOWED_ORIGINS: str = os.getenv("ALLOWED_ORIGINS", "*")
+    ALLOWED_ORIGINS: str = os.getenv("ALLOWED_ORIGINS", "")
     
     # Google OAuth Configuration
     GOOGLE_CLIENT_ID: str = os.getenv("GOOGLE_CLIENT_ID", "test-google-client-id.apps.googleusercontent.com")
@@ -54,6 +54,8 @@ class Settings(BaseSettings):
     @property
     def allowed_origins_list(self) -> list:
         """Convert ALLOWED_ORIGINS string to list."""
+        if not self.ALLOWED_ORIGINS:
+            return []
         if self.ALLOWED_ORIGINS == "*":
             return ["*"]
         return [origin.strip() for origin in self.ALLOWED_ORIGINS.split(",")]

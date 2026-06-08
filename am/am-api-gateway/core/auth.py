@@ -54,7 +54,7 @@ async def get_current_user(
         # Validate token with auth service
         async with httpx.AsyncClient() as client:
             response = await client.post(
-                f"{settings.AUTH_SERVICE_URL}/api/v1/validate",
+                f"{settings.AUTH_SERVICE_URL}/v1/validate",
                 json={"token": token},
                 timeout=10.0
             )
@@ -110,7 +110,7 @@ async def generate_service_token(
     try:
         async with httpx.AsyncClient() as client:
             response = await client.post(
-                f"{settings.AUTH_SERVICE_URL}/api/v1/internal/service-token",
+                f"{settings.AUTH_SERVICE_URL}/v1/internal/service-token",
                 headers={"Authorization": f"Bearer {user_token}"},
                 json={
                     "service_id": service_id,
@@ -140,3 +140,4 @@ async def generate_service_token(
     except Exception as e:
         logger.error(f"Unexpected error generating service token: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+

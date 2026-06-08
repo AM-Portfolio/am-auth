@@ -6,4 +6,5 @@ echo "Testing Protected API (Document Types) with Google User Token..."
 echo "User: priyanshukpd@gmail.com"
 echo "Token: ${ACCESS_TOKEN:0:20}..."
 
-curl -v -H "Authorization: Bearer $ACCESS_TOKEN" http://localhost:8000/api/v1/documents/types
+curl -v -H "Authorization: Bearer $ACCESS_TOKEN" http://localhost:8000/v1/documents/types
+

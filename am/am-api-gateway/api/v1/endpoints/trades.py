@@ -33,21 +33,21 @@ async def proxy_trade_service(
     """
     Generic proxy for ALL Trade Microservice endpoints
     
-    Gateway URL Pattern: /api/v1/am/trade/{path}
+    Gateway URL Pattern: /v1/am/trade/{path}
     Trade Service URL: /{path} (passes entire path as-is)
     
     Examples:
-    - Gateway: GET /api/v1/am/trade/api/v1/trades/filter?portfolioIds=123
-      → Trade Service: GET /api/v1/trades/filter?portfolioIds=123
+    - Gateway: GET /v1/am/trade/v1/trades/filter?portfolioIds=123
+      → Trade Service: GET /v1/trades/filter?portfolioIds=123
     
-    - Gateway: GET /api/v1/am/trade/api/v1/journal/{journalId}
-      → Trade Service: GET /api/v1/journal/{journalId}
+    - Gateway: GET /v1/am/trade/v1/journal/{journalId}
+      → Trade Service: GET /v1/journal/{journalId}
     
-    - Gateway: GET /api/v1/am/trade/api/v1/portfolio/{portfolioId}
-      → Trade Service: GET /api/v1/portfolio/{portfolioId}
+    - Gateway: GET /v1/am/trade/v1/portfolio/{portfolioId}
+      → Trade Service: GET /v1/portfolio/{portfolioId}
     
-    - Gateway: POST /api/v1/am/trade/api/v1/trades
-      → Trade Service: POST /api/v1/trades
+    - Gateway: POST /v1/am/trade/v1/trades
+      → Trade Service: POST /v1/trades
     
     This allows the trade microservice to have multiple API paths (trades, journal, 
     portfolio, etc.) without hardcoding each one in the gateway.
@@ -120,3 +120,4 @@ async def proxy_trade_service(
             exc_info=True
         )
         raise HTTPException(status_code=500, detail="Internal server error")
+

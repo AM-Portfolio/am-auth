@@ -426,12 +426,12 @@ async def get_system_info(credentials: HTTPAuthorizationCredentials = Depends(se
             "java_internal_service": "http://java-internal-service:8003"
         },
         "diagnostics_endpoints": {
-            "full_health_check": "/api/v1/system/health",
-            "services_status": "/api/v1/system/services/status",
-            "database_status": "/api/v1/system/database/status",
-            "python_scripts": "/api/v1/system/python-scripts/status",
-            "run_diagnostics": "/api/v1/system/diagnostics/run",
-            "system_info": "/api/v1/system/info"
+            "full_health_check": "/v1/system/health",
+            "services_status": "/v1/system/services/status",
+            "database_status": "/v1/system/database/status",
+            "python_scripts": "/v1/system/python-scripts/status",
+            "run_diagnostics": "/v1/system/diagnostics/run",
+            "system_info": "/v1/system/info"
         },
         "test_scripts_location": "am/am-tests/",
         "test_categories": {
@@ -441,3 +441,4 @@ async def get_system_info(credentials: HTTPAuthorizationCredentials = Depends(se
             "bash_scripts": "am/am-tests/scripts/"
         }
     }
+
